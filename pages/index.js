@@ -1,6 +1,6 @@
-import home from "./home";
+import Home from "./Home";
 import favorites from "./favorites";
 import search from "./search";
 import settings from "./settings";
 
-export { home, favorites, search, settings };
+export { Home, favorites, search, settings };
