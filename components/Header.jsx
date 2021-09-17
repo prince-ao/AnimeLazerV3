@@ -1,5 +1,12 @@
 import React from "react";
-import { StyleSheet, View, SafeAreaView, Image } from "react-native";
+import {
+  StyleSheet,
+  View,
+  SafeAreaView,
+  Image,
+  TouchableOpacity,
+} from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 
 const Header = () => {
   return (
@@ -24,5 +31,10 @@ const styles = StyleSheet.create({
   logo: {
     width: 150,
     height: 30,
+  },
+  back: {
+    position: "absolute",
+    left: 20,
+    top: 10,
   },
 });

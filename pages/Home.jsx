@@ -83,10 +83,13 @@ const tempData = [
   },
 ];
 
+/*const newObj = {
+  handle: () => {
+    navigate.navigate("EpisodeRoom", {});
+  },
+};*/
+
 const Home = ({ navigation, navigate }) => {
-  const handlePress = () => {
-    navigate.push("EpisodeRoom");
-  };
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" />
@@ -99,7 +102,11 @@ const Home = ({ navigation, navigate }) => {
             {tempData.map((data, key) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
-                  <TouchableOpacity onPress={handlePress}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigate.navigate("EpisodeRoom", { ...tempData[key] })
+                    }
+                  >
                     <Image source={data.url} style={styles.poster} />
                     <Text style={styles.posterText}>{data.title}</Text>
                   </TouchableOpacity>
@@ -114,7 +121,11 @@ const Home = ({ navigation, navigate }) => {
             {tempData.map((data, key) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
-                  <TouchableOpacity onPress={handlePress}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigate.navigate("EpisodeRoom", { ...tempData[key] })
+                    }
+                  >
                     <Image source={data.url} style={styles.poster} />
                     <Text style={styles.posterText}>{data.title}</Text>
                   </TouchableOpacity>
@@ -129,7 +140,11 @@ const Home = ({ navigation, navigate }) => {
             {tempData.map((data, key) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
-                  <TouchableOpacity onPress={handlePress}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigate.navigate("EpisodeRoom", { ...tempData[key] })
+                    }
+                  >
                     <Image source={data.url} style={styles.poster} />
                     <Text style={styles.posterText}>{data.title}</Text>
                   </TouchableOpacity>
@@ -144,7 +159,11 @@ const Home = ({ navigation, navigate }) => {
             {tempData.map((data, key) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
-                  <TouchableOpacity onPress={handlePress}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigate.navigate("EpisodeRoom", { ...tempData[key] })
+                    }
+                  >
                     <Image source={data.url} style={styles.poster} />
                     <Text style={styles.posterText}>{data.title}</Text>
                   </TouchableOpacity>
@@ -159,7 +178,11 @@ const Home = ({ navigation, navigate }) => {
             {tempData.map((data, key) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
-                  <TouchableOpacity onPress={handlePress}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigate.navigate("EpisodeRoom", { ...tempData[key] })
+                    }
+                  >
                     <Image source={data.url} style={styles.poster} />
                     <Text style={styles.posterText}>{data.title}</Text>
                   </TouchableOpacity>
@@ -174,7 +197,11 @@ const Home = ({ navigation, navigate }) => {
             {tempData.map((data, key) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
-                  <TouchableOpacity onPress={handlePress}>
+                  <TouchableOpacity
+                    onPress={() =>
+                      navigate.navigate("EpisodeRoom", { ...tempData[key] })
+                    }
+                  >
                     <Image source={data.url} style={styles.poster} />
                     <Text style={styles.posterText}>{data.title}</Text>
                   </TouchableOpacity>
@@ -204,6 +231,7 @@ const styles = StyleSheet.create({
     marginRight: 30,
     alignSelf: "center",
     marginLeft: 10,
+    borderRadius: 6,
   },
   showText: {
     color: "#fff",
