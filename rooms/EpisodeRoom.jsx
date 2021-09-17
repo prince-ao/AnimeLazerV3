@@ -28,9 +28,9 @@ const EpisodeRoom = ({ navigation, route }) => {
       </View>
       <View style={styles.infoContainer}>
         <View style={styles.genInfoContainer}>
-          <Image source={route.params.url} alt="poster" style={styles.poster} />
+          <Image source={{uri: route.params.uri}} alt="poster" style={styles.poster} />
           <View style={styles.textInfoContainer}>
-            <Text style={styles.title}>{route.params.title}</Text>
+            <Text style={styles.title}>{route.params.animeName}</Text>
             <View style={styles.genDesc}>
               <Text style={styles.white}>Type: {route.params.Type}</Text>
               <Text style={styles.white}>Score: {route.params.score}</Text>
