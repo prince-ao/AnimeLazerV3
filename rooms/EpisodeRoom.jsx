@@ -34,7 +34,7 @@ const EpisodeRoom = ({ navigation, route }) => {
             <View style={styles.genDesc}>
               <Text style={styles.white}>Type: {route.params.Type}</Text>
               <Text style={styles.white}>Score: {route.params.score}</Text>
-              <Text style={styles.white}>Episodes {(route.params.status).replace('Ep', '')}</Text>
+              <Text style={styles.white}>Episodes {(route.params.status).includes('Ep') ? (route.params.status).replace('Ep', '').includes('isode') ? (route.params.status).replace('Ep', '').replace('isode', '')  : (route.params.status).replace('Ep', '') : (route.params.status).replace('episode', '')}</Text>
             </View>
             <View style={styles.description}>
               <Text style={styles.white}>Desdasdassc</Text>
