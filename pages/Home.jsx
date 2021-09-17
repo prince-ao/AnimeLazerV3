@@ -348,7 +348,7 @@ const Home = ({ navigation, navigate }) => {
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
                     onPress={() =>
-                      navigate.navigate("EpisodeRoom", { ...tempData[key] })
+                      navigate.navigate("EpisodeRoom", { ...fiction[key] })
                     }
                   >
                     <Image source={{uri: data.uri}} style={styles.poster} />
@@ -367,7 +367,7 @@ const Home = ({ navigation, navigate }) => {
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
                     onPress={() =>
-                      navigate.navigate("EpisodeRoom", { ...tempData[key] })
+                      navigate.navigate("EpisodeRoom", { ...school[key] })
                     }
                   >
                     <Image source={{uri: data.uri}} style={styles.poster} />
@@ -386,7 +386,7 @@ const Home = ({ navigation, navigate }) => {
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
                     onPress={() =>
-                      navigate.navigate("EpisodeRoom", { ...tempData[key] })
+                      navigate.navigate("EpisodeRoom", { ...monsters[key] })
                     }
                   >
                     <Image source={{uri: data.uri}} style={styles.poster} />
@@ -405,7 +405,7 @@ const Home = ({ navigation, navigate }) => {
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
                     onPress={() =>
-                      navigate.navigate("EpisodeRoom", { ...tempData[key] })
+                      navigate.navigate("EpisodeRoom", { ...topRated[key] })
                     }
                   >
                     <Image source={{uri: data.uri}} style={styles.poster} />
