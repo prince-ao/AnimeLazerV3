@@ -404,8 +404,41 @@ const Home = ({ navigation, navigate }) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
-                    onPress={() =>
-                      navigate.navigate("EpisodeRoom", { ...topRated[key] })
+                    onPress={() => 
+                      {
+                        axios.post(`${API.url}/AnimeLazer/Login`, {
+                          headers: {
+                              'Content-Type': 'application/json',
+                              id: API.id
+                          }
+                        })
+                        .then(async function(res) {
+                          axios.get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                              headers: {
+                                  'Content-Type': 'application/json',
+                                  Authorization: `${API.key}${res.data.token}`,
+                                  url: "https://www1.7anime.io/anime/fena-pirate-princess/"
+                              }
+                          }).then(async function(res1) {  
+                              res1.data.data.map((data) => {
+                                topRated.push({
+                                  type: data.type,
+                                  summary: data.summary
+                                })
+                                navigate.navigate("EpisodeRoom", { ...topRated[key] })
+                                
+                              })
+                              
+                              
+                          })
+                      
+                      
+                        })
+                        .catch(function(err) {
+                          console.log(err)
+                        })
+                        
+                      }
                     }
                   >
                     <Image source={{uri: data.uri}} style={styles.poster} />
