@@ -309,9 +309,34 @@ const Home = ({ navigation, navigate }) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
-                    onPress={() =>
-                      navigate.navigate("EpisodeRoom", { ...episodes[key] })
-                    }
+                    onPress={() => {
+                      axios.post(`${API.url}/AnimeLazer/Login`, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            id: API.id
+                        }
+                      })
+                      .then(async function(res) {
+                        axios.get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `${API.key}${res.data.token}`,
+                                src: data.animeUrl
+                            }
+                            
+                        }).then(async function(res1) {  
+                            navigate.navigate("WatchRoom", {
+                                src: res1.data.data
+                               })  
+                        })
+                    
+                    
+                      })
+                      .catch(function(err) {
+                        console.log(err)
+                      })
+                  }
+                  }
                   >
                     <Image source={{uri: data.uri}} style={styles.poster} />
                     <Text style={styles.posterText}>{data.animeName}</Text>
@@ -417,7 +442,7 @@ const Home = ({ navigation, navigate }) => {
                               headers: {
                                   'Content-Type': 'application/json',
                                   Authorization: `${API.key}${res.data.token}`,
-                                  url: "https://www1.7anime.io/anime/fena-pirate-princess/"
+                                  url: data.animeUrl
                               }
                           }).then(async function(res1) {  
                               res1.data.data.map((data) => {
@@ -425,7 +450,14 @@ const Home = ({ navigation, navigate }) => {
                                   type: data.type,
                                   summary: data.summary
                                 })
-                                navigate.navigate("EpisodeRoom", { ...topRated[key] })
+                                navigate.navigate("EpisodeRoom", {
+                                  type: data.type,
+                                  summary: data.summary,
+                                  animeCover: data.animeCover,
+                                  animeTitle: data.animeEnglishTitle,
+                                  episodes: data.episodesAvaliable
+
+                                 })
                                 
                               })
                               

@@ -28,13 +28,13 @@ const EpisodeRoom = ({ navigation, route }) => {
       </View>
       <View style={styles.infoContainer}>
         <View style={styles.genInfoContainer}>
-          <Image source={{uri: route.params.uri}} alt="poster" style={styles.poster} />
+          <Image source={{uri: route.params.animeCover}} alt="poster" style={styles.poster} />
           <View style={styles.textInfoContainer}>
             <Text style={styles.title}>{route.params.animeName}</Text>
             <View style={styles.genDesc}>
               <Text style={styles.white}>Type: {route.params.type}</Text>
               <Text style={styles.white}>Score: {route.params.score}</Text>
-              <Text style={styles.white}>Episodes {(route.params.status).includes('Ep') ? (route.params.status).replace('Ep', '').includes('isode') ? (route.params.status).replace('Ep', '').replace('isode', '')  : (route.params.status).replace('Ep', '') : (route.params.status).replace('episode', '')}</Text>
+              <Text style={styles.white}>Episodes: {route.params.episodes}</Text>
             </View>
             <View style={styles.description}>
               <Text style={styles.white}>Desdasdassc</Text>
