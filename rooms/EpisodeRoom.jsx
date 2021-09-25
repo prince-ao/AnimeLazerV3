@@ -9,21 +9,29 @@ import {
   ScrollView,
   Image,
   Button,
-  Dimensions
+  Dimensions,
+  ToastAndroid
 } from "react-native";
 import { Header } from "../components/index";
 import { Ionicons } from "@expo/vector-icons";
 
 
+const axios = require('axios')
 
-const EpisodeRoom = ({ navigation, route }) => {
+const API = {
+  id: '_' + Math.random().toString(36).substr(2, 9),
+  url: "https://animelazerapi.herokuapp.com",
+  key: "Bearer "
+}
+
+const EpisodeRoom = ({ navigation, route}) => {
   const MAX_LINES = 3;
-  const [showMore, setShowMore] = useState(false);
+  const [showLess, setShowLess] = useState(false);
   const [lengthMore, setLengthMore] = useState(false);
 
 
   const toggleNumberOfLines = () => {
-    setShowMore(!showMore)
+    setShowLess(!showLess)
   }
 
   const onTextLayout = useCallback(
@@ -73,12 +81,12 @@ const EpisodeRoom = ({ navigation, route }) => {
           </View>
         </View>
         <View style={styles.descContainer}>
-          <Text numberOfLines={showMore ? undefined : MAX_LINES} onTextLayout={onTextLayout} style={styles.white}>
+          <Text numberOfLines={showLess ? undefined : MAX_LINES} onTextLayout={onTextLayout} style={styles.white}>
           {route.params.summary}
           </Text>
           {
             lengthMore ? <Ionicons
-            onPress={toggleNumberOfLines} size={22} style={styles.arrow} name={showMore ? 'chevron-up-sharp' : 'chevron-down-sharp'}>
+            onPress={toggleNumberOfLines} size={22} style={styles.arrow} name={showLess ? 'chevron-up-sharp' : 'chevron-down-sharp'}>
               </Ionicons>
             : null
           }
@@ -89,7 +97,34 @@ const EpisodeRoom = ({ navigation, route }) => {
               {
                route.params.episodesList.map((data, key) => {
                   return (
-                    <Text style={styles.episodeCard} key={key}>{data.episode}</Text>
+                    <Text style={styles.episodeCard} key={key} onPress={() => {
+                      axios.get(`${API.url}/AnimeLazer/Login`, {
+                        headers: {
+                            'Content-Type': 'application/json',
+                            id: API.id
+                        }
+                      })
+                      .then(async function(res) {
+                        axios.get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
+                            headers: {
+                                'Content-Type': 'application/json',
+                                Authorization: `${API.key}${res.data.token}`,
+                                src: data.url
+                            }
+                            
+                        }).then(async function(res1) {
+                          console.log(res1.data.data)
+                            navigation.navigate("WatchRoom", {
+                                src: res1.data.data
+                               })  
+                        })
+                    
+                    
+                      })
+                      .catch(function(err) {
+                        console.log(err)
+                      })
+                    }}> { "Episode " +data.episode}</Text>
                   )
                 })
               }
@@ -120,46 +155,43 @@ const styles = StyleSheet.create(
   },
   genresCard: {
     color: "white",
-    padding: 5,
+    fontSize: 14,
+    padding: 7,
     textAlign: "center",
     backgroundColor: "#383838",
-    borderRadius: 13,
-    flexDirection: "row",
-    display: "flex",
+    borderRadius: 14,
+    borderTopRightRadius: 15,
+    borderTopLeftRadius: 15,
+    borderBottomLeftRadius: 15,
+    borderBottomRightRadius: 15,
     marginBottom: 6,
-    marginEnd: 4
-    
+    marginEnd: 8,
+    display: "flex"
     
   },
   genres: {
-    top: 7,
-    alignItems: "baseline",
-    flexDirection: "column",
-    justifyContent: "center",
+    top: 10,
+    flexDirection: "row",
     flexWrap: "wrap",
-    flexGrow: 1,
-    flex: 0.9,
-    
+    flex: 1
   },
   episodesList: {
-    top: 7,
-    alignItems: "baseline",
+    marginLeft: 21,
     justifyContent: "center",
+    alignItems: "baseline",
+    flexDirection: "row",
     flexWrap: "wrap",
-    flexGrow: 1,
-    flex: 0.9,
 
   },
   episodeCard: {
     color: "white",
-    padding: 5,
+    padding: 10,
     textAlign: "center",
     backgroundColor: "#383838",
     borderRadius: 10,
-    flexDirection: "row",
     display: "flex",
-    marginBottom: 6,
-    marginEnd: 4
+    marginBottom: 10,
+    marginEnd: 25,
   },
   poster: {
     height: 235,
