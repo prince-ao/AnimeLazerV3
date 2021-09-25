@@ -340,7 +340,7 @@ const Home = ({ navigation, navigate }) => {
                   }
                   >
                     <Image source={{uri: data.uri}} style={styles.poster} />
-                    <Text style={styles.posterText}>{data.animeName}</Text>
+                    <Text numberOfLines={2} style={styles.posterText}>{data.animeName}</Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -395,7 +395,7 @@ const Home = ({ navigation, navigate }) => {
                     }
                   >
                     <Image source={{uri: data.uri}} style={styles.poster} />
-                    <Text style={styles.posterText}>{data.animeName}</Text>
+                    <Text numberOfLines={2} style={styles.posterText}>{data.animeName}</Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -450,7 +450,7 @@ const Home = ({ navigation, navigate }) => {
                     }
                   >
                     <Image source={{uri: data.uri}} style={styles.poster} />
-                    <Text style={styles.posterText}>{data.animeName}</Text>
+                    <Text numberOfLines={2} style={styles.posterText}>{data.animeName}</Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -505,7 +505,7 @@ const Home = ({ navigation, navigate }) => {
                     }
                   >
                     <Image source={{uri: data.uri}} style={styles.poster} />
-                    <Text style={styles.posterText}>{data.animeName}</Text>
+                    <Text numberOfLines={2} style={styles.posterText}>{data.animeName}</Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -513,7 +513,7 @@ const Home = ({ navigation, navigate }) => {
           </ScrollView>
         </View>
         <View style={styles.shows}>
-          <Text style={styles.showText}>Monsters</Text>
+          <Text  style={styles.showText}>Monsters</Text>
           <ScrollView horizontal style={styles.mapContainer}>
             {monsters.map((data, key) => {
               return (
@@ -566,7 +566,7 @@ const Home = ({ navigation, navigate }) => {
                     }
                   >
                     <Image source={{uri: data.uri}} style={styles.poster} />
-                    <Text style={styles.posterText}>{data.animeName}</Text>
+                    <Text numberOfLines={2} style={styles.posterText}>{data.animeName}</Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -627,7 +627,7 @@ const Home = ({ navigation, navigate }) => {
                     }
                   >
                     <Image source={{uri: data.uri}} style={styles.poster} />
-                    <Text style={styles.posterText}>{data.animeName}</Text>
+                    <Text numberOfLines={2} style={styles.posterText}>{data.animeName}</Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -658,6 +658,7 @@ const styles = StyleSheet.create({
     borderRadius: 6,
   },
   showText: {
+    marginLeft: 10,
     color: "#fff",
     fontWeight: "bold",
     fontSize: 20,
@@ -673,6 +674,8 @@ const styles = StyleSheet.create({
     paddingBottom: 30,
   },
   posterText: {
+    marginRight: 30,
+    marginLeft: 10,
     textAlign: "center",
     fontWeight: "bold",
     color: "#fff",
