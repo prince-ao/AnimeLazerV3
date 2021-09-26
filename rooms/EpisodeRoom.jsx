@@ -213,22 +213,22 @@ const styles = StyleSheet.create(
     color: "white",
   },
   arrow: {
-    marginLeft: Dimensions.get('window').width - 65,
+    marginLeft: Dimensions.get('window').width / 1.2,
     color: "white"
   },
   genInfoContainer: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "flex-start",
-    marginTop: Dimensions.get('window').height - 710,
+    marginTop: Dimensions.get('window').height / 20,
   },
   textInfoContainer: {
-    marginLeft: Dimensions.get('window').width - 370,
+    marginLeft: Dimensions.get('window').width / 16,
   },
   title: {
     fontSize: 20,
     color: "white",
-    width: Dimensions.get('window').height - 570,
+    width: Dimensions.get('window').height / 5,
   },
   genDesc: {
     marginTop: 5,

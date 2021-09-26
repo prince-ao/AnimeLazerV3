@@ -667,14 +667,15 @@ const styles = StyleSheet.create({
   posterCotainer: {
     display: "flex",
     flexWrap: "wrap",
-    marginRight: Dimensions.get('window').width - 400,
+    marginRight: Dimensions.get('window').width / 100e1,
     alignItems: "center",
-    width: 150,
+    width: 140,
     height: 210,
-    marginTop: Dimensions.get('window').height - 740,
+    marginTop: Dimensions.get('window').height / 46,
     paddingBottom: 30,
   },
   posterText: {
+    marginTop: 2,
     marginRight: 30,
     marginLeft: 10,
     textAlign: "center",
