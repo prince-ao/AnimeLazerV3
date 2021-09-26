@@ -69,7 +69,10 @@ const EpisodeRoom = ({ navigation, route}) => {
               <Text style={styles.white}>Episodes: <Text style={styles.innerText}>{route.params.episodes} </Text></Text>
               <Text style={styles.white}>Status: <Text style={styles.innerText}>{route.params.status} </Text></Text>
             </View>
-            <View style={styles.genres}>
+            <ScrollView
+            overScrollMode="never"
+            showsVerticalScrollIndicator ={false} style={styles.genres}>
+            <View>
               {
                route.params.genres.map((data, key) => {
                   return (
@@ -78,6 +81,7 @@ const EpisodeRoom = ({ navigation, route}) => {
                 })
               }
             </View>
+            </ScrollView>
           </View>
         </View>
         <View style={styles.descContainer}>
@@ -92,7 +96,10 @@ const EpisodeRoom = ({ navigation, route}) => {
           }
         </View>
       </View>
-      <ScrollView>
+      <ScrollView
+      overScrollMode="never"
+      showsVerticalScrollIndicator ={false}
+      showsHorizontalScrollIndicator={false}>
       <View style={styles.episodesList}>
               {
                route.params.episodesList.map((data, key) => {
@@ -206,25 +213,25 @@ const styles = StyleSheet.create(
     color: "white",
   },
   arrow: {
-    marginLeft: 325,
+    marginLeft: Dimensions.get('window').width - 65,
     color: "white"
   },
   genInfoContainer: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "flex-start",
-    marginTop: 50,
+    marginTop: Dimensions.get('window').height - 710,
   },
   textInfoContainer: {
-    marginLeft: 25,
+    marginLeft: Dimensions.get('window').width - 370,
   },
   title: {
     fontSize: 20,
     color: "white",
-    width: 180,
+    width: Dimensions.get('window').height - 570,
   },
   genDesc: {
-    marginTop: 10,
+    marginTop: 5,
   },
   description: {
     display: "flex",
