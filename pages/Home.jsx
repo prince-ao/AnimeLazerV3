@@ -7,6 +7,7 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
+  Dimensions
 } from "react-native";
 import { Header } from "../components/index";
 const axios = require('axios')
@@ -666,11 +667,11 @@ const styles = StyleSheet.create({
   posterCotainer: {
     display: "flex",
     flexWrap: "wrap",
-    marginRight: 30,
+    marginRight: Dimensions.get('window').width - 400,
     alignItems: "center",
     width: 150,
     height: 210,
-    marginTop: 30,
+    marginTop: Dimensions.get('window').height - 740,
     paddingBottom: 30,
   },
   posterText: {
@@ -681,9 +682,8 @@ const styles = StyleSheet.create({
     color: "#fff",
   },
   mapContainer: {
-    height: 270,
+    height: 250,
   },
   padding: {
-    marginTop: 40,
   },
 });
