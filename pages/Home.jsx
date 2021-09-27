@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { FAB } from 'react-native-elements';
 import {
   StyleSheet,
   Text,
@@ -19,84 +20,6 @@ const API = {
   key: "Bearer "
 }
 
-// const tempData = [
-//   {
-//     title: "Pokemon",
-//     Type: "TV",
-//     Episodes: 276,
-//     score: 7.35,
-//     url: require("../assets/assasination-classroom.jpg"),
-//   },
-//   {
-//     title: "Oyasumi Punpun",
-//     Type: "Manga",
-//     Episodes: 147,
-//     score: 9.05,
-//     url: require("../assets/assasination-classroom.jpg"),
-//   },
-//   {
-//     title: "Fullmetal Alchemist: Brotherhood",
-//     Type: "TV",
-//     Episodes: 64,
-//     score: 9.16,
-//     url: require("../assets/assasination-classroom.jpg"),
-//   },
-//   {
-//     title: "Shingeki no Kyojin Season 3 Part 2",
-//     Type: "TV",
-//     Episodes: 10,
-//     score: 9.1,
-//     url: require("../assets/assasination-classroom.jpg"),
-//   },
-//   {
-//     title: "Steins;Gate",
-//     Type: "TV",
-//     Episodes: 24,
-//     score: 9.1,
-//     url: require("../assets/assasination-classroom.jpg"),
-//   },
-//   {
-//     title: "Gintama°",
-//     Type: "TV",
-//     Episodes: 51,
-//     score: 9.09,
-//     url: require("../assets/assasination-classroom.jpg"),
-//   },
-//   {
-//     title: "Fruits Basket: The Final",
-//     Type: "TV",
-//     Episodes: 13,
-//     score: 9.08,
-//     url: require("../assets/assasination-classroom.jpg"),
-//   },
-//   {
-//     title: "Gintama'",
-//     Type: "TV",
-//     Episodes: 51,
-//     score: 9.06,
-//     url: require("../assets/assasination-classroom.jpg"),
-//   },
-//   {
-//     title: "Hunter x Hunter (2011)",
-//     Type: "TV",
-//     Episodes: 148,
-//     score: 9.06,
-//     url: require("../assets/assasination-classroom.jpg"),
-//   },
-//   {
-//     title: "Ginga Eiyuu Densetsu",
-//     Type: "TV",
-//     Episodes: 110,
-//     score: 9.05,
-//     url: require("../assets/assasination-classroom.jpg"),
-//   },
-// ];
-
-/*const newObj = {
-  handle: () => {
-    navigate.navigate("EpisodeRoom", {});
-  },
-};*/
 
 const Home = ({ navigation, navigate }) => {
 
@@ -636,6 +559,11 @@ const Home = ({ navigation, navigate }) => {
           </ScrollView>
         </View>
       </ScrollView>
+      <FAB placement="right"
+       color="#0367fc"
+        style={styles.FAB}
+        icon={{name: 'search', color: 'white'}}
+        onPress={() => navigate.navigate('search')}/>
     </View>
   );
 };

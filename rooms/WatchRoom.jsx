@@ -1,8 +1,11 @@
 
-import React, { useState } from 'react';
-import { StyleSheet, Text, View, Dimensions, Button } from 'react-native';
-import { Video } from 'expo-av'
+import React, { useState, useRef } from 'react';
+import { StyleSheet, Text, View, Dimensions, TouchableOpacity, Button, Platform } from 'react-native';
+import { Video, ResizeMode } from 'expo-av'
 import * as FileSystem from 'expo-file-system';
+import { Ionicons } from "@expo/vector-icons";
+import * as ScreenOrientation from 'expo-screen-orientation';
+
 
 const { width, height } = Dimensions.get('window');
 
@@ -11,6 +14,8 @@ const WatchRoom = ({navigation, route}) => {
   const [buttonTitle, setButtonTitle] = useState('Download')
   const [progressValue, setProgressValue] = useState(0)
   const [totalSize, setTotalSize] = useState(0)
+
+  const videoRef = useRef()
 
   function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return '0 Bytes';
@@ -60,22 +65,53 @@ const WatchRoom = ({navigation, route}) => {
       console.error(e);
     }
 
+
   }
+  const onFullscreenUpdate = async ({fullscreenUpdate}) => {
+    switch (fullscreenUpdate) {
+        case Video.FULLSCREEN_UPDATE_PLAYER_DID_PRESENT:
+            await ScreenOrientation.unlockAsync() // only on Android required
+            break;
+        case Video.FULLSCREEN_UPDATE_PLAYER_WILL_DISMISS:
+            await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT) // only on Android required
+            break;
+    }
+}
+const showVideoInFullscreen = async () => { await videoRef.current.presentFullscreenPlayer() }
 
   return (
-    <View style={styles.container}>
-      <Video
-        source={{ uri: videoUrl }}
-        rate={1.0}
-        volume={1.0}
-        isMuted={false}
-        resizeMode="cover"
-        shouldPlay={false}
-        isLooping={false}
-        useNativeControls
-        style={styles.video}
-      />
 
+    <View style={styles.container}>
+        {
+            (Platform.OS === 'android') ? (
+            <Video
+            style={styles.video}
+            ref={videoRef}
+            source={{uri: videoUrl}}
+            resizeMode={ResizeMode.CONTAIN}
+            useNativeControls={true}
+            onFullscreenUpdate={onFullscreenUpdate}
+
+        />
+            ) : (
+                <Video
+                source={{ uri: videoUrl }}
+                rate={1.0}
+                volume={1.0}
+                isMuted={false}
+                resizeMode="cover"
+                shouldPlay={false}
+                isLooping={false}
+                useNativeControls
+                style={styles.video}
+              />
+
+            )
+        
+        }
+      <View style={styles.back}>
+            <Ionicons onPress={() => navigation.goBack()} name="chevron-back-sharp" size={35} color="#5c94dd" /> 
+      </View>
       <Button title={buttonTitle} onPress={downloadVideo}></Button>
       <Text> Size: {totalSize} </Text>
       <Text>Progress: {progressValue} %</Text>
@@ -89,6 +125,12 @@ const styles = StyleSheet.create({
   video: {
     width: width,
     height: height / 3
+  },
+  back: {
+    position: "absolute",
+     padding: 10,
+    left: 20,
+    top: 10,
   },
 
   container: {

@@ -1,10 +1,11 @@
 {
   "expo": {
-    "name": "anime-lazer-v3",
+    "name": "Anime Lazer",
     "slug": "anime-lazer-v3",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "sdkVersion": "42.0.0",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -20,13 +21,18 @@
       "supportsTablet": true
     },
     "android": {
+      "package": "com.animelazer.heroku",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#FFFFFF"
       }
     },
-    "web": {
-      "favicon": "./assets/favicon.png"
-    }
+    "packagerOpts": {
+      "assetExts": [
+        "ttf",
+        "mp4"
+      ]
+    },
+    "description": ""
   }
 }

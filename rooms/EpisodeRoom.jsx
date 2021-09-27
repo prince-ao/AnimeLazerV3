@@ -120,10 +120,25 @@ const EpisodeRoom = ({ navigation, route}) => {
                             }
                             
                         }).then(async function(res1) {
-                          console.log(res1.data.data)
-                            navigation.navigate("WatchRoom", {
+                            if (res1.data.data.length === 0 || typeof res1.data.data === undefined | null) {
+                              (Platform.OS === 'android') 
+                                  ? ToastAndroid.showWithGravity("This video file cannot be played.", 2000, ToastAndroid.BOTTOM)
+                                  : Alert.alert(
+                                  "Warning",
+                                  "This video file cannot be played",
+                                  [
+                                    {
+                                      text: "Cancel",
+                                      onPress: () => console.log("Cancel Pressed"),
+                                      style: "cancel"
+                                    },
+                                    { text: "OK", onPress: () => console.log("OK Pressed") }
+                                  ])
+                            } else {
+                              navigation.navigate("WatchRoom", {
                                 src: res1.data.data
                                })  
+                            }
                         })
                     
                     

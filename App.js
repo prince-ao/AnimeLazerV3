@@ -5,7 +5,7 @@ import { NavigationContainer } from "@react-navigation/native";
 import React from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
-import { Home, search, favorites, settings } from "./pages/index";
+import { Home, Search, favorites, settings } from "./pages/index";
 import { createStackNavigator } from "@react-navigation/stack";
 import EpisodeRoom from "./rooms/EpisodeRoom";
 import WatchRoom from "./rooms/WatchRoom";
@@ -36,12 +36,16 @@ const BottomTab = ({ navigation }) => {
         },
         tabBarActiveTintColor: "#0367fc",
         tabBarInactiveTintColor: "gray",
+        tabBarStyle: {
+          backgroundColor: "#1a1a1a",
+          borderTopWidth: 0
+        }
       })}
     >
       <Tab.Screen name="home">
         {(props) => <Home {...props} navigate={navigation} />}
       </Tab.Screen>
-      <Tab.Screen name="search" component={search} />
+      <Tab.Screen name="search" component={Search} />
       <Tab.Screen name="favorites" component={favorites} />
       <Tab.Screen name="settings" component={settings} />
     </Tab.Navigator>
@@ -66,7 +70,7 @@ export default function App() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: "#e6e6e6",
     alignItems: "center",
     justifyContent: "center",
   },
