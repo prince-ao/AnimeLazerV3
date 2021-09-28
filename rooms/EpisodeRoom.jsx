@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useRef } from "react";
 import {
   StyleSheet,
   Text,
@@ -10,35 +10,34 @@ import {
   Image,
   Button,
   Dimensions,
-  ToastAndroid
+  ToastAndroid,
 } from "react-native";
 import { Header } from "../components/index";
 import { Ionicons } from "@expo/vector-icons";
 
-
-const axios = require('axios')
+const axios = require("axios");
 
 const API = {
-  id: '_' + Math.random().toString(36).substr(2, 9),
+  id: "_" + Math.random().toString(36).substr(2, 9),
   url: "https://animelazerapi.herokuapp.com",
-  key: "Bearer "
-}
+  key: "Bearer ",
+};
 
-const EpisodeRoom = ({ navigation, route}) => {
+const EpisodeRoom = ({ navigation, route }) => {
   const MAX_LINES = 3;
   const [showLess, setShowLess] = useState(false);
   const [lengthMore, setLengthMore] = useState(false);
-
+  const [descLength, setDescLength] = useState(30);
+  const [drop, setDrop] = useState(false);
+  const inputEl = useRef(null);
 
   const toggleNumberOfLines = () => {
-    setShowLess(!showLess)
-  }
+    setShowLess(!showLess);
+  };
 
-  const onTextLayout = useCallback(
-    (e) => {
-      setLengthMore(e.nativeEvent.lines.length > MAX_LINES);
-    }, []);
-
+  const onTextLayout = useCallback((e) => {
+    setLengthMore(e.nativeEvent.lines.length > MAX_LINES);
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -56,101 +55,149 @@ const EpisodeRoom = ({ navigation, route}) => {
         >
           <Ionicons name="heart-sharp" size={35} color="#5c94dd" />
         </TouchableOpacity> */}
-
       </View>
       <View style={styles.infoContainer}>
         <View style={styles.genInfoContainer}>
-          <Image source={{uri: route.params.animeCover}} alt="poster" style={styles.poster} />
+          <Image
+            source={{ uri: route.params.animeCover }}
+            alt="poster"
+            style={styles.poster}
+          />
           <View style={styles.textInfoContainer}>
-            <Text numberOfLines={2} ellipsizeMode='tail' style={styles.title}>{route.params.animeTitle}</Text>
+            <Text numberOfLines={2} ellipsizeMode="tail" style={styles.title}>
+              {route.params.animeTitle}
+            </Text>
             <View style={styles.genDesc}>
-              <Text style={styles.white}>Type: <Text style={styles.innerText}>{route.params.type} </Text></Text>
-              <Text numberOfLines={1} ellipsizeMode='tail' style={styles.white}>Released: <Text style={styles.innerText}>{(route.params.season).includes("Anime") ? (route.params.season).replace("Anime", "") : (route.params.season)} </Text> </Text>
-              <Text style={styles.white}>Episodes: <Text style={styles.innerText}>{route.params.episodes} </Text></Text>
-              <Text style={styles.white}>Status: <Text style={styles.innerText}>{route.params.status} </Text></Text>
+              <Text style={styles.white}>
+                Type: <Text style={styles.innerText}>{route.params.type} </Text>
+              </Text>
+              <Text numberOfLines={1} ellipsizeMode="tail" style={styles.white}>
+                Released:{" "}
+                <Text style={styles.innerText}>
+                  {route.params.season.includes("Anime")
+                    ? route.params.season.replace("Anime", "")
+                    : route.params.season}{" "}
+                </Text>{" "}
+              </Text>
+              <Text style={styles.white}>
+                Episodes:{" "}
+                <Text style={styles.innerText}>{route.params.episodes} </Text>
+              </Text>
+              <Text style={styles.white}>
+                Status:{" "}
+                <Text style={styles.innerText}>{route.params.status} </Text>
+              </Text>
             </View>
             <ScrollView
-            overScrollMode="never"
-            showsVerticalScrollIndicator ={false} style={styles.genres}>
-            <View>
-              {
-               route.params.genres.map((data, key) => {
+              overScrollMode="never"
+              showsVerticalScrollIndicator={false}
+              style={styles.genres}
+            >
+              <View>
+                {route.params.genres.map((data, key) => {
                   return (
-                    <Text style={styles.genresCard} key={key}>{data.Genre}</Text>
-                  )
-                })
-              }
-            </View>
+                    <Text style={styles.genresCard} key={key}>
+                      {data.Genre}
+                    </Text>
+                  );
+                })}
+              </View>
             </ScrollView>
           </View>
         </View>
-        <View style={styles.descContainer}>
-          <Text numberOfLines={showLess ? undefined : MAX_LINES} onTextLayout={onTextLayout} style={styles.white}>
-          {route.params.summary}
+        <View ref={inputEl} style={styles.descContainer}>
+          {/*TODO later version: find a way to calculate the size of a the Text */}
+          <Text style={{ height: descLength, color: "white" }}>
+            {route.params.summary}
           </Text>
-          {
-            lengthMore ? <Ionicons
-            onPress={toggleNumberOfLines} size={22} style={styles.arrow} name={showLess ? 'chevron-up-sharp' : 'chevron-down-sharp'}>
-              </Ionicons>
-            : null
-          }
+          <TouchableOpacity
+            style={styles.white}
+            onPress={() => {
+              descLength === 30 ? setDescLength(200) : setDescLength(30);
+              setDrop(!drop);
+            }}
+          >
+            <Ionicons
+              name={drop ? "chevron-up" : "chevron-down"}
+              size={25}
+              color="white"
+            />
+          </TouchableOpacity>
         </View>
       </View>
       <ScrollView
-      overScrollMode="never"
-      showsVerticalScrollIndicator ={false}
-      showsHorizontalScrollIndicator={false}>
-      <View style={styles.episodesList}>
-              {
-               route.params.episodesList.map((data, key) => {
-                  return (
-                    <Text style={styles.episodeCard} key={key} onPress={() => {
-                      axios.get(`${API.url}/AnimeLazer/Login`, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            id: API.id
-                        }
-                      })
-                      .then(async function(res) {
-                        axios.get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
-                            headers: {
-                                'Content-Type': 'application/json',
-                                Authorization: `${API.key}${res.data.token}`,
-                                src: data.url
-                            }
-                            
-                        }).then(async function(res1) {
-                            if (res1.data.data.length === 0 || typeof res1.data.data === undefined | null) {
-                              (Platform.OS === 'android') 
-                                  ? ToastAndroid.showWithGravity("This video file cannot be played.", 2000, ToastAndroid.BOTTOM)
-                                  : Alert.alert(
+        overScrollMode="never"
+        showsVerticalScrollIndicator={false}
+        showsHorizontalScrollIndicator={false}
+      >
+        <View style={styles.episodesList}>
+          {route.params.episodesList.map((data, key) => {
+            return (
+              <Text
+                style={styles.episodeCard}
+                key={key}
+                onPress={() => {
+                  axios
+                    .get(`${API.url}/AnimeLazer/Login`, {
+                      headers: {
+                        "Content-Type": "application/json",
+                        id: API.id,
+                      },
+                    })
+                    .then(async function (res) {
+                      axios
+                        .get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
+                          headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `${API.key}${res.data.token}`,
+                            src: data.url,
+                          },
+                        })
+                        .then(async function (res1) {
+                          if (
+                            res1.data.data.length === 0 ||
+                            (typeof res1.data.data === undefined) | null
+                          ) {
+                            Platform.OS === "android"
+                              ? ToastAndroid.showWithGravity(
+                                  "This video file cannot be played.",
+                                  2000,
+                                  ToastAndroid.BOTTOM
+                                )
+                              : Alert.alert(
                                   "Warning",
                                   "This video file cannot be played",
                                   [
                                     {
                                       text: "Cancel",
-                                      onPress: () => console.log("Cancel Pressed"),
-                                      style: "cancel"
+                                      onPress: () =>
+                                        console.log("Cancel Pressed"),
+                                      style: "cancel",
                                     },
-                                    { text: "OK", onPress: () => console.log("OK Pressed") }
-                                  ])
-                            } else {
-                              navigation.navigate("WatchRoom", {
-                                src: res1.data.data
-                               })  
-                            }
-                        })
-                    
-                    
-                      })
-                      .catch(function(err) {
-                        console.log(err)
-                      })
-                    }}> { "Episode " +data.episode}</Text>
-                  )
-                })
-              }
-            </View>
+                                    {
+                                      text: "OK",
+                                      onPress: () => console.log("OK Pressed"),
+                                    },
+                                  ]
+                                );
+                          } else {
+                            navigation.navigate("WatchRoom", {
+                              src: res1,
+                            });
+                          }
+                        });
+                    })
+                    .catch(function (err) {
+                      console.log(err);
+                    });
+                }}
+              >
+                {" "}
+                {"Episode " + data.episode}
+              </Text>
+            );
+          })}
+        </View>
       </ScrollView>
     </SafeAreaView>
   );
@@ -158,10 +205,7 @@ const EpisodeRoom = ({ navigation, route}) => {
 
 export default EpisodeRoom;
 
-
-const styles = StyleSheet.create(
-  {
-  
+const styles = StyleSheet.create({
   container: {
     backgroundColor: "#1b1b1b",
     width: "100%",
@@ -188,14 +232,13 @@ const styles = StyleSheet.create(
     borderBottomRightRadius: 15,
     marginBottom: 6,
     marginEnd: 8,
-    display: "flex"
-    
+    display: "flex",
   },
   genres: {
     top: 10,
     flexDirection: "row",
     flexWrap: "wrap",
-    flex: 1
+    flex: 1,
   },
   episodesList: {
     marginLeft: 21,
@@ -203,7 +246,6 @@ const styles = StyleSheet.create(
     alignItems: "baseline",
     flexDirection: "row",
     flexWrap: "wrap",
-
   },
   episodeCard: {
     color: "white",
@@ -222,28 +264,28 @@ const styles = StyleSheet.create(
     marginLeft: 20,
   },
   innerText: {
-    color: "gray"
+    color: "gray",
   },
   white: {
     color: "white",
   },
   arrow: {
-    marginLeft: Dimensions.get('window').width / 1.2,
-    color: "white"
+    marginLeft: Dimensions.get("window").width / 1.2,
+    color: "white",
   },
   genInfoContainer: {
     display: "flex",
     flexDirection: "row",
     justifyContent: "flex-start",
-    marginTop: Dimensions.get('window').height / 20,
+    marginTop: Dimensions.get("window").height / 20,
   },
   textInfoContainer: {
-    marginLeft: Dimensions.get('window').width / 16,
+    marginLeft: Dimensions.get("window").width / 16,
   },
   title: {
     fontSize: 20,
     color: "white",
-    width: Dimensions.get('window').height / 5,
+    width: Dimensions.get("window").height / 5,
   },
   genDesc: {
     marginTop: 5,
@@ -257,7 +299,7 @@ const styles = StyleSheet.create(
     marginTop: 20,
   },
   descContainer: {
-    margin: 15
+    margin: 15,
   },
   logo: {
     marginTop: 40,

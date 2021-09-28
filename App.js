@@ -38,8 +38,8 @@ const BottomTab = ({ navigation }) => {
         tabBarInactiveTintColor: "gray",
         tabBarStyle: {
           backgroundColor: "#1a1a1a",
-          borderTopWidth: 0
-        }
+          borderTopWidth: 0,
+        },
       })}
     >
       <Tab.Screen name="home">

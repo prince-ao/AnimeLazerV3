@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { FAB } from 'react-native-elements';
+import { FAB } from "react-native-elements";
 import {
   StyleSheet,
   Text,
@@ -8,217 +8,205 @@ import {
   ScrollView,
   TouchableOpacity,
   Image,
-  Dimensions
+  Dimensions,
 } from "react-native";
 import { Header } from "../components/index";
-const axios = require('axios')
-
+const axios = require("axios");
 
 const API = {
-  id: '_' + Math.random().toString(36).substr(2, 9),
+  id: "_" + Math.random().toString(36).substr(2, 9),
   url: "https://animelazerapi.herokuapp.com",
-  key: "Bearer "
-}
-
+  key: "Bearer ",
+};
 
 const Home = ({ navigation, navigate }) => {
+  const [episodes, setEpisodes] = useState([]);
+  const [action, setAction] = useState([]);
+  const [fiction, setFiction] = useState([]);
+  const [school, setSchool] = useState([]);
+  const [monsters, setMonsters] = useState([]);
+  const [topRated, setTopRated] = useState([]);
 
-  const [episodes, setEpisodes] = useState([])
-  const [action, setAction] = useState([])
-  const [fiction, setFiction] = useState([])
-  const [school, setSchool] = useState([])
-  const [monsters, setMonsters] = useState([])
-  const [topRated, setTopRated] = useState([])
-
-
-  useEffect(()=> {
-    getFictionAnimes()
-    getRecentEp()
-    getActionAnimes()
-    getSchoolAnimes()
-    getMonstersAnimes()
-    getTopRatedAnimes()
-  }, [])
+  useEffect(() => {
+    getFictionAnimes();
+    getRecentEp();
+    getActionAnimes();
+    getSchoolAnimes();
+    getMonstersAnimes();
+    getTopRatedAnimes();
+  }, []);
 
   // const newRes = async() => {
   //   const res = await newAPI.get('')
   //   console.log(res.data)
   // }
   function getActionAnimes() {
-    axios.get(`${API.url}/AnimeLazer/Login`, {
-      headers: {
-          'Content-Type': 'application/json',
-          id: API.id
-      }
-    })
-    .then(async function(res) {
-      axios.get(`${API.url}/Animes/actionAnimes`, {
-          headers: {
-              'Content-Type': 'application/json',
-              Authorization: `${API.key}${res.data.token}`
-          }
-      }).then(async function(res1) {
-          setAction(res1.data.data)
+    axios
+      .get(`${API.url}/AnimeLazer/Login`, {
+        headers: {
+          "Content-Type": "application/json",
+          id: API.id,
+        },
       })
-  
-  
-    })
-    .catch(function(err) {
-      console.log(err)
-    })
-    
-
+      .then(async function (res) {
+        axios
+          .get(`${API.url}/Animes/actionAnimes`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${API.key}${res.data.token}`,
+            },
+          })
+          .then(async function (res1) {
+            setAction(res1.data.data);
+          });
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
   }
-
 
   function getFictionAnimes() {
-    axios.get(`${API.url}/AnimeLazer/Login`, {
-      headers: {
-          'Content-Type': 'application/json',
-          id: API.id
-      }
-    })
-    .then(async function(res) {
-      axios.get(`${API.url}/Animes/fictionAnimes`, {
-          headers: {
-              'Content-Type': 'application/json',
-              Authorization: `${API.key}${res.data.token}`
-          }
-      }).then(async function(res1) {
-          setFiction(res1.data.data)
+    axios
+      .get(`${API.url}/AnimeLazer/Login`, {
+        headers: {
+          "Content-Type": "application/json",
+          id: API.id,
+        },
       })
-  
-  
-    })
-    .catch(function(err) {
-      console.log(err)
-    })
-    
-
+      .then(async function (res) {
+        axios
+          .get(`${API.url}/Animes/fictionAnimes`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${API.key}${res.data.token}`,
+            },
+          })
+          .then(async function (res1) {
+            setFiction(res1.data.data);
+          });
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
   }
 
-
   function getSchoolAnimes() {
-    axios.get(`${API.url}/AnimeLazer/Login`, {
-      headers: {
-          'Content-Type': 'application/json',
-          id: API.id
-      }
-    })
-    .then(async function(res) {
-      axios.get(`${API.url}/Animes/schoolAnimes`, {
-          headers: {
-              'Content-Type': 'application/json',
-              Authorization: `${API.key}${res.data.token}`
-          }
-      }).then(async function(res1) {
-          setSchool(res1.data.data)
+    axios
+      .get(`${API.url}/AnimeLazer/Login`, {
+        headers: {
+          "Content-Type": "application/json",
+          id: API.id,
+        },
       })
-  
-  
-    })
-    .catch(function(err) {
-      console.log(err)
-    })
-    
-
+      .then(async function (res) {
+        axios
+          .get(`${API.url}/Animes/schoolAnimes`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${API.key}${res.data.token}`,
+            },
+          })
+          .then(async function (res1) {
+            setSchool(res1.data.data);
+          });
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
   }
 
   function getMonstersAnimes() {
-    axios.get(`${API.url}/AnimeLazer/Login`, {
-      headers: {
-          'Content-Type': 'application/json',
-          id: API.id
-      }
-    })
-    .then(async function(res) {
-      axios.get(`${API.url}/Animes/monstersAnimes`, {
-          headers: {
-              'Content-Type': 'application/json',
-              Authorization: `${API.key}${res.data.token}`
-          }
-      }).then(async function(res1) {
-          setMonsters(res1.data.data)
+    axios
+      .get(`${API.url}/AnimeLazer/Login`, {
+        headers: {
+          "Content-Type": "application/json",
+          id: API.id,
+        },
       })
-  
-  
-    })
-    .catch(function(err) {
-      console.log(err)
-    })
-    
-
+      .then(async function (res) {
+        axios
+          .get(`${API.url}/Animes/monstersAnimes`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${API.key}${res.data.token}`,
+            },
+          })
+          .then(async function (res1) {
+            setMonsters(res1.data.data);
+          });
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
   }
 
   function getTopRatedAnimes() {
-    axios.get(`${API.url}/AnimeLazer/Login`, {
-      headers: {
-          'Content-Type': 'application/json',
-          id: API.id
-      }
-    })
-    .then(async function(res) {
-      axios.get(`${API.url}/Animes/topRatedAnimes`, {
-          headers: {
-              'Content-Type': 'application/json',
-              Authorization: `${API.key}${res.data.token}`
-          }
-      }).then(async function(res1) {
-          setTopRated(res1.data.data)
+    axios
+      .get(`${API.url}/AnimeLazer/Login`, {
+        headers: {
+          "Content-Type": "application/json",
+          id: API.id,
+        },
       })
-  
-  
-    })
-    .catch(function(err) {
-      console.log(err)
-    })
-    
-
+      .then(async function (res) {
+        axios
+          .get(`${API.url}/Animes/topRatedAnimes`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${API.key}${res.data.token}`,
+            },
+          })
+          .then(async function (res1) {
+            setTopRated(res1.data.data);
+          });
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
   }
 
-
   function getRecentEp() {
-    axios.get(`${API.url}/AnimeLazer/Login`, {
-      headers: {
-          'Content-Type': 'application/json',
-          id: API.id
-      }
-    })
-    .then(async function(res) {
-      axios.get(`${API.url}/Animes/recentEpisodes`, {
-          headers: {
-              'Content-Type': 'application/json',
-              Authorization: `${API.key}${res.data.token}`
-          }
-      }).then(async function(res1) {
-          setEpisodes(res1.data.data)
+    axios
+      .get(`${API.url}/AnimeLazer/Login`, {
+        headers: {
+          "Content-Type": "application/json",
+          id: API.id,
+        },
       })
-  
-  
-    })
-    .catch(function(err) {
-      console.log(err)
-    })
-    
+      .then(async function (res) {
+        axios
+          .get(`${API.url}/Animes/recentEpisodes`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${API.key}${res.data.token}`,
+            },
+          })
+          .then(async function (res1) {
+            setEpisodes(res1.data.data);
+          });
+      })
+      .catch(function (err) {
+        console.log(err);
+      });
   }
 
   if (!episodes) {
-    return null
+    return null;
   }
   if (!action) {
-    return null
+    return null;
   }
   if (!fiction) {
-    return null
+    return null;
   }
   if (!school) {
-    return null
+    return null;
   }
   if (!monsters) {
-    return null
+    return null;
   }
   if (!topRated) {
-    return null
+    return null;
   }
   return (
     <View style={styles.container}>
@@ -234,37 +222,38 @@ const Home = ({ navigation, navigate }) => {
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
                     onPress={() => {
-                      axios.get(`${API.url}/AnimeLazer/Login`, {
-                        headers: {
-                            'Content-Type': 'application/json',
-                            id: API.id
-                        }
-                      })
-                      .then(async function(res) {
-                        axios.get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
-                            headers: {
-                                'Content-Type': 'application/json',
-                                Authorization: `${API.key}${res.data.token}`,
-                                src: data.animeUrl
-                            }
-                            
-                        }).then(async function(res1) {
-                          console.log(res1.data.data)
-                            navigate.navigate("WatchRoom", {
-                                src: res1.data.data
-                               })  
+                      axios
+                        .get(`${API.url}/AnimeLazer/Login`, {
+                          headers: {
+                            "Content-Type": "application/json",
+                            id: API.id,
+                          },
                         })
-                    
-                    
-                      })
-                      .catch(function(err) {
-                        console.log(err)
-                      })
-                  }
-                  }
+                        .then(async function (res) {
+                          axios
+                            .get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
+                              headers: {
+                                "Content-Type": "application/json",
+                                Authorization: `${API.key}${res.data.token}`,
+                                src: data.animeUrl,
+                              },
+                            })
+                            .then(async function (res1) {
+                              console.log(res1.data.data);
+                              navigate.navigate("WatchRoom", {
+                                src: res1,
+                              });
+                            });
+                        })
+                        .catch(function (err) {
+                          console.log(err);
+                        });
+                    }}
                   >
-                    <Image source={{uri: data.uri}} style={styles.poster} />
-                    <Text numberOfLines={2} style={styles.posterText}>{data.animeName}</Text>
+                    <Image source={{ uri: data.uri }} style={styles.poster} />
+                    <Text numberOfLines={2} style={styles.posterText}>
+                      {data.animeName}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -278,22 +267,24 @@ const Home = ({ navigation, navigate }) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
-                    onPress={() =>
-                      {
-                        axios.get(`${API.url}/AnimeLazer/Login`, {
+                    onPress={() => {
+                      axios
+                        .get(`${API.url}/AnimeLazer/Login`, {
                           headers: {
-                              'Content-Type': 'application/json',
-                              id: API.id
-                          }
+                            "Content-Type": "application/json",
+                            id: API.id,
+                          },
                         })
-                        .then(async function(res) {
-                          axios.get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                        .then(async function (res) {
+                          axios
+                            .get(`${API.url}/Animes/scrapeAnimeDetails`, {
                               headers: {
-                                  'Content-Type': 'application/json',
-                                  Authorization: `${API.key}${res.data.token}`,
-                                  url: data.animeUrl
-                              }
-                          }).then(async function(res1) {  
+                                "Content-Type": "application/json",
+                                Authorization: `${API.key}${res.data.token}`,
+                                url: data.animeUrl,
+                              },
+                            })
+                            .then(async function (res1) {
                               res1.data.data.map((data) => {
                                 navigate.navigate("EpisodeRoom", {
                                   type: data.type,
@@ -305,21 +296,21 @@ const Home = ({ navigation, navigate }) => {
                                   language: data.language,
                                   genres: data.genresList,
                                   status: data.status,
-                                  episodesList: data.episodesList
+                                  episodesList: data.episodesList,
                                   // there is more options such as animeJapaneseTitle, studio.
-                                 })
-                              })
-                          })
+                                });
+                              });
+                            });
                         })
-                        .catch(function(err) {
-                          console.log(err)
-                        })
-                        
-                      }
-                    }
+                        .catch(function (err) {
+                          console.log(err);
+                        });
+                    }}
                   >
-                    <Image source={{uri: data.uri}} style={styles.poster} />
-                    <Text numberOfLines={2} style={styles.posterText}>{data.animeName}</Text>
+                    <Image source={{ uri: data.uri }} style={styles.poster} />
+                    <Text numberOfLines={2} style={styles.posterText}>
+                      {data.animeName}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -333,22 +324,24 @@ const Home = ({ navigation, navigate }) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
-                    onPress={() =>
-                      {
-                        axios.get(`${API.url}/AnimeLazer/Login`, {
+                    onPress={() => {
+                      axios
+                        .get(`${API.url}/AnimeLazer/Login`, {
                           headers: {
-                              'Content-Type': 'application/json',
-                              id: API.id
-                          }
+                            "Content-Type": "application/json",
+                            id: API.id,
+                          },
                         })
-                        .then(async function(res) {
-                          axios.get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                        .then(async function (res) {
+                          axios
+                            .get(`${API.url}/Animes/scrapeAnimeDetails`, {
                               headers: {
-                                  'Content-Type': 'application/json',
-                                  Authorization: `${API.key}${res.data.token}`,
-                                  url: data.animeUrl
-                              }
-                          }).then(async function(res1) {  
+                                "Content-Type": "application/json",
+                                Authorization: `${API.key}${res.data.token}`,
+                                url: data.animeUrl,
+                              },
+                            })
+                            .then(async function (res1) {
                               res1.data.data.map((data) => {
                                 navigate.navigate("EpisodeRoom", {
                                   type: data.type,
@@ -360,21 +353,21 @@ const Home = ({ navigation, navigate }) => {
                                   language: data.language,
                                   genres: data.genresList,
                                   status: data.status,
-                                  episodesList: data.episodesList
+                                  episodesList: data.episodesList,
                                   // there is more options such as animeJapaneseTitle, studio.
-                                 })
-                              })
-                          })
+                                });
+                              });
+                            });
                         })
-                        .catch(function(err) {
-                          console.log(err)
-                        })
-                        
-                      }
-                    }
+                        .catch(function (err) {
+                          console.log(err);
+                        });
+                    }}
                   >
-                    <Image source={{uri: data.uri}} style={styles.poster} />
-                    <Text numberOfLines={2} style={styles.posterText}>{data.animeName}</Text>
+                    <Image source={{ uri: data.uri }} style={styles.poster} />
+                    <Text numberOfLines={2} style={styles.posterText}>
+                      {data.animeName}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -388,22 +381,24 @@ const Home = ({ navigation, navigate }) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
-                    onPress={() =>
-                      {
-                        axios.get(`${API.url}/AnimeLazer/Login`, {
+                    onPress={() => {
+                      axios
+                        .get(`${API.url}/AnimeLazer/Login`, {
                           headers: {
-                              'Content-Type': 'application/json',
-                              id: API.id
-                          }
+                            "Content-Type": "application/json",
+                            id: API.id,
+                          },
                         })
-                        .then(async function(res) {
-                          axios.get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                        .then(async function (res) {
+                          axios
+                            .get(`${API.url}/Animes/scrapeAnimeDetails`, {
                               headers: {
-                                  'Content-Type': 'application/json',
-                                  Authorization: `${API.key}${res.data.token}`,
-                                  url: data.animeUrl
-                              }
-                          }).then(async function(res1) {  
+                                "Content-Type": "application/json",
+                                Authorization: `${API.key}${res.data.token}`,
+                                url: data.animeUrl,
+                              },
+                            })
+                            .then(async function (res1) {
                               res1.data.data.map((data) => {
                                 navigate.navigate("EpisodeRoom", {
                                   type: data.type,
@@ -415,21 +410,21 @@ const Home = ({ navigation, navigate }) => {
                                   language: data.language,
                                   genres: data.genresList,
                                   status: data.status,
-                                  episodesList: data.episodesList
+                                  episodesList: data.episodesList,
                                   // there is more options such as animeJapaneseTitle, studio.
-                                 })
-                              })
-                          })
+                                });
+                              });
+                            });
                         })
-                        .catch(function(err) {
-                          console.log(err)
-                        })
-                        
-                      }
-                    }
+                        .catch(function (err) {
+                          console.log(err);
+                        });
+                    }}
                   >
-                    <Image source={{uri: data.uri}} style={styles.poster} />
-                    <Text numberOfLines={2} style={styles.posterText}>{data.animeName}</Text>
+                    <Image source={{ uri: data.uri }} style={styles.poster} />
+                    <Text numberOfLines={2} style={styles.posterText}>
+                      {data.animeName}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -437,28 +432,30 @@ const Home = ({ navigation, navigate }) => {
           </ScrollView>
         </View>
         <View style={styles.shows}>
-          <Text  style={styles.showText}>Monsters</Text>
+          <Text style={styles.showText}>Monsters</Text>
           <ScrollView horizontal style={styles.mapContainer}>
             {monsters.map((data, key) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
-                    onPress={() =>
-                      {
-                        axios.get(`${API.url}/AnimeLazer/Login`, {
+                    onPress={() => {
+                      axios
+                        .get(`${API.url}/AnimeLazer/Login`, {
                           headers: {
-                              'Content-Type': 'application/json',
-                              id: API.id
-                          }
+                            "Content-Type": "application/json",
+                            id: API.id,
+                          },
                         })
-                        .then(async function(res) {
-                          axios.get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                        .then(async function (res) {
+                          axios
+                            .get(`${API.url}/Animes/scrapeAnimeDetails`, {
                               headers: {
-                                  'Content-Type': 'application/json',
-                                  Authorization: `${API.key}${res.data.token}`,
-                                  url: data.animeUrl
-                              }
-                          }).then(async function(res1) {  
+                                "Content-Type": "application/json",
+                                Authorization: `${API.key}${res.data.token}`,
+                                url: data.animeUrl,
+                              },
+                            })
+                            .then(async function (res1) {
                               res1.data.data.map((data) => {
                                 navigate.navigate("EpisodeRoom", {
                                   type: data.type,
@@ -470,27 +467,21 @@ const Home = ({ navigation, navigate }) => {
                                   language: data.language,
                                   genres: data.genresList,
                                   status: data.status,
-                                  episodesList: data.episodesList
+                                  episodesList: data.episodesList,
                                   // there is more options such as animeJapaneseTitle, studio.
-
-                                 })
-                                
-                              })
-                              
-                              
-                          })
-                      
-                      
+                                });
+                              });
+                            });
                         })
-                        .catch(function(err) {
-                          console.log(err)
-                        })
-                        
-                      }
-                    }
+                        .catch(function (err) {
+                          console.log(err);
+                        });
+                    }}
                   >
-                    <Image source={{uri: data.uri}} style={styles.poster} />
-                    <Text numberOfLines={2} style={styles.posterText}>{data.animeName}</Text>
+                    <Image source={{ uri: data.uri }} style={styles.poster} />
+                    <Text numberOfLines={2} style={styles.posterText}>
+                      {data.animeName}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -504,22 +495,24 @@ const Home = ({ navigation, navigate }) => {
               return (
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
-                    onPress={() => 
-                      {
-                        axios.get(`${API.url}/AnimeLazer/Login`, {
+                    onPress={() => {
+                      axios
+                        .get(`${API.url}/AnimeLazer/Login`, {
                           headers: {
-                              'Content-Type': 'application/json',
-                              id: API.id
-                          }
+                            "Content-Type": "application/json",
+                            id: API.id,
+                          },
                         })
-                        .then(async function(res) {
-                          axios.get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                        .then(async function (res) {
+                          axios
+                            .get(`${API.url}/Animes/scrapeAnimeDetails`, {
                               headers: {
-                                  'Content-Type': 'application/json',
-                                  Authorization: `${API.key}${res.data.token}`,
-                                  url: data.animeUrl
-                              }
-                          }).then(async function(res1) {  
+                                "Content-Type": "application/json",
+                                Authorization: `${API.key}${res.data.token}`,
+                                url: data.animeUrl,
+                              },
+                            })
+                            .then(async function (res1) {
                               res1.data.data.map((data) => {
                                 navigate.navigate("EpisodeRoom", {
                                   type: data.type,
@@ -531,27 +524,21 @@ const Home = ({ navigation, navigate }) => {
                                   language: data.language,
                                   genres: data.genresList,
                                   status: data.status,
-                                  episodesList: data.episodesList
+                                  episodesList: data.episodesList,
                                   // there is more options such as animeJapaneseTitle, studio.
-
-                                 })
-                                
-                              })
-                              
-                              
-                          })
-                      
-                      
+                                });
+                              });
+                            });
                         })
-                        .catch(function(err) {
-                          console.log(err)
-                        })
-                        
-                      }
-                    }
+                        .catch(function (err) {
+                          console.log(err);
+                        });
+                    }}
                   >
-                    <Image source={{uri: data.uri}} style={styles.poster} />
-                    <Text numberOfLines={2} style={styles.posterText}>{data.animeName}</Text>
+                    <Image source={{ uri: data.uri }} style={styles.poster} />
+                    <Text numberOfLines={2} style={styles.posterText}>
+                      {data.animeName}
+                    </Text>
                   </TouchableOpacity>
                 </View>
               );
@@ -559,11 +546,13 @@ const Home = ({ navigation, navigate }) => {
           </ScrollView>
         </View>
       </ScrollView>
-      <FAB placement="right"
-       color="#0367fc"
+      <FAB
+        placement="right"
+        color="#0367fc"
         style={styles.FAB}
-        icon={{name: 'search', color: 'white'}}
-        onPress={() => navigate.navigate('search')}/>
+        icon={{ name: "search", color: "white" }}
+        onPress={() => navigate.navigate("search")}
+      />
     </View>
   );
 };
@@ -595,11 +584,11 @@ const styles = StyleSheet.create({
   posterCotainer: {
     display: "flex",
     flexWrap: "wrap",
-    marginRight: Dimensions.get('window').width / 100e1,
+    marginRight: Dimensions.get("window").width / 100e1,
     alignItems: "center",
     width: 140,
     height: 210,
-    marginTop: Dimensions.get('window').height / 46,
+    marginTop: Dimensions.get("window").height / 46,
     paddingBottom: 30,
   },
   posterText: {
@@ -613,6 +602,5 @@ const styles = StyleSheet.create({
   mapContainer: {
     height: 250,
   },
-  padding: {
-  },
+  padding: {},
 });
