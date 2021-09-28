@@ -12,42 +12,44 @@ import { Video, ResizeMode } from "expo-av";
 import * as FileSystem from "expo-file-system";
 import { Ionicons } from "@expo/vector-icons";
 import * as ScreenOrientation from "expo-screen-orientation";
+import { color } from "react-native-elements/dist/helpers";
 
 const { width, height } = Dimensions.get("window");
 
 const WatchRoom = ({ navigation, route }) => {
-  const [videoUrl, setVideoUrl] = useState(route.params.src.data.data);
+  const videoUrl = route.params.src
   const [buttonTitle, setButtonTitle] = useState("Download");
   const [progressValue, setProgressValue] = useState(0);
+  const [isDownloading, setIsDownloading] = useState(false)
   const [totalSize, setTotalSize] = useState(0);
   const video = React.useRef(null);
   const [status, setStatus] = React.useState({});
-  const [title, setTitle] = useState("");
+  const title = route.params.title
   const [star, setStar] = useState(false);
 
-  useEffect(() => {
-    let count = 0;
-    let title = "";
-    let realTitle = "";
-    for (let i = 0; i < route.params.src.config.headers.src.length; i++) {
-      if (route.params.src.config.headers.src[i] === "/") {
-        count++;
-      }
-      if (count === 4) {
-        title += route.params.src.config.headers.src[i];
-      }
-    }
-    for (let i = 0; i < title.length; i++) {
-      if (title[i] === "/") {
-        continue;
-      } else if (title[i] === "-") {
-        realTitle += " ";
-      } else {
-        realTitle += title[i];
-      }
-    }
-    setTitle(realTitle);
-  }, []);
+  // useEffect(() => {
+  //   let count = 0;
+  //   let title = "";
+  //   let realTitle = "";
+  //   for (let i = 0; i < route.params.src.config.headers.src.length; i++) {
+  //     if (route.params.src.config.headers.src[i] === "/") {
+  //       count++;
+  //     }
+  //     if (count === 4) {
+  //       title += route.params.src.config.headers.src[i];
+  //     }
+  //   }
+  //   for (let i = 0; i < title.length; i++) {
+  //     if (title[i] === "/") {
+  //       continue;
+  //     } else if (title[i] === "-") {
+  //       realTitle += " ";
+  //     } else {
+  //       realTitle += title[i];
+  //     }
+  //   }
+  //   setTitle(realTitle);
+  // }, []);
 
   const videoRef = useRef();
 
@@ -64,8 +66,8 @@ const WatchRoom = ({ navigation, route }) => {
   }
 
   // async function getVideoUrl() {
-  //   let tmp = await FileSystem.getInfoAsync(FileSystem.documentDirectory + 'small.mp4');
-  //   let url = tmp.exists ? FileSystem.documentDirectory + 'small.mp4' : videoUrl
+  //   let tmp = await FileSystem.getInfoAsync(FileSystem.documentDirectory + videoUrl);
+  //   let url = tmp.exists ? FileSystem.documentDirectory + videoUrl : videoUrl
   //   return url
   // }
 
@@ -74,6 +76,7 @@ const WatchRoom = ({ navigation, route }) => {
   // })
 
   async function downloadVideo() {
+    setIsDownloading(true)
     setButtonTitle("Downloading");
 
     const callback = (downloadProgress) => {
@@ -88,13 +91,14 @@ const WatchRoom = ({ navigation, route }) => {
 
     const downloadResumable = FileSystem.createDownloadResumable(
       videoUrl,
-      FileSystem.documentDirectory + "small.mp4",
+      FileSystem.documentDirectory + title,
       {},
       callback
     );
 
     try {
       const { uri } = await downloadResumable.downloadAsync();
+      setIsDownloading(false)
       console.log("Finished downloading to ", uri);
       setButtonTitle("Downloaded");
     } catch (e) {
@@ -184,8 +188,16 @@ const WatchRoom = ({ navigation, route }) => {
         />
       </View>
       <Button title={buttonTitle} onPress={downloadVideo}></Button>
-      <Text> Size: {totalSize} </Text>
-      <Text>Progress: {progressValue} %</Text>
+      {
+        isDownloading ? (
+          <>
+        <Text style={{color: "white"}}> Size: {totalSize} </Text>
+        <Text style={{color: "white"}}>Progress: {progressValue} %</Text>
+        </>
+        ) : (
+          null
+        )
+      }
     </View>
   );
 };
