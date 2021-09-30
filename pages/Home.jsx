@@ -9,6 +9,9 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
+
+  SafeAreaView,
+
   ActivityIndicator,
   Platform
 } from "react-native";
@@ -19,6 +22,18 @@ const API = {
   id: "_" + Math.random().toString(36).substr(2, 9),
   url: "https://animelazerapi.herokuapp.com",
   key: "Bearer ",
+};
+
+const Statusbar = ({ backgroundColor, barStyle = "dark-content" }) => {
+  return (
+    <View style={{ backgroundColor }}>
+      <StatusBar
+        animated={true}
+        backgroundColor={backgroundColor}
+        barStyle={barStyle}
+      />
+    </View>
+  );
 };
 
 const Home = ({ navigation, navigate, truth }) => {
@@ -232,435 +247,456 @@ const Home = ({ navigation, navigate, truth }) => {
     return null;
   }
   return (
-    <View
-      style={{
-        backgroundColor: truth ? "#1a1a1a" : "#f0f0f0",
-        width: "100%",
-        height: "100%",
-        color: "#e6e6e6",
-      }}
-    >
-      <StatusBar barStyle="light-content" />
-      <Header />
-      <ScrollView>
-        <View style={styles.padding} />
-        <View style={styles.shows}>
-          <Text style={styles.showText}>Recent</Text>
-          <ScrollView horizontal style={styles.mapContainer}>
-            {episodes.map((data, key) => {
-              return (
-                <View style={styles.posterCotainer} key={key}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setIsLoading(true)
-                      axios
-                        .get(`${API.url}/AnimeLazer/Login`, {
-                          headers: {
-                            "Content-Type": "application/json",
-                            id: API.id,
-                          },
-                        })
-                        .then(async function (res) {
-                          axios
-                            .get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
-                              headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `${API.key}${res.data.token}`,
-                                src: data.animeUrl,
-                              },
-                            })
-                            .then(async function (res1) {
-                              setIsLoading(false)
-                              console.log(res1.data.data);
-                              navigate.navigate("WatchRoom", {
-                                title: data.animeName + " " + data.status,
-                                src: res1,
-                              });
-                            });
-                        })
-                        .catch(function (err) {
-                          setIsLoading(false)
-                          console.log(err);
-                        });
-                    }}
-                  >
-                    <Image source={{ uri: data.uri }} style={styles.poster} />
-                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.posterText}>
-                      {data.animeName}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </ScrollView>
-        </View>
-        <View style={styles.shows}>
-          <Text style={styles.showText}>Action</Text>
-          <ScrollView horizontal style={styles.mapContainer}>
-            {action.map((data, key) => {
-              return (
-                <View style={styles.posterCotainer} key={key}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setIsLoading(true)
-                      axios
-                        .get(`${API.url}/AnimeLazer/Login`, {
-                          headers: {
-                            "Content-Type": "application/json",
-                            id: API.id,
-                          },
-                        })
-                        .then(async function (res) {
-                          axios
-                            .get(`${API.url}/Animes/scrapeAnimeDetails`, {
-                              headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `${API.key}${res.data.token}`,
-                                url: data.animeUrl,
-                              },
-                            })
-                            .then(async function (res1) {
-                              res1.data.data.map((data) => {
-                                setIsLoading(false)
-                                navigate.navigate("EpisodeRoom", {
-                                  type: data.type,
-                                  summary: data.summary,
-                                  animeCover: data.animeCover,
-                                  animeTitle: data.animeEnglishTitle,
-                                  episodes: data.episodesAvaliable,
-                                  season: data.season,
-                                  language: data.language,
-                                  genres: data.genresList,
-                                  status: data.status,
-                                  episodesList: data.episodesList,
-                                  // there is more options such as animeJapaneseTitle, studio.
-                                });
-                              });
-                            });
-                        })
-                        .catch(function (err) {
-                          setIsLoading(false)
-                          console.log(err);
-                        });
-                    }}
-                  >
-                    <Image source={{ uri: data.uri }} style={styles.poster} />
-                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.posterText}>
-                      {data.animeName}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </ScrollView>
-        </View>
-        <View style={styles.shows}>
-          <Text style={styles.showText}>Fiction</Text>
-          <ScrollView horizontal style={styles.mapContainer}>
-            {fiction.map((data, key) => {
-              return (
-                <View style={styles.posterCotainer} key={key}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setIsLoading(true)
-                      axios
-                        .get(`${API.url}/AnimeLazer/Login`, {
-                          headers: {
-                            "Content-Type": "application/json",
-                            id: API.id,
-                          },
-                        })
-                        .then(async function (res) {
-                          axios
-                            .get(`${API.url}/Animes/scrapeAnimeDetails`, {
-                              headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `${API.key}${res.data.token}`,
-                                url: data.animeUrl,
-                              },
-                            })
-                            .then(async function (res1) {
-                              res1.data.data.map((data) => {
-                                setIsLoading(false)
-                                navigate.navigate("EpisodeRoom", {
-                                  type: data.type,
-                                  summary: data.summary,
-                                  animeCover: data.animeCover,
-                                  animeTitle: data.animeEnglishTitle,
-                                  episodes: data.episodesAvaliable,
-                                  season: data.season,
-                                  language: data.language,
-                                  genres: data.genresList,
-                                  status: data.status,
-                                  episodesList: data.episodesList,
-                                  // there is more options such as animeJapaneseTitle, studio.
-                                });
-                              });
-                            });
-                        })
-                        .catch(function (err) {
-                          setIsLoading(false)
-                          console.log(err);
-                        });
-                    }}
-                  >
-                    <Image source={{ uri: data.uri }} style={styles.poster} />
-                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.posterText}>
-                      {data.animeName}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </ScrollView>
-        </View>
-        <View style={styles.shows}>
-          <Text style={styles.showText}>School</Text>
-          <ScrollView horizontal style={styles.mapContainer}>
-            {school.map((data, key) => {
-              return (
-                <View style={styles.posterCotainer} key={key}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setIsLoading(true)
-                      axios
-                        .get(`${API.url}/AnimeLazer/Login`, {
-                          headers: {
-                            "Content-Type": "application/json",
-                            id: API.id,
-                          },
-                        })
-                        .then(async function (res) {
-                          axios
-                            .get(`${API.url}/Animes/scrapeAnimeDetails`, {
-                              headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `${API.key}${res.data.token}`,
-                                url: data.animeUrl,
-                              },
-                            })
-                            .then(async function (res1) {
-                              res1.data.data.map((data) => {
-                                setIsLoading(false)
-                                navigate.navigate("EpisodeRoom", {
-                                  type: data.type,
-                                  summary: data.summary,
-                                  animeCover: data.animeCover,
-                                  animeTitle: data.animeEnglishTitle,
-                                  episodes: data.episodesAvaliable,
-                                  season: data.season,
-                                  language: data.language,
-                                  genres: data.genresList,
-                                  status: data.status,
-                                  episodesList: data.episodesList,
-                                  // there is more options such as animeJapaneseTitle, studio.
-                                });
-                              });
-                            });
-                        })
-                        .catch(function (err) {
-                          setIsLoading(false)
-                          console.log(err);
-                        });
-                    }}
-                  >
-                    <Image source={{ uri: data.uri }} style={styles.poster} />
-                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.posterText}>
-                      {data.animeName}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </ScrollView>
-        </View>
-        <View style={styles.shows}>
-          <Text style={styles.showText}>Monsters</Text>
-          <ScrollView horizontal style={styles.mapContainer}>
-            {monsters.map((data, key) => {
-              return (
-                <View style={styles.posterCotainer} key={key}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setIsLoading(true)
-                      axios
-                        .get(`${API.url}/AnimeLazer/Login`, {
-                          headers: {
-                            "Content-Type": "application/json",
-                            id: API.id,
-                          },
-                        })
-                        .then(async function (res) {
-                          axios
-                            .get(`${API.url}/Animes/scrapeAnimeDetails`, {
-                              headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `${API.key}${res.data.token}`,
-                                url: data.animeUrl,
-                              },
-                            })
-                            .then(async function (res1) {
-                              res1.data.data.map((data) => {
-                                setIsLoading(false)
-                                navigate.navigate("EpisodeRoom", {
-                                  type: data.type,
-                                  summary: data.summary,
-                                  animeCover: data.animeCover,
-                                  animeTitle: data.animeEnglishTitle,
-                                  episodes: data.episodesAvaliable,
-                                  season: data.season,
-                                  language: data.language,
-                                  genres: data.genresList,
-                                  status: data.status,
-                                  episodesList: data.episodesList,
-                                  // there is more options such as animeJapaneseTitle, studio.
-                                });
-                              });
-                            });
-                        })
-                        .catch(function (err) {
-                          setIsLoading(false)
-                          console.log(err);
-                        });
-                    }}
-                  >
-                    <Image source={{ uri: data.uri }} style={styles.poster} />
-                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.posterText}>
-                      {data.animeName}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </ScrollView>
-        </View>
-        <View style={styles.shows}>
-          <Text style={styles.showText}>Top Rated</Text>
-          <ScrollView horizontal style={styles.mapContainer}>
-            {topRated.map((data, key) => {
-              return (
-                <View style={styles.posterCotainer} key={key}>
-                  <TouchableOpacity
-                    onPress={() => {
-                      setIsLoading(true)
-                      axios
-                        .get(`${API.url}/AnimeLazer/Login`, {
-                          headers: {
-                            "Content-Type": "application/json",
-                            id: API.id,
-                          },
-                        })
-                        .then(async function (res) {
-                          axios
-                            .get(`${API.url}/Animes/scrapeAnimeDetails`, {
-                              headers: {
-                                "Content-Type": "application/json",
-                                Authorization: `${API.key}${res.data.token}`,
-                                url: data.animeUrl,
-                              },
-                            })
-                            .then(async function (res1) {
-                              res1.data.data.map((data) => {
-                                setIsLoading(false)
-                                navigate.navigate("EpisodeRoom", {
-                                  type: data.type,
-                                  summary: data.summary,
-                                  animeCover: data.animeCover,
-                                  animeTitle: data.animeEnglishTitle,
-                                  episodes: data.episodesAvaliable,
-                                  season: data.season,
-                                  language: data.language,
-                                  genres: data.genresList,
-                                  status: data.status,
-                                  episodesList: data.episodesList,
-                                  // there is more options such as animeJapaneseTitle, studio.
-                                });
-                              });
-                            });
-                        })
-                        .catch(function (err) {
-                          setIsLoading(false)
-                          console.log(err);
-                        });
-                    }}
-                  >
-                    <Image source={{ uri: data.uri }} style={styles.poster} />
-                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.posterText}>
-                      {data.animeName}
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              );
-            })}
-          </ScrollView>
-        </View>
-      </ScrollView>
-      <ActivityIndicator animating={isLoading} color="#0367fc" style={styles.loading} size={(Platform.OS === 'android') ? 51 : "large"}/>
-      <FAB
-        placement="right"
-        color="#0367fc"
-        style={styles.FAB}
-        icon={{ name: "search", color: "white" }}
-        onPress={() => navigate.navigate("search")}
+
+    <>
+      <SafeAreaView
+        style={{
+          flex: 0,
+          backgroundColor: "#000",
+        }}
       />
-    </View>
+      <SafeAreaView
+        style={{
+          backgroundColor: truth ? "#1a1a1a" : "#f0f0f0",
+          width: "100%",
+          height: "100%",
+          flex: 1,
+        }}
+      >
+        <StatusBar barStyle="light-content" />
+        <Header />
+        <ScrollView>
+          <View style={styles(truth).padding} />
+          <View style={styles(truth).shows}>
+            <Text style={styles(truth).showText}>Recent</Text>
+            <ScrollView horizontal style={styles(truth).mapContainer}>
+              {episodes.map((data, key) => {
+                return (
+                  <View style={styles(truth).posterCotainer} key={key}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setIsLoading(true)
+                        axios
+                          .get(`${API.url}/AnimeLazer/Login`, {
+                            headers: {
+                              "Content-Type": "application/json",
+                              id: API.id,
+                            },
+                          })
+                          .then(async function (res) {
+                          setIsLoading(false)
+                            axios
+                              .get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `${API.key}${res.data.token}`,
+                                  src: data.animeUrl,
+                                },
+                              })
+                              .then(async function (res1) {
+                              setIsLoading(false)
+                                console.log(res1.data.data);
+                                navigate.navigate("WatchRoom", {
+                                  src: res1,
+                                });
+                              });
+                          })
+                          .catch(function (err) {
+                            console.log(err);
+                          });
+                      }}
+                    >
+                      <Image
+                        source={{ uri: data.uri }}
+                        style={styles(truth).poster}
+                      />
+                      <Text numberOfLines={2} style={styles(truth).posterText}>
+                        {data.animeName}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+          <View style={styles(truth).shows}>
+            <Text style={styles(truth).showText}>Action</Text>
+            <ScrollView horizontal style={styles(truth).mapContainer}>
+              {action.map((data, key) => {
+                return (
+                  <View style={styles(truth).posterCotainer} key={key}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setIsLoading(true)
+                        axios
+                          .get(`${API.url}/AnimeLazer/Login`, {
+                            headers: {
+                              "Content-Type": "application/json",
+                              id: API.id,
+                            },
+                          })
+                          .then(async function (res) {
+                            axios
+                              .get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `${API.key}${res.data.token}`,
+                                  url: data.animeUrl,
+                                },
+                              })
+                              .then(async function (res1) {
+                                res1.data.data.map((data) => {
+                                  setIsLoading(false)
+                                  navigate.navigate("EpisodeRoom", {
+                                    type: data.type,
+                                    summary: data.summary,
+                                    animeCover: data.animeCover,
+                                    animeTitle: data.animeEnglishTitle,
+                                    episodes: data.episodesAvaliable,
+                                    season: data.season,
+                                    language: data.language,
+                                    genres: data.genresList,
+                                    status: data.status,
+                                    episodesList: data.episodesList,
+                                    // there is more options such as animeJapaneseTitle, studio.
+                                  });
+                                });
+                              });
+                          })
+                          .catch(function (err) {
+                          setIsLoading(false)
+                            console.log(err);
+                          });
+                      }}
+                    >
+                      <Image
+                        source={{ uri: data.uri }}
+                        style={styles(truth).poster}
+                      />
+                      <Text numberOfLines={2} style={styles(truth).posterText}>
+                        {data.animeName}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+          <View style={styles(truth).shows}>
+            <Text style={styles(truth).showText}>Fiction</Text>
+            <ScrollView horizontal style={styles(truth).mapContainer}>
+              {fiction.map((data, key) => {
+                return (
+                  <View style={styles(truth).posterCotainer} key={key}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setIsLoading(true)
+                        axios
+                          .get(`${API.url}/AnimeLazer/Login`, {
+                            headers: {
+                              "Content-Type": "application/json",
+                              id: API.id,
+                            },
+                          })
+                          .then(async function (res) {
+                            axios
+                              .get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `${API.key}${res.data.token}`,
+                                  url: data.animeUrl,
+                                },
+                              })
+                              .then(async function (res1) {
+                                res1.data.data.map((data) => {
+                                  setIsLoading(false)
+                                  navigate.navigate("EpisodeRoom", {
+                                    type: data.type,
+                                    summary: data.summary,
+                                    animeCover: data.animeCover,
+                                    animeTitle: data.animeEnglishTitle,
+                                    episodes: data.episodesAvaliable,
+                                    season: data.season,
+                                    language: data.language,
+                                    genres: data.genresList,
+                                    status: data.status,
+                                    episodesList: data.episodesList,
+                                    // there is more options such as animeJapaneseTitle, studio.
+                                  });
+                                });
+                              });
+                          })
+                          .catch(function (err) {
+                          setIsLoading(false)
+                            console.log(err);
+                          });
+                      }}
+                    >
+                      <Image
+                        source={{ uri: data.uri }}
+                        style={styles(truth).poster}
+                      />
+                      <Text numberOfLines={2} style={styles(truth).posterText}>
+                        {data.animeName}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+          <View style={styles(truth).shows}>
+            <Text style={styles(truth).showText}>School</Text>
+            <ScrollView horizontal style={styles(truth).mapContainer}>
+              {school.map((data, key) => {
+                return (
+                  <View style={styles(truth).posterCotainer} key={key}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setIsLoading(true)
+                        axios
+                          .get(`${API.url}/AnimeLazer/Login`, {
+                            headers: {
+                              "Content-Type": "application/json",
+                              id: API.id,
+                            },
+                          })
+                          .then(async function (res) {
+                            axios
+                              .get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `${API.key}${res.data.token}`,
+                                  url: data.animeUrl,
+                                },
+                              })
+                              .then(async function (res1) {
+                                res1.data.data.map((data) => {
+                                  setIsLoading(false)
+                                  navigate.navigate("EpisodeRoom", {
+                                    type: data.type,
+                                    summary: data.summary,
+                                    animeCover: data.animeCover,
+                                    animeTitle: data.animeEnglishTitle,
+                                    episodes: data.episodesAvaliable,
+                                    season: data.season,
+                                    language: data.language,
+                                    genres: data.genresList,
+                                    status: data.status,
+                                    episodesList: data.episodesList,
+                                    // there is more options such as animeJapaneseTitle, studio.
+                                  });
+                                });
+                              });
+                          })
+                          .catch(function (err) {
+                          setIsLoading(false)
+                            console.log(err);
+                          });
+                      }}
+                    >
+                      <Image
+                        source={{ uri: data.uri }}
+                        style={styles(truth).poster}
+                      />
+                      <Text numberOfLines={2} style={styles(truth).posterText}>
+                        {data.animeName}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+          <View style={styles(truth).shows}>
+            <Text style={styles(truth).showText}>Monsters</Text>
+            <ScrollView horizontal style={styles(truth).mapContainer}>
+              {monsters.map((data, key) => {
+                return (
+                  <View style={styles(truth).posterCotainer} key={key}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setIsLoading(true)
+                        axios
+                          .get(`${API.url}/AnimeLazer/Login`, {
+                            headers: {
+                              "Content-Type": "application/json",
+                              id: API.id,
+                            },
+                          })
+                          .then(async function (res) {
+                            axios
+                              .get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `${API.key}${res.data.token}`,
+                                  url: data.animeUrl,
+                                },
+                              })
+                              .then(async function (res1) {
+                                res1.data.data.map((data) => {
+                                  setIsLoading(false)
+                                  navigate.navigate("EpisodeRoom", {
+                                    type: data.type,
+                                    summary: data.summary,
+                                    animeCover: data.animeCover,
+                                    animeTitle: data.animeEnglishTitle,
+                                    episodes: data.episodesAvaliable,
+                                    season: data.season,
+                                    language: data.language,
+                                    genres: data.genresList,
+                                    status: data.status,
+                                    episodesList: data.episodesList,
+                                    // there is more options such as animeJapaneseTitle, studio.
+                                  });
+                                });
+                              });
+                          })
+                          .catch(function (err) {
+                          setIsLoading(false)
+                            console.log(err);
+                          });
+                      }}
+                    >
+                      <Image
+                        source={{ uri: data.uri }}
+                        style={styles(truth).poster}
+                      />
+                      <Text numberOfLines={2} style={styles(truth).posterText}>
+                        {data.animeName}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+          <View style={styles(truth).shows}>
+            <Text style={styles(truth).showText}>Top Rated</Text>
+            <ScrollView horizontal style={styles(truth).mapContainer}>
+              {topRated.map((data, key) => {
+                return (
+                  <View style={styles(truth).posterCotainer} key={key}>
+                    <TouchableOpacity
+                      onPress={() => {
+                        setIsLoading(true)
+                        axios
+                          .get(`${API.url}/AnimeLazer/Login`, {
+                            headers: {
+                              "Content-Type": "application/json",
+                              id: API.id,
+                            },
+                          })
+                          .then(async function (res) {
+                            axios
+                              .get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `${API.key}${res.data.token}`,
+                                  url: data.animeUrl,
+                                },
+                              })
+                              .then(async function (res1) {
+                                res1.data.data.map((data) => {
+                                  setIsLoading(false)
+                                  navigate.navigate("EpisodeRoom", {
+                                    type: data.type,
+                                    summary: data.summary,
+                                    animeCover: data.animeCover,
+                                    animeTitle: data.animeEnglishTitle,
+                                    episodes: data.episodesAvaliable,
+                                    season: data.season,
+                                    language: data.language,
+                                    genres: data.genresList,
+                                    status: data.status,
+                                    episodesList: data.episodesList,
+                                    // there is more options such as animeJapaneseTitle, studio.
+                                  });
+                                });
+                              });
+                          })
+                          .catch(function (err) {
+                          setIsLoading(false)
+                            console.log(err);
+                          });
+                      }}
+                    >
+                      <Image
+                        source={{ uri: data.uri }}
+                        style={styles(truth).poster}
+                      />
+                      <Text numberOfLines={2} style={styles(truth).posterText}>
+                        {data.animeName}
+                      </Text>
+                    </TouchableOpacity>
+                  </View>
+                );
+              })}
+            </ScrollView>
+          </View>
+        </ScrollView>
+        <ActivityIndicator animating={isLoading} color="#0367fc" style={styles.loading} size={(Platform.OS === 'android') ? 51 : "large"}/>
+        <FAB
+          placement="right"
+          color="#0367fc"
+          style={styles(truth).FAB}
+          icon={{ name: "search", color: "white" }}
+          onPress={() => navigate.navigate("search")}
+        />
+      </SafeAreaView>
+    </>
   );
 };
 
 export default Home;
 
-const styles = StyleSheet.create({
-  container: {
-    backgroundColor: "#1a1a1a",
-    width: "100%",
-    height: "100%",
-    color: "#e6e6e6",
-  },
-  shows: {},
-  poster: {
-    width: 130,
-    height: 190,
-    marginRight: 30,
-    alignSelf: "center",
-    marginLeft: 10,
-    borderRadius: 6,
-  },
-  showText: {
-    marginLeft: 10,
-    color: "#fff",
-    fontWeight: "bold",
-    fontSize: 20,
-  },
-  posterCotainer: {
-    display: "flex",
-    flexWrap: "wrap",
-    marginRight: Dimensions.get("window").width / 100e1,
-    alignItems: "center",
-    width: 140,
-    height: 210,
-    marginTop: Dimensions.get("window").height / 46,
-    paddingBottom: 30,
-  },
-  posterText: {
-    marginTop: 2,
-    marginRight: 30,
-    marginLeft: 10,
-    textAlign: "center",
-    fontWeight: "bold",
-    color: "#fff",
-  },
-  mapContainer: {
-    height: 250,
-  },
-  padding: {},
-  loading: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center'
 
-  },
-});
+const styles = (truth) => {
+  return StyleSheet.create({
+    container: {
+      backgroundColor: "#1a1a1a",
+      width: "100%",
+      height: "100%",
+      color: "#e6e6e6",
+    },
+    shows: {},
+    poster: {
+      width: 130,
+      height: 190,
+      marginRight: 30,
+      alignSelf: "center",
+      marginLeft: 10,
+      borderRadius: 6,
+    },
+    showText: {
+      marginLeft: 10,
+      color: truth ? "#e6e6e6eb" : "#222222",
+      fontWeight: "bold",
+      fontSize: 20,
+    },
+    posterCotainer: {
+      display: "flex",
+      flexWrap: "wrap",
+      marginRight: Dimensions.get("window").width / 100e1,
+      alignItems: "center",
+      width: 140,
+      height: 210,
+      marginTop: Dimensions.get("window").height / 46,
+      paddingBottom: 30,
+    },
+    posterText: {
+      marginTop: 2,
+      marginRight: 30,
+      marginLeft: 10,
+      textAlign: "center",
+      fontWeight: "bold",
+      color: truth ? "#e6e6e6eb" : "#222222",
+    },
+    mapContainer: {
+      height: 250,
+    },
+    padding: {
+      marginTop: 50,
+    },
+  });
+};
