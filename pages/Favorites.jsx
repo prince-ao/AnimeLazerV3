@@ -2,16 +2,21 @@ import React from "react";
 import { StyleSheet, Text, SafeAreaView, StatusBar } from "react-native";
 import { Header } from "../components/index";
 
-const favorites = () => {
+const Favorites = ({ truth }) => {
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView
+      style={{
+        backgroundColor: truth ? "#1a1a1a" : "#f0f0f0",
+        height: "100%",
+      }}
+    >
       <StatusBar barStyle="light-content" />
       <Header />
     </SafeAreaView>
   );
 };
 
-export default favorites;
+export default Favorites;
 
 const styles = StyleSheet.create({
   container: {

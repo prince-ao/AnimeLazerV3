@@ -9,7 +9,6 @@ import {
   ScrollView,
   Image,
   TouchableOpacity,
-  ActivityIndicator
 } from "react-native";
 import { SearchBar } from "react-native-elements";
 
@@ -21,11 +20,9 @@ const API = {
   key: "Bearer ",
 };
 
-const Search = ({ navigation, navigate }) => {
+const Search = ({ navigation, navigate, truth }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [searchResult, setSearchResult] = useState([]);
-
-  const [isLoading, setIsLoading] = useState(false)
 
   const onChangeSearch = (query) => {
     setSearchQuery(query);
@@ -36,7 +33,6 @@ const Search = ({ navigation, navigate }) => {
   }, []);
 
   function getQueryRes(searchQuery) {
-    setIsLoading(true)
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -54,7 +50,6 @@ const Search = ({ navigation, navigate }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
             if (
               typeof res1.data.data !== "undefined" &&
               res1.data.data.length === 0
@@ -83,7 +78,6 @@ const Search = ({ navigation, navigate }) => {
           });
       })
       .catch(function (err) {
-        setIsLoading(false)
         console.log(err);
       });
   }
@@ -93,7 +87,11 @@ const Search = ({ navigation, navigate }) => {
   }
   return (
     <SafeAreaView
-      style={{ width: "100%", height: "100%", backgroundColor: "#1a1a1a" }}
+      style={{
+        width: "100%",
+        height: "100%",
+        backgroundColor: truth ? "#1a1a1a" : "#f0f0f0",
+      }}
     >
       <SearchBar
         containerStyle={{ backgroundColor: "#1a1a1a", borderBottomWidth: 1 }}
@@ -110,7 +108,6 @@ const Search = ({ navigation, navigate }) => {
               <TouchableOpacity
                 style={styles.searchContainer}
                 onPress={() => {
-                  setIsLoading(true)
                   axios
                     .get(`${API.url}/AnimeLazer/Login`, {
                       headers: {
@@ -128,7 +125,6 @@ const Search = ({ navigation, navigate }) => {
                           },
                         })
                         .then(async function (res1) {
-                          setIsLoading(false)
                           res1.data.data.map((data) => {
                             if (data === null) {
                               Platform.OS === "android"
@@ -168,7 +164,6 @@ const Search = ({ navigation, navigate }) => {
                         });
                     })
                     .catch(function (err) {
-                      setIsLoading(false)
                       console.log(err);
                     });
                 }}
@@ -202,7 +197,6 @@ const Search = ({ navigation, navigate }) => {
           );
         })}
       </ScrollView>
-      <ActivityIndicator animating={isLoading} color="#0367fc" style={styles.loading} size={(Platform.OS === 'android') ? 51 : "large"}/>
     </SafeAreaView>
   );
 };
@@ -227,16 +221,6 @@ const styles = StyleSheet.create({
     alignSelf: "center",
     marginLeft: 10,
     borderRadius: 6,
-  },
-  loading: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center'
-
   },
   status: {
     marginTop: 20,

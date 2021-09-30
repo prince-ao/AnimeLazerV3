@@ -9,8 +9,6 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
-  ActivityIndicator,
-  Platform
 } from "react-native";
 import { Header } from "../components/index";
 const axios = require("axios");
@@ -21,9 +19,7 @@ const API = {
   key: "Bearer ",
 };
 
-const Home = ({ navigation, navigate, check }) => {
-  const [isLoading, setIsLoading] = useState(false)
-
+const Home = ({ navigation, navigate, truth }) => {
   const [episodes, setEpisodes] = useState([]);
   const [action, setAction] = useState([]);
   const [fiction, setFiction] = useState([]);
@@ -45,7 +41,6 @@ const Home = ({ navigation, navigate, check }) => {
   //   console.log(res.data)
   // }
   function getActionAnimes() {
-    setIsLoading(true)
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -62,18 +57,15 @@ const Home = ({ navigation, navigate, check }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
             setAction(res1.data.data);
           });
       })
       .catch(function (err) {
-        setIsLoading(false)
         console.log(err);
       });
   }
 
   function getFictionAnimes() {
-    setIsLoading(true)
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -90,18 +82,15 @@ const Home = ({ navigation, navigate, check }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
             setFiction(res1.data.data);
           });
       })
       .catch(function (err) {
-        setIsLoading(false)
         console.log(err);
       });
   }
 
   function getSchoolAnimes() {
-    setIsLoading(true)
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -118,18 +107,15 @@ const Home = ({ navigation, navigate, check }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
             setSchool(res1.data.data);
           });
       })
       .catch(function (err) {
-        setIsLoading(false)
         console.log(err);
       });
   }
 
   function getMonstersAnimes() {
-    setIsLoading(true)
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -146,18 +132,15 @@ const Home = ({ navigation, navigate, check }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
             setMonsters(res1.data.data);
           });
       })
       .catch(function (err) {
-        setIsLoading(false)
         console.log(err);
       });
   }
 
   function getTopRatedAnimes() {
-    setIsLoading(true)
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -174,18 +157,15 @@ const Home = ({ navigation, navigate, check }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
             setTopRated(res1.data.data);
           });
       })
       .catch(function (err) {
-        setIsLoading(false)
         console.log(err);
       });
   }
 
   function getRecentEp() {
-    setIsLoading(true)
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -202,7 +182,6 @@ const Home = ({ navigation, navigate, check }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
             setEpisodes(res1.data.data);
           });
       })
@@ -229,9 +208,15 @@ const Home = ({ navigation, navigate, check }) => {
   if (!topRated) {
     return null;
   }
-
   return (
-    <View style={styles.container}>
+    <View
+      style={{
+        backgroundColor: truth ? "#1a1a1a" : "#f0f0f0",
+        width: "100%",
+        height: "100%",
+        color: "#e6e6e6",
+      }}
+    >
       <StatusBar barStyle="light-content" />
       <Header />
       <ScrollView>
@@ -244,7 +229,6 @@ const Home = ({ navigation, navigate, check }) => {
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
                     onPress={() => {
-                      setIsLoading(true)
                       axios
                         .get(`${API.url}/AnimeLazer/Login`, {
                           headers: {
@@ -262,21 +246,19 @@ const Home = ({ navigation, navigate, check }) => {
                               },
                             })
                             .then(async function (res1) {
-                              setIsLoading(false)
+                              console.log(res1.data.data);
                               navigate.navigate("WatchRoom", {
-                                title: data.animeName + " " + data.status,
-                                src: res1.data.data,
+                                src: res1,
                               });
                             });
                         })
                         .catch(function (err) {
-                          setIsLoading(false)
                           console.log(err);
                         });
                     }}
                   >
                     <Image source={{ uri: data.uri }} style={styles.poster} />
-                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.posterText}>
+                    <Text numberOfLines={2} style={styles.posterText}>
                       {data.animeName}
                     </Text>
                   </TouchableOpacity>
@@ -293,7 +275,6 @@ const Home = ({ navigation, navigate, check }) => {
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
                     onPress={() => {
-                      setIsLoading(true)
                       axios
                         .get(`${API.url}/AnimeLazer/Login`, {
                           headers: {
@@ -312,7 +293,6 @@ const Home = ({ navigation, navigate, check }) => {
                             })
                             .then(async function (res1) {
                               res1.data.data.map((data) => {
-                                setIsLoading(false)
                                 navigate.navigate("EpisodeRoom", {
                                   type: data.type,
                                   summary: data.summary,
@@ -330,13 +310,12 @@ const Home = ({ navigation, navigate, check }) => {
                             });
                         })
                         .catch(function (err) {
-                          setIsLoading(false)
                           console.log(err);
                         });
                     }}
                   >
                     <Image source={{ uri: data.uri }} style={styles.poster} />
-                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.posterText}>
+                    <Text numberOfLines={2} style={styles.posterText}>
                       {data.animeName}
                     </Text>
                   </TouchableOpacity>
@@ -353,7 +332,6 @@ const Home = ({ navigation, navigate, check }) => {
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
                     onPress={() => {
-                      setIsLoading(true)
                       axios
                         .get(`${API.url}/AnimeLazer/Login`, {
                           headers: {
@@ -372,7 +350,6 @@ const Home = ({ navigation, navigate, check }) => {
                             })
                             .then(async function (res1) {
                               res1.data.data.map((data) => {
-                                setIsLoading(false)
                                 navigate.navigate("EpisodeRoom", {
                                   type: data.type,
                                   summary: data.summary,
@@ -390,13 +367,12 @@ const Home = ({ navigation, navigate, check }) => {
                             });
                         })
                         .catch(function (err) {
-                          setIsLoading(false)
                           console.log(err);
                         });
                     }}
                   >
                     <Image source={{ uri: data.uri }} style={styles.poster} />
-                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.posterText}>
+                    <Text numberOfLines={2} style={styles.posterText}>
                       {data.animeName}
                     </Text>
                   </TouchableOpacity>
@@ -413,7 +389,6 @@ const Home = ({ navigation, navigate, check }) => {
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
                     onPress={() => {
-                      setIsLoading(true)
                       axios
                         .get(`${API.url}/AnimeLazer/Login`, {
                           headers: {
@@ -432,7 +407,6 @@ const Home = ({ navigation, navigate, check }) => {
                             })
                             .then(async function (res1) {
                               res1.data.data.map((data) => {
-                                setIsLoading(false)
                                 navigate.navigate("EpisodeRoom", {
                                   type: data.type,
                                   summary: data.summary,
@@ -450,13 +424,12 @@ const Home = ({ navigation, navigate, check }) => {
                             });
                         })
                         .catch(function (err) {
-                          setIsLoading(false)
                           console.log(err);
                         });
                     }}
                   >
                     <Image source={{ uri: data.uri }} style={styles.poster} />
-                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.posterText}>
+                    <Text numberOfLines={2} style={styles.posterText}>
                       {data.animeName}
                     </Text>
                   </TouchableOpacity>
@@ -473,7 +446,6 @@ const Home = ({ navigation, navigate, check }) => {
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
                     onPress={() => {
-                      setIsLoading(true)
                       axios
                         .get(`${API.url}/AnimeLazer/Login`, {
                           headers: {
@@ -492,7 +464,6 @@ const Home = ({ navigation, navigate, check }) => {
                             })
                             .then(async function (res1) {
                               res1.data.data.map((data) => {
-                                setIsLoading(false)
                                 navigate.navigate("EpisodeRoom", {
                                   type: data.type,
                                   summary: data.summary,
@@ -510,13 +481,12 @@ const Home = ({ navigation, navigate, check }) => {
                             });
                         })
                         .catch(function (err) {
-                          setIsLoading(false)
                           console.log(err);
                         });
                     }}
                   >
                     <Image source={{ uri: data.uri }} style={styles.poster} />
-                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.posterText}>
+                    <Text numberOfLines={2} style={styles.posterText}>
                       {data.animeName}
                     </Text>
                   </TouchableOpacity>
@@ -533,7 +503,6 @@ const Home = ({ navigation, navigate, check }) => {
                 <View style={styles.posterCotainer} key={key}>
                   <TouchableOpacity
                     onPress={() => {
-                      setIsLoading(true)
                       axios
                         .get(`${API.url}/AnimeLazer/Login`, {
                           headers: {
@@ -552,7 +521,6 @@ const Home = ({ navigation, navigate, check }) => {
                             })
                             .then(async function (res1) {
                               res1.data.data.map((data) => {
-                                setIsLoading(false)
                                 navigate.navigate("EpisodeRoom", {
                                   type: data.type,
                                   summary: data.summary,
@@ -570,13 +538,12 @@ const Home = ({ navigation, navigate, check }) => {
                             });
                         })
                         .catch(function (err) {
-                          setIsLoading(false)
                           console.log(err);
                         });
                     }}
                   >
                     <Image source={{ uri: data.uri }} style={styles.poster} />
-                    <Text numberOfLines={2} ellipsizeMode="tail" style={styles.posterText}>
+                    <Text numberOfLines={2} style={styles.posterText}>
                       {data.animeName}
                     </Text>
                   </TouchableOpacity>
@@ -586,7 +553,6 @@ const Home = ({ navigation, navigate, check }) => {
           </ScrollView>
         </View>
       </ScrollView>
-      <ActivityIndicator animating={isLoading} color="#0367fc" style={styles.loading} size={(Platform.OS === 'android') ? 51 : "large"}/>
       <FAB
         placement="right"
         color="#0367fc"
@@ -606,16 +572,6 @@ const styles = StyleSheet.create({
     width: "100%",
     height: "100%",
     color: "#e6e6e6",
-  },
-  loading: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center'
-
   },
   shows: {},
   poster: {

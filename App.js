@@ -2,10 +2,10 @@ import { StatusBar } from "expo-status-bar";
 import "react-native-gesture-handler";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
-import React from "react";
+import React, { useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
-import { Home, Search, favorites, settings } from "./pages/index";
+import { Home, Search, Favorites, Settings } from "./pages/index";
 import { createStackNavigator } from "@react-navigation/stack";
 import EpisodeRoom from "./rooms/EpisodeRoom";
 import WatchRoom from "./rooms/WatchRoom";
@@ -15,6 +15,7 @@ const Stack = createStackNavigator();
 const Tab = createBottomTabNavigator();
 
 const BottomTab = ({ navigation }) => {
+  const [truthy, setTruthy] = useState(true);
   return (
     <Tab.Navigator
       initialRouteName="home"
@@ -43,11 +44,26 @@ const BottomTab = ({ navigation }) => {
       })}
     >
       <Tab.Screen name="home">
-        {(props) => <Home {...props} navigate={navigation} />}
+        {(props) => <Home {...props} navigate={navigation} truth={truthy} />}
       </Tab.Screen>
-      <Tab.Screen name="search" component={Search} />
-      <Tab.Screen name="favorites" component={favorites} />
-      <Tab.Screen name="settings" component={settings} />
+      <Tab.Screen name="search">
+        {(props) => <Search {...props} navigate={navigation} truth={truthy} />}
+      </Tab.Screen>
+      <Tab.Screen name="favorites">
+        {(props) => (
+          <Favorites {...props} navigate={navigation} truth={truthy} />
+        )}
+      </Tab.Screen>
+      <Tab.Screen name="settings">
+        {(props) => (
+          <Settings
+            {...props}
+            navigate={navigation}
+            truth={truthy}
+            truthSet={setTruthy}
+          />
+        )}
+      </Tab.Screen>
     </Tab.Navigator>
   );
 };
