@@ -11,6 +11,8 @@ import {
   Button,
   Dimensions,
   ToastAndroid,
+  ActivityIndicator,
+  Platform
 } from "react-native";
 import { Header } from "../components/index";
 import { Ionicons } from "@expo/vector-icons";
@@ -30,6 +32,8 @@ const EpisodeRoom = ({ navigation, route }) => {
   const [descLength, setDescLength] = useState(30);
   const [drop, setDrop] = useState(false);
   const inputEl = useRef(null);
+
+  const [isLoading, setIsLoading] = useState(false)
 
   const toggleNumberOfLines = () => {
     setShowLess(!showLess);
@@ -137,6 +141,7 @@ const EpisodeRoom = ({ navigation, route }) => {
                 style={styles.episodeCard}
                 key={key}
                 onPress={() => {
+                  setIsLoading(true)
                   axios
                     .get(`${API.url}/AnimeLazer/Login`, {
                       headers: {
@@ -154,6 +159,7 @@ const EpisodeRoom = ({ navigation, route }) => {
                           },
                         })
                         .then(async function (res1) {
+                          setIsLoading(true)
                           if (
                             res1.data.data.length === 0 ||
                             (typeof res1.data.data === undefined) | null
@@ -182,12 +188,14 @@ const EpisodeRoom = ({ navigation, route }) => {
                                 );
                           } else {
                             navigation.navigate("WatchRoom", {
+                              title: route.params.animeTitle + " " + data.episode,
                               src: res1,
                             });
                           }
                         });
                     })
                     .catch(function (err) {
+                      setIsLoading(false)
                       console.log(err);
                     });
                 }}
@@ -199,6 +207,7 @@ const EpisodeRoom = ({ navigation, route }) => {
           })}
         </View>
       </ScrollView>
+      <ActivityIndicator animating={isLoading} color="#0367fc" style={styles.loading} size={(Platform.OS === 'android') ? 51 : "large"}/>
     </SafeAreaView>
   );
 };
@@ -310,5 +319,15 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 20,
     top: 10,
+  },
+  loading: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    top: 0,
+    bottom: 0,
+    alignItems: 'center',
+    justifyContent: 'center'
+
   },
 });
