@@ -4,15 +4,24 @@ import { Header } from "../components/index";
 
 const Favorites = ({ truth }) => {
   return (
-    <SafeAreaView
-      style={{
-        backgroundColor: truth ? "#1a1a1a" : "#f0f0f0",
-        height: "100%",
-      }}
-    >
-      <StatusBar barStyle="light-content" />
-      <Header />
-    </SafeAreaView>
+    <>
+      <SafeAreaView
+        style={{
+          flex: 0,
+          backgroundColor: "#000",
+        }}
+      />
+      <SafeAreaView
+        style={{
+          backgroundColor: truth ? "#1a1a1a" : "#f0f0f0",
+          height: "100%",
+          flex: 1,
+        }}
+      >
+        <StatusBar barStyle="light-content" />
+        <Header />
+      </SafeAreaView>
+    </>
   );
 };
 

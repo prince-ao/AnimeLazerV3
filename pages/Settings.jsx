@@ -18,38 +18,46 @@ const Settings = ({ truth, truthSet }) => {
     truthSet(!truth);
   };
   return (
-    <SafeAreaView
-      style={{
-        backgroundColor: truth ? "#1a1a1a" : "#f0f0f0",
-        height: "100%",
-      }}
-    >
-      <StatusBar barStyle="light-content" />
-      <Header />
-      <ScrollView>
-        <View style={styles.settingCont}>
-          <Ionicons
-            name={isEnabled ? "moon" : "moon-outline"}
-            size={25}
-            color="#bdbdbd"
-            style={styles.settingIcon}
-          />
-          <Text style={styles.settingText}>Appearance: {appearance}</Text>
-          <Switch
-            trackColor={{ false: "#cccccc", true: "#221fce" }}
-            thumbColor={isEnabled ? "#cecece" : "#221fce"}
-            ios_backgroundColor="#b8b8b8"
-            value={isEnabled}
-            onValueChange={() => {
-              setIsEnabled(!isEnabled);
-              setApearance(isEnabled ? "Light" : "Dark");
-              handleChange();
-            }}
-            style={styles.settingSwitch}
-          />
-        </View>
-      </ScrollView>
-    </SafeAreaView>
+    <>
+      <SafeAreaView
+        style={{
+          flex: 0,
+          backgroundColor: "#000",
+        }}
+      />
+      <SafeAreaView
+        style={{
+          backgroundColor: truth ? "#1a1a1a" : "#f0f0f0",
+          height: "100%",
+        }}
+      >
+        <StatusBar barStyle="light-content" />
+        <Header />
+        <ScrollView>
+          <View style={styles.settingCont}>
+            <Ionicons
+              name={isEnabled ? "moon" : "moon-outline"}
+              size={25}
+              color="#bdbdbd"
+              style={styles.settingIcon}
+            />
+            <Text style={styles.settingText}>Appearance: {appearance}</Text>
+            <Switch
+              trackColor={{ false: "#cccccc", true: "#221fce" }}
+              thumbColor={isEnabled ? "#cecece" : "#221fce"}
+              ios_backgroundColor="#b8b8b8"
+              value={isEnabled}
+              onValueChange={() => {
+                setIsEnabled(!isEnabled);
+                setApearance(isEnabled ? "Light" : "Dark");
+                handleChange();
+              }}
+              style={styles.settingSwitch}
+            />
+          </View>
+        </ScrollView>
+      </SafeAreaView>
+    </>
   );
 };
 
