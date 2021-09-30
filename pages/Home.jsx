@@ -9,11 +9,9 @@ import {
   TouchableOpacity,
   Image,
   Dimensions,
-
   SafeAreaView,
-
   ActivityIndicator,
-  Platform
+  Platform,
 } from "react-native";
 import { Header } from "../components/index";
 const axios = require("axios");
@@ -37,8 +35,7 @@ const Statusbar = ({ backgroundColor, barStyle = "dark-content" }) => {
 };
 
 const Home = ({ navigation, navigate, truth }) => {
-
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const [episodes, setEpisodes] = useState([]);
   const [action, setAction] = useState([]);
@@ -61,7 +58,7 @@ const Home = ({ navigation, navigate, truth }) => {
   //   console.log(res.data)
   // }
   function getActionAnimes() {
-    setIsLoading(true)
+    setIsLoading(true);
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -78,18 +75,18 @@ const Home = ({ navigation, navigate, truth }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
+            setIsLoading(false);
             setAction(res1.data.data);
           });
       })
       .catch(function (err) {
-        setIsLoading(false)
+        setIsLoading(false);
         console.log(err);
       });
   }
 
   function getFictionAnimes() {
-    setIsLoading(true)
+    setIsLoading(true);
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -106,18 +103,18 @@ const Home = ({ navigation, navigate, truth }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
+            setIsLoading(false);
             setFiction(res1.data.data);
           });
       })
       .catch(function (err) {
-        setIsLoading(false)
+        setIsLoading(false);
         console.log(err);
       });
   }
 
   function getSchoolAnimes() {
-    setIsLoading(true)
+    setIsLoading(true);
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -134,18 +131,18 @@ const Home = ({ navigation, navigate, truth }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
+            setIsLoading(false);
             setSchool(res1.data.data);
           });
       })
       .catch(function (err) {
-        setIsLoading(false)
+        setIsLoading(false);
         console.log(err);
       });
   }
 
   function getMonstersAnimes() {
-    setIsLoading(true)
+    setIsLoading(true);
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -162,18 +159,18 @@ const Home = ({ navigation, navigate, truth }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
+            setIsLoading(false);
             setMonsters(res1.data.data);
           });
       })
       .catch(function (err) {
-        setIsLoading(false)
+        setIsLoading(false);
         console.log(err);
       });
   }
 
   function getTopRatedAnimes() {
-    setIsLoading(true)
+    setIsLoading(true);
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -190,18 +187,18 @@ const Home = ({ navigation, navigate, truth }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
+            setIsLoading(false);
             setTopRated(res1.data.data);
           });
       })
       .catch(function (err) {
-        setIsLoading(false)
+        setIsLoading(false);
         console.log(err);
       });
   }
 
   function getRecentEp() {
-    setIsLoading(true)
+    setIsLoading(true);
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
         headers: {
@@ -218,12 +215,12 @@ const Home = ({ navigation, navigate, truth }) => {
             },
           })
           .then(async function (res1) {
-            setIsLoading(false)
+            setIsLoading(false);
             setEpisodes(res1.data.data);
           });
       })
       .catch(function (err) {
-        setIsLoading(false)
+        setIsLoading(false);
         console.log(err);
       });
   }
@@ -247,7 +244,6 @@ const Home = ({ navigation, navigate, truth }) => {
     return null;
   }
   return (
-
     <>
       <SafeAreaView
         style={{
@@ -275,7 +271,7 @@ const Home = ({ navigation, navigate, truth }) => {
                   <View style={styles(truth).posterCotainer} key={key}>
                     <TouchableOpacity
                       onPress={() => {
-                        setIsLoading(true)
+                        setIsLoading(true);
                         axios
                           .get(`${API.url}/AnimeLazer/Login`, {
                             headers: {
@@ -284,7 +280,6 @@ const Home = ({ navigation, navigate, truth }) => {
                             },
                           })
                           .then(async function (res) {
-                          setIsLoading(false)
                             axios
                               .get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
                                 headers: {
@@ -294,7 +289,7 @@ const Home = ({ navigation, navigate, truth }) => {
                                 },
                               })
                               .then(async function (res1) {
-                              setIsLoading(false)
+                                setIsLoading(false);
                                 console.log(res1.data.data);
                                 navigate.navigate("WatchRoom", {
                                   src: res1,
@@ -327,7 +322,7 @@ const Home = ({ navigation, navigate, truth }) => {
                   <View style={styles(truth).posterCotainer} key={key}>
                     <TouchableOpacity
                       onPress={() => {
-                        setIsLoading(true)
+                        setIsLoading(true);
                         axios
                           .get(`${API.url}/AnimeLazer/Login`, {
                             headers: {
@@ -346,7 +341,7 @@ const Home = ({ navigation, navigate, truth }) => {
                               })
                               .then(async function (res1) {
                                 res1.data.data.map((data) => {
-                                  setIsLoading(false)
+                                  setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
                                     type: data.type,
                                     summary: data.summary,
@@ -364,7 +359,7 @@ const Home = ({ navigation, navigate, truth }) => {
                               });
                           })
                           .catch(function (err) {
-                          setIsLoading(false)
+                            setIsLoading(false);
                             console.log(err);
                           });
                       }}
@@ -390,7 +385,7 @@ const Home = ({ navigation, navigate, truth }) => {
                   <View style={styles(truth).posterCotainer} key={key}>
                     <TouchableOpacity
                       onPress={() => {
-                        setIsLoading(true)
+                        setIsLoading(true);
                         axios
                           .get(`${API.url}/AnimeLazer/Login`, {
                             headers: {
@@ -409,7 +404,7 @@ const Home = ({ navigation, navigate, truth }) => {
                               })
                               .then(async function (res1) {
                                 res1.data.data.map((data) => {
-                                  setIsLoading(false)
+                                  setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
                                     type: data.type,
                                     summary: data.summary,
@@ -427,7 +422,7 @@ const Home = ({ navigation, navigate, truth }) => {
                               });
                           })
                           .catch(function (err) {
-                          setIsLoading(false)
+                            setIsLoading(false);
                             console.log(err);
                           });
                       }}
@@ -453,7 +448,7 @@ const Home = ({ navigation, navigate, truth }) => {
                   <View style={styles(truth).posterCotainer} key={key}>
                     <TouchableOpacity
                       onPress={() => {
-                        setIsLoading(true)
+                        setIsLoading(true);
                         axios
                           .get(`${API.url}/AnimeLazer/Login`, {
                             headers: {
@@ -472,7 +467,7 @@ const Home = ({ navigation, navigate, truth }) => {
                               })
                               .then(async function (res1) {
                                 res1.data.data.map((data) => {
-                                  setIsLoading(false)
+                                  setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
                                     type: data.type,
                                     summary: data.summary,
@@ -490,7 +485,7 @@ const Home = ({ navigation, navigate, truth }) => {
                               });
                           })
                           .catch(function (err) {
-                          setIsLoading(false)
+                            setIsLoading(false);
                             console.log(err);
                           });
                       }}
@@ -516,7 +511,7 @@ const Home = ({ navigation, navigate, truth }) => {
                   <View style={styles(truth).posterCotainer} key={key}>
                     <TouchableOpacity
                       onPress={() => {
-                        setIsLoading(true)
+                        setIsLoading(true);
                         axios
                           .get(`${API.url}/AnimeLazer/Login`, {
                             headers: {
@@ -535,7 +530,7 @@ const Home = ({ navigation, navigate, truth }) => {
                               })
                               .then(async function (res1) {
                                 res1.data.data.map((data) => {
-                                  setIsLoading(false)
+                                  setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
                                     type: data.type,
                                     summary: data.summary,
@@ -553,7 +548,7 @@ const Home = ({ navigation, navigate, truth }) => {
                               });
                           })
                           .catch(function (err) {
-                          setIsLoading(false)
+                            setIsLoading(false);
                             console.log(err);
                           });
                       }}
@@ -579,7 +574,7 @@ const Home = ({ navigation, navigate, truth }) => {
                   <View style={styles(truth).posterCotainer} key={key}>
                     <TouchableOpacity
                       onPress={() => {
-                        setIsLoading(true)
+                        setIsLoading(true);
                         axios
                           .get(`${API.url}/AnimeLazer/Login`, {
                             headers: {
@@ -598,7 +593,7 @@ const Home = ({ navigation, navigate, truth }) => {
                               })
                               .then(async function (res1) {
                                 res1.data.data.map((data) => {
-                                  setIsLoading(false)
+                                  setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
                                     type: data.type,
                                     summary: data.summary,
@@ -616,7 +611,7 @@ const Home = ({ navigation, navigate, truth }) => {
                               });
                           })
                           .catch(function (err) {
-                          setIsLoading(false)
+                            setIsLoading(false);
                             console.log(err);
                           });
                       }}
@@ -635,7 +630,12 @@ const Home = ({ navigation, navigate, truth }) => {
             </ScrollView>
           </View>
         </ScrollView>
-        <ActivityIndicator animating={isLoading} color="#0367fc" style={styles.loading} size={(Platform.OS === 'android') ? 51 : "large"}/>
+        <ActivityIndicator
+          animating={isLoading}
+          color="#d5e6ff"
+          style={styles(truth, isLoading).loading}
+          size={Platform.OS === "android" ? 51 : "large"}
+        />
         <FAB
           placement="right"
           color="#0367fc"
@@ -650,8 +650,7 @@ const Home = ({ navigation, navigate, truth }) => {
 
 export default Home;
 
-
-const styles = (truth) => {
+const styles = (truth, isLoading) => {
   return StyleSheet.create({
     container: {
       backgroundColor: "#1a1a1a",
@@ -697,6 +696,15 @@ const styles = (truth) => {
     },
     padding: {
       marginTop: 50,
+    },
+    loading: {
+      position: "absolute",
+      top: 300,
+      left: 170,
+      width: 70,
+      height: 70,
+      backgroundColor: isLoading ? "#585858" : "transparent",
+      borderRadius: 8,
     },
   });
 };

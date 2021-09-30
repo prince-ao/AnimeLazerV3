@@ -12,7 +12,7 @@ import {
   Dimensions,
   ToastAndroid,
   ActivityIndicator,
-  Platform
+  Platform,
 } from "react-native";
 import { Header } from "../components/index";
 import { Ionicons } from "@expo/vector-icons";
@@ -33,7 +33,7 @@ const EpisodeRoom = ({ navigation, route }) => {
   const [drop, setDrop] = useState(false);
   const inputEl = useRef(null);
 
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleNumberOfLines = () => {
     setShowLess(!showLess);
@@ -47,18 +47,20 @@ const EpisodeRoom = ({ navigation, route }) => {
     <SafeAreaView style={styles.container}>
       <StatusBar barStyle="light-content" />
       <View style={styles.headerContainer}>
-        <TouchableOpacity
-          style={styles.back}
-          onPress={() => navigation.goBack()}
-        >
-          <Ionicons name="chevron-back-sharp" size={35} color="#5c94dd" />
-        </TouchableOpacity>
         <Image style={styles.logo} source={require("../assets/Logo.png")} />
         {/* <TouchableOpacity
           style={{left: 170, top: 0, margin: 0}}
         >
           <Ionicons name="heart-sharp" size={35} color="#5c94dd" />
         </TouchableOpacity> */}
+        <TouchableOpacity
+          style={{ position: "absolute", top: 10, left: 15 }}
+          onPress={() => {
+            navigation.goBack();
+          }}
+        >
+          <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
+        </TouchableOpacity>
       </View>
       <View style={styles.infoContainer}>
         <View style={styles.genInfoContainer}>
@@ -141,7 +143,7 @@ const EpisodeRoom = ({ navigation, route }) => {
                 style={styles.episodeCard}
                 key={key}
                 onPress={() => {
-                  setIsLoading(true)
+                  setIsLoading(true);
                   axios
                     .get(`${API.url}/AnimeLazer/Login`, {
                       headers: {
@@ -159,7 +161,7 @@ const EpisodeRoom = ({ navigation, route }) => {
                           },
                         })
                         .then(async function (res1) {
-                          setIsLoading(true)
+                          setIsLoading(true);
                           if (
                             res1.data.data.length === 0 ||
                             (typeof res1.data.data === undefined) | null
@@ -188,14 +190,15 @@ const EpisodeRoom = ({ navigation, route }) => {
                                 );
                           } else {
                             navigation.navigate("WatchRoom", {
-                              title: route.params.animeTitle + " " + data.episode,
+                              title:
+                                route.params.animeTitle + " " + data.episode,
                               src: res1,
                             });
                           }
                         });
                     })
                     .catch(function (err) {
-                      setIsLoading(false)
+                      setIsLoading(false);
                       console.log(err);
                     });
                 }}
@@ -207,7 +210,12 @@ const EpisodeRoom = ({ navigation, route }) => {
           })}
         </View>
       </ScrollView>
-      <ActivityIndicator animating={isLoading} color="#0367fc" style={styles.loading} size={(Platform.OS === 'android') ? 51 : "large"}/>
+      <ActivityIndicator
+        animating={isLoading}
+        color="#0367fc"
+        style={styles.loading}
+        size={Platform.OS === "android" ? 51 : "large"}
+      />
     </SafeAreaView>
   );
 };
@@ -319,15 +327,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 20,
     top: 10,
-  },
-  loading: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    top: 0,
-    bottom: 0,
-    alignItems: 'center',
-    justifyContent: 'center'
-
+    width: 400,
+    height: 300,
   },
 });
