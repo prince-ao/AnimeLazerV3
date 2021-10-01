@@ -97,7 +97,7 @@ const Search = ({ navigation, navigate, truth }) => {
       <SafeAreaView
         style={{
           flex: 0,
-          backgroundColor: "#000",
+          backgroundColor: "#1a1a1a",
         }}
       />
       <SafeAreaView

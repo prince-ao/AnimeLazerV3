@@ -16,6 +16,7 @@ const Tab = createBottomTabNavigator();
 
 const BottomTab = ({ navigation }) => {
   const [truthy, setTruthy] = useState(true);
+  const [isLogged, setIsLogged] = useState(false);
   return (
     <Tab.Navigator
       initialRouteName="home"
@@ -51,7 +52,12 @@ const BottomTab = ({ navigation }) => {
       </Tab.Screen>
       <Tab.Screen name="favorites">
         {(props) => (
-          <Favorites {...props} navigate={navigation} truth={truthy} />
+          <Favorites
+            {...props}
+            navigate={navigation}
+            truth={truthy}
+            logged={isLogged}
+          />
         )}
       </Tab.Screen>
       <Tab.Screen name="settings">
