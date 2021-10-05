@@ -14,9 +14,7 @@ const Stack = createStackNavigator();
 
 const Tab = createBottomTabNavigator();
 
-const BottomTab = ({ navigation }) => {
-  const [truthy, setTruthy] = useState(true);
-  const [isLogged, setIsLogged] = useState(false);
+const BottomTab = ({ navigation, truthy, setTruthy }) => {
   return (
     <Tab.Navigator
       initialRouteName="home"
@@ -52,12 +50,7 @@ const BottomTab = ({ navigation }) => {
       </Tab.Screen>
       <Tab.Screen name="favorites">
         {(props) => (
-          <Favorites
-            {...props}
-            navigate={navigation}
-            truth={truthy}
-            logged={isLogged}
-          />
+          <Favorites {...props} navigate={navigation} truth={truthy} />
         )}
       </Tab.Screen>
       <Tab.Screen name="settings">
@@ -75,15 +68,24 @@ const BottomTab = ({ navigation }) => {
 };
 
 export default function App() {
+  const [truthy, setTruthy] = useState(true);
   return (
     <NavigationContainer>
       <Stack.Navigator
         initialRouteName="BottomTab"
         screenOptions={{ tabBarShowLabel: false, headerShown: false }}
       >
-        <Stack.Screen name="BottomTab" component={BottomTab} />
-        <Stack.Screen name="EpisodeRoom" component={EpisodeRoom} />
-        <Stack.Screen name="WatchRoom" component={WatchRoom} />
+        <Stack.Screen name="BottomTab">
+          {(props) => (
+            <BottomTab {...props} truthy={truthy} setTruthy={setTruthy} />
+          )}
+        </Stack.Screen>
+        <Stack.Screen name="EpisodeRoom">
+          {(props) => <EpisodeRoom {...props} truthy={truthy} />}
+        </Stack.Screen>
+        <Stack.Screen name="WatchRoom">
+          {(props) => <WatchRoom {...props} truthy={truthy} />}
+        </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
   );

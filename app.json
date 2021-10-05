@@ -14,11 +14,22 @@
     "updates": {
       "fallbackToCacheTimeout": 0
     },
-    "assetBundlePatterns": [
-      "**/*"
-    ],
+    "assetBundlePatterns": ["**/*"],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "LSApplicationQueriesSchemes": [
+          "message",
+          "readdle-spark",
+          "airmail",
+          "ms-outlook",
+          "googlegmail",
+          "inbox-gmail",
+          "ymail",
+          "superhuman",
+          "yandexmail"
+        ]
+      }
     },
     "android": {
       "package": "com.animelazer.heroku",
@@ -28,10 +39,7 @@
       }
     },
     "packagerOpts": {
-      "assetExts": [
-        "ttf",
-        "mp4"
-      ]
+      "assetExts": ["ttf", "mp4"]
     },
     "description": ""
   }

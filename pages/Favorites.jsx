@@ -28,20 +28,6 @@ const Favorites = ({ truth, logged }) => {
         <StatusBar barStyle="light-content" />
         <Header />
         <Text style={styles(truth).title}>Favorites</Text>
-        {logged ? (
-          <View>
-            <Text>Nothing</Text>
-          </View>
-        ) : (
-          <View style={styles(truth).container}>
-            <TouchableOpacity style={styles(truth).buttons}>
-              <Text style={styles(truth).buttonsText}>Log in</Text>
-            </TouchableOpacity>
-            <TouchableOpacity style={styles(truth).buttons}>
-              <Text style={styles(truth).buttonsText}>Sign up</Text>
-            </TouchableOpacity>
-          </View>
-        )}
       </SafeAreaView>
     </>
   );
@@ -57,20 +43,6 @@ const styles = (truth) =>
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-    },
-    buttons: {
-      marginBottom: 80,
-      backgroundColor: "#838383",
-      width: 100,
-      height: 50,
-      borderRadius: 10,
-      marginTop: 10,
-    },
-    buttonsText: {
-      color: "#fff",
-      textAlign: "center",
-      fontSize: 20,
-      marginTop: 10,
     },
     title: {
       fontSize: 40,
