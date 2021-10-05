@@ -8,14 +8,31 @@ import {
   ScrollView,
   View,
   Switch,
+  TouchableOpacity,
+  Linking,
+  Share,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
+import {
+  Ionicons,
+  AntDesign,
+  MaterialCommunityIcons,
+  FontAwesome5,
+} from "@expo/vector-icons";
 
 const Settings = ({ truth, truthSet }) => {
   const [isEnabled, setIsEnabled] = useState(true);
   const [appearance, setApearance] = useState("Dark");
   const handleChange = () => {
     truthSet(!truth);
+  };
+  const onShare = async () => {
+    try {
+      const result = await Share.share({
+        message: "TODO",
+      });
+    } catch (error) {
+      alert(error.message);
+    }
   };
   return (
     <>
@@ -55,6 +72,178 @@ const Settings = ({ truth, truthSet }) => {
               style={styles.settingSwitch}
             />
           </View>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              backgroundColor: "#4d4d4d",
+              heigth: "100%",
+              marginLeft: 30,
+              marginRight: 30,
+              marginTop: 40,
+              borderRadius: 5,
+            }}
+          >
+            <View style={{ paddingBottom: 10 }} />
+            <TouchableOpacity
+              style={{ ...styles.settingCont2, maringTop: 20 }}
+              onPress={() =>
+                Linking.openURL(
+                  "mailto:animelazers@gmail.com?subject=Support&body=Hi,"
+                )
+              }
+            >
+              <AntDesign
+                name="customerservice"
+                size={27}
+                color="#bdbdbd"
+                style={{ marginLeft: 20 }}
+              />
+              <Text
+                style={{
+                  marginLeft: 20,
+                  fontSize: 15,
+                  marginTop: 5,
+                  color: "white",
+                }}
+              >
+                Contact Us
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{ ...styles.settingCont2, marginTop: 20 }}>
+              <MaterialCommunityIcons
+                name="shield-lock"
+                size={27}
+                color="#bdbdbd"
+                style={{ marginLeft: 20 }}
+              />
+              <Text
+                style={{
+                  marginLeft: 20,
+                  fontSize: 15,
+                  marginTop: 5,
+                  color: "white",
+                }}
+              >
+                Privacy Policy
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity style={{ ...styles.settingCont2, marginTop: 20 }}>
+              <AntDesign
+                name="questioncircle"
+                size={23}
+                color="#bdbdbd"
+                style={{ marginLeft: 20 }}
+              />
+              <Text
+                style={{
+                  marginLeft: 20,
+                  fontSize: 15,
+                  marginTop: 5,
+                  color: "white",
+                }}
+              >
+                FAQ
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ ...styles.settingCont2, marginTop: 20 }}
+              onPress={() =>
+                Linking.openURL(
+                  "mailto:animelazer@gmail.com?subject=Rate&body=I would give this app a "
+                )
+              }
+            >
+              <AntDesign
+                name="star"
+                size={26}
+                color="#bdbdbd"
+                style={{ marginLeft: 20 }}
+              />
+              <Text
+                style={{
+                  marginLeft: 20,
+                  fontSize: 15,
+                  marginTop: 5,
+                  color: "white",
+                }}
+              >
+                Rate us
+              </Text>
+            </TouchableOpacity>
+            <View style={{ paddingBottom: 10 }} />
+          </View>
+          <TouchableOpacity style={styles.settingCont} onPress={onShare}>
+            <FontAwesome5
+              name="user-friends"
+              size={22}
+              color="#bdbdbd"
+              style={{ marginLeft: 20 }}
+            />
+            <Text
+              style={{
+                marginLeft: 20,
+                fontSize: 15,
+                marginTop: 5,
+                color: "white",
+              }}
+            >
+              Suggest to Friends
+            </Text>
+          </TouchableOpacity>
+          <View
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              backgroundColor: "#4d4d4d",
+              heigth: "100%",
+              marginLeft: 30,
+              marginRight: 30,
+              marginTop: 40,
+              borderRadius: 5,
+            }}
+          >
+            <TouchableOpacity style={{ ...styles.settingCont2, marginTop: 20 }}>
+              <AntDesign
+                name="instagram"
+                size={24}
+                color="#bdbdbd"
+                style={{ marginLeft: 20 }}
+              />
+              <Text
+                style={{
+                  marginLeft: 20,
+                  fontSize: 15,
+                  marginTop: 5,
+                  color: "white",
+                }}
+              >
+                Follow us on Instagram
+              </Text>
+            </TouchableOpacity>
+            <TouchableOpacity
+              style={{ ...styles.settingCont2, marginTop: 20 }}
+              onPress={() => Linking.openURL("https://twitter.com/lazer_anime")}
+            >
+              <AntDesign
+                name="twitter"
+                size={21}
+                color="#bdbdbd"
+                style={{ marginLeft: 20 }}
+              />
+              <Text
+                style={{
+                  marginLeft: 20,
+                  fontSize: 15,
+                  marginTop: 5,
+                  color: "white",
+                }}
+              >
+                Follow us on Twitter
+              </Text>
+            </TouchableOpacity>
+            <View style={{ paddingBottom: 20 }} />
+          </View>
         </ScrollView>
       </SafeAreaView>
     </>
@@ -78,6 +267,11 @@ const styles = StyleSheet.create({
     marginTop: 40,
     height: 40,
     alignItems: "center",
+  },
+  settingCont2: {
+    display: "flex",
+    flexDirection: "row",
+    width: "100%",
   },
   settingText: {
     color: "white",

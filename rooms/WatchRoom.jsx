@@ -5,6 +5,7 @@ import {
   View,
   Dimensions,
   TouchableOpacity,
+  SafeAreaView,
   Button,
   Platform,
 } from "react-native";
@@ -15,15 +16,21 @@ import * as ScreenOrientation from "expo-screen-orientation";
 
 const { width, height } = Dimensions.get("window");
 
-const WatchRoom = ({ navigation, route }) => {
+const WatchRoom = ({ navigation, route, truthy }) => {
   const videoUrl = route.params.src;
   const [buttonTitle, setButtonTitle] = useState("Download");
   const [progressValue, setProgressValue] = useState(0);
-  const [isDownloading, setIsDownloading] = useState(false)
+  const [isDownloading, setIsDownloading] = useState(false);
   const [totalSize, setTotalSize] = useState(0);
+<<<<<<< HEAD
   const video = useRef(null);
   const [status, setStatus] = useState({});
   const title = route.params.title
+=======
+  const video = React.useRef(null);
+  const [status, setStatus] = React.useState({});
+  const title = route.params.title;
+>>>>>>> 81572c211d29be0203a9e7b697cd95b4a58cff2a
   const [star, setStar] = useState(false);
 
   // useEffect(() => {
@@ -76,7 +83,7 @@ const WatchRoom = ({ navigation, route }) => {
   // })
 
   async function downloadVideo() {
-    setIsDownloading(true)
+    setIsDownloading(true);
     setButtonTitle("Downloading");
 
     const callback = (downloadProgress) => {
@@ -98,7 +105,7 @@ const WatchRoom = ({ navigation, route }) => {
 
     try {
       const { uri } = await downloadResumable.downloadAsync();
-      setIsDownloading(false)
+      setIsDownloading(false);
       console.log("Finished downloading to ", uri);
       setButtonTitle("Downloaded");
     } catch (e) {
@@ -123,17 +130,10 @@ const WatchRoom = ({ navigation, route }) => {
   };
 
   return (
-    <View style={styles.container}>
-      <TouchableOpacity
-        onPress={() => {
-          setStar(!star);
-        }}
-        style={{ position: "absolute", top: 50, right: 50 }}
-      >
-        <Ionicons name="star" size={25} color={star ? "#ffd700" : "#fff"} />
-      </TouchableOpacity>
-      <Text
+    <>
+      <SafeAreaView
         style={{
+<<<<<<< HEAD
           color: "white",
           fontSize: 32,
           marginTop: -10,
@@ -195,35 +195,106 @@ const WatchRoom = ({ navigation, route }) => {
         <Text style={{color: "white"}}> Size: {totalSize} </Text>
         <Text style={{color: "white"}}>Progress: {progressValue} %</Text>
         </>
+=======
+          flex: 0,
+          backgroundColor: "#000",
+        }}
+      />
+      <View style={styles(truthy).container}>
+        <Text
+          style={{
+            color: "white",
+            fontSize: 32,
+            marginTop: -10,
+            marginBottom: 30,
+          }}
+        >
+          {title}
+        </Text>
+        {Platform.OS === "android" ? (
+          <Video
+            style={styles(truthy).video}
+            ref={videoRef}
+            source={{ uri: videoUrl }}
+            resizeMode={ResizeMode.CONTAIN}
+            useNativeControls={true}
+            onFullscreenUpdate={onFullscreenUpdate}
+          />
+>>>>>>> 81572c211d29be0203a9e7b697cd95b4a58cff2a
         ) : (
-          null
-        )
-      }
-    </View>
+          <Video
+            ref={video}
+            source={{ uri: videoUrl }}
+            rate={1.0}
+            volume={1.0}
+            isMuted={false}
+            resizeMode="cover"
+            shouldPlay={false}
+            isLooping={false}
+            useNativeControls={true}
+            style={styles(truthy).video}
+            onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+          />
+        )}
+        <TouchableOpacity
+          onPress={() => {
+            status.isPlaying
+              ? video.current.pauseAsync()
+              : video.current.playAsync();
+          }}
+          style={{ position: "absolute", top: height / 2.4, left: width / 2.2 }}
+        >
+          <Ionicons
+            name={status.isPlaying ? "" : "play"}
+            size={55}
+            color="#fff"
+          />
+        </TouchableOpacity>
+        {/* <TouchableOpacity onPress={() => console.log(status.getStatusAsync)}>
+          <Ionicons name="play-forward" size={35} color="#527ef5" />
+        </TouchableOpacity> */}
+        <View style={styles(truthy).back}>
+          <Ionicons
+            onPress={() => navigation.goBack()}
+            name="chevron-back-sharp"
+            size={35}
+            color="#5c94dd"
+          />
+        </View>
+        <Button title={buttonTitle} onPress={downloadVideo}></Button>
+        {isDownloading ? (
+          <>
+            <Text style={{ color: "white" }}> Size: {totalSize} </Text>
+            <Text style={{ color: "white" }}>Progress: {progressValue} %</Text>
+          </>
+        ) : null}
+      </View>
+    </>
   );
 };
 
 export default WatchRoom;
 
-const styles = StyleSheet.create({
-  video: {
-    width: width,
-    height: height / 2.5,
-  },
-  back: {
-    position: "absolute",
-    padding: 10,
-    left: 20,
-    top: 10,
-  },
+const styles = (truthy) =>
+  StyleSheet.create({
+    video: {
+      width: width,
+      height: height / 2.5,
+    },
+    back: {
+      position: "absolute",
+      padding: 10,
+      left: 20,
+      top: 10,
+    },
 
-  container: {
-    flex: 1,
-    backgroundColor: "#000",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-});
+    container: {
+      flex: 1,
+      backgroundColor: truthy ? "#000" : "#eeeeee",
+      alignItems: "center",
+      justifyContent: "center",
+    },
+  });
 
 // import React, { useState, useRef } from 'react';
 // import { StyleSheet, View, Platform, Button, NativeModules, useWindowDimensions } from 'react-native';
