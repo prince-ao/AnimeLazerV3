@@ -45,13 +45,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   }, []);
 
   return (
-<<<<<<< HEAD
-    <SafeAreaView style={styles(isLoading).container}>
-      <StatusBar barStyle="light-content" />
-      <View style={styles(isLoading).headerContainer}>
-        <Image style={styles(isLoading).logo} source={require("../assets/Logo.png")} />
-        {/* <TouchableOpacity
-=======
     <>
       <SafeAreaView
         style={{
@@ -67,81 +60,12 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
             source={require("../assets/Logo.png")}
           />
           {/* <TouchableOpacity
->>>>>>> 81572c211d29be0203a9e7b697cd95b4a58cff2a
           style={{left: 170, top: 0, margin: 0}}
         >
           <Ionicons name="heart-sharp" size={35} color="#5c94dd" />
         </TouchableOpacity> */}
-<<<<<<< HEAD
-        <TouchableOpacity
-          style={{ position: "absolute", top: 10, left: 15 }}
-          onPress={() => {
-            navigation.goBack();
-          }}
-        >
-          <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
-        </TouchableOpacity>
-      </View>
-      <View style={styles(isLoading).infoContainer}>
-        <View style={styles(isLoading).genInfoContainer}>
-          <Image
-            source={{ uri: route.params.animeCover }}
-            alt="poster"
-            style={styles(isLoading).poster}
-          />
-          <View style={styles(isLoading).textInfoContainer}>
-            <Text numberOfLines={2} ellipsizeMode="tail" style={styles(isLoading).title}>
-              {route.params.animeTitle}
-            </Text>
-            <View style={styles(isLoading).genDesc}>
-              <Text style={styles(isLoading).white}>
-                Type: <Text style={styles(isLoading).innerText}>{route.params.type} </Text>
-              </Text>
-              <Text numberOfLines={1} ellipsizeMode="tail" style={styles(isLoading).white}>
-                Released:{" "}
-                <Text style={styles(isLoading).innerText}>
-                  {route.params.season.includes("Anime")
-                    ? route.params.season.replace("Anime", "")
-                    : route.params.season}{" "}
-                </Text>{" "}
-              </Text>
-              <Text style={styles(isLoading).white}>
-                Episodes:{" "}
-                <Text style={styles(isLoading).innerText}>{route.params.episodes} </Text>
-              </Text>
-              <Text style={styles(isLoading).white}>
-                Status:{" "}
-                <Text style={styles(isLoading).innerText}>{route.params.status} </Text>
-              </Text>
-            </View>
-            <ScrollView
-              overScrollMode="never"
-              showsVerticalScrollIndicator={false}
-              style={styles(isLoading).genres}
-            >
-              <View>
-                {route.params.genres.map((data, key) => {
-                  return (
-                    <Text style={styles(isLoading).genresCard} key={key}>
-                      {data.Genre}
-                    </Text>
-                  );
-                })}
-              </View>
-            </ScrollView>
-          </View>
-        </View>
-        <View ref={inputEl} style={styles(isLoading).descContainer}>
-          {/*TODO later version: find a way to calculate the size of a the Text */}
-          <Text style={{ height: descLength, color: "white" }}>
-            {route.params.summary}
-          </Text>
-          <TouchableOpacity
-            style={styles(isLoading).white}
-=======
           <TouchableOpacity
             style={{ position: "absolute", top: 10, left: 15 }}
->>>>>>> 81572c211d29be0203a9e7b697cd95b4a58cff2a
             onPress={() => {
               navigation.goBack();
             }}
@@ -149,80 +73,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
             <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
           </TouchableOpacity>
         </View>
-<<<<<<< HEAD
-      </View>
-      <ScrollView
-        overScrollMode="never"
-        showsVerticalScrollIndicator={false}
-        showsHorizontalScrollIndicator={false}
-      >
-        <View style={styles(isLoading).episodesList}>
-          {route.params.episodesList.map((data, key) => {
-            return (
-              <Text
-                style={styles(isLoading).episodeCard}
-                key={key}
-                onPress={() => {
-                  setIsLoading(true);
-                  axios
-                    .get(`${API.url}/AnimeLazer/Login`, {
-                      headers: {
-                        "Content-Type": "application/json",
-                        id: API.id,
-                      },
-                    })
-                    .then(async function (res) {
-                      axios
-                        .get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
-                          headers: {
-                            "Content-Type": "application/json",
-                            Authorization: `${API.key}${res.data.token}`,
-                            src: data.url,
-                          },
-                        })
-                        .then(async function (res1) {
-                          setIsLoading(false);
-                          if (
-                            res1.data.data.length === 0 ||
-                            (typeof res1.data.data === undefined) | null
-                          ) {
-                            Platform.OS === "android"
-                              ? ToastAndroid.showWithGravity(
-                                  "This video file cannot be played.",
-                                  2000,
-                                  ToastAndroid.BOTTOM
-                                )
-                              : Alert.alert(
-                                  "Warning",
-                                  "This video file cannot be played",
-                                  [
-                                    {
-                                      text: "Cancel",
-                                      onPress: () =>
-                                        console.log("Cancel Pressed"),
-                                      style: "cancel",
-                                    },
-                                    {
-                                      text: "OK",
-                                      onPress: () => console.log("OK Pressed"),
-                                    },
-                                  ]
-                                );
-                          } else {
-                            navigation.navigate("WatchRoom", {
-                              title:
-                                route.params.animeTitle + " " + data.episode,
-                              src: res1,
-                            });
-                          }
-                        });
-                    })
-                    .catch(function (err) {
-                      setIsLoading(false);
-                      console.log(err);
-                    });
-                }}
-=======
         <View style={styles(truthy).infoContainer}>
           <View style={styles(truthy).genInfoContainer}>
             <Image
@@ -235,7 +85,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                 numberOfLines={2}
                 ellipsizeMode="tail"
                 style={styles(truthy).title}
->>>>>>> 81572c211d29be0203a9e7b697cd95b4a58cff2a
               >
                 {route.params.animeTitle}
               </Text>
@@ -310,16 +159,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
             </TouchableOpacity>
           </View>
         </View>
-<<<<<<< HEAD
-      </ScrollView>
-      <ActivityIndicator
-        animating={isLoading}
-        color="#0367fc"
-        style={styles(isLoading).loading}
-        size={Platform.OS === "android" ? 51 : "large"}
-      />
-    </SafeAreaView>
-=======
         <ScrollView
           overScrollMode="never"
           showsVerticalScrollIndicator={false}
@@ -406,132 +245,11 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
         />
       </SafeAreaView>
     </>
->>>>>>> 81572c211d29be0203a9e7b697cd95b4a58cff2a
   );
 };
 
 export default EpisodeRoom;
 
-<<<<<<< HEAD
-const styles = (isLoading) => StyleSheet.create({
-  container: {
-    backgroundColor: "#1b1b1b",
-    width: "100%",
-    height: "100%",
-    color: "white",
-  },
-  headerContainer: {
-    width: "100%",
-    height: 15,
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  genresCard: {
-    color: "white",
-    fontSize: 14,
-    padding: 7,
-    textAlign: "center",
-    backgroundColor: "#383838",
-    borderRadius: 14,
-    borderTopRightRadius: 15,
-    borderTopLeftRadius: 15,
-    borderBottomLeftRadius: 15,
-    borderBottomRightRadius: 15,
-    marginBottom: 6,
-    marginEnd: 8,
-    display: "flex",
-  },
-  genres: {
-    top: 10,
-    flexDirection: "row",
-    flexWrap: "wrap",
-    flex: 1,
-  },
-  episodesList: {
-    marginLeft: 21,
-    justifyContent: "center",
-    alignItems: "baseline",
-    flexDirection: "row",
-    flexWrap: "wrap",
-  },
-  episodeCard: {
-    color: "white",
-    padding: 10,
-    textAlign: "center",
-    backgroundColor: "#383838",
-    borderRadius: 10,
-    display: "flex",
-    marginBottom: 10,
-    marginEnd: 25,
-  },
-  poster: {
-    height: 235,
-    width: 150,
-    borderRadius: 3,
-    marginLeft: 20,
-  },
-  innerText: {
-    color: "gray",
-  },
-  white: {
-    color: "white",
-  },
-  arrow: {
-    marginLeft: Dimensions.get("window").width / 1.2,
-    color: "white",
-  },
-  genInfoContainer: {
-    display: "flex",
-    flexDirection: "row",
-    justifyContent: "flex-start",
-    marginTop: Dimensions.get("window").height / 20,
-  },
-  textInfoContainer: {
-    marginLeft: Dimensions.get("window").width / 16,
-  },
-  title: {
-    fontSize: 20,
-    color: "white",
-    width: Dimensions.get("window").height / 5,
-  },
-  genDesc: {
-    marginTop: 5,
-  },
-  description: {
-    display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-between",
-    width: 160,
-    marginTop: 20,
-  },
-  descContainer: {
-    margin: 15,
-  },
-  logo: {
-    marginTop: 40,
-    width: 150,
-    height: 30,
-  },
-  back: {
-    position: "absolute",
-    left: 20,
-    top: 10,
-    width: 400,
-    height: 300,
-  },
-  loading: {
-    position: "absolute",
-    top: 300,
-    left: 170,
-    width: 70,
-    height: 70,
-    backgroundColor: isLoading ? "#585858" : "transparent",
-    borderRadius: 8,
-  },
-});
-=======
 const styles = (truthy, isLoading) =>
   StyleSheet.create({
     container: {
@@ -654,4 +372,3 @@ const styles = (truthy, isLoading) =>
       borderRadius: 8,
     },
   });
->>>>>>> 81572c211d29be0203a9e7b697cd95b4a58cff2a

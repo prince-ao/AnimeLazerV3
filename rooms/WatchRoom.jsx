@@ -22,15 +22,12 @@ const WatchRoom = ({ navigation, route, truthy }) => {
   const [progressValue, setProgressValue] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [totalSize, setTotalSize] = useState(0);
-<<<<<<< HEAD
+  
   const video = useRef(null);
   const [status, setStatus] = useState({});
   const title = route.params.title
-=======
-  const video = React.useRef(null);
-  const [status, setStatus] = React.useState({});
-  const title = route.params.title;
->>>>>>> 81572c211d29be0203a9e7b697cd95b4a58cff2a
+
+
   const [star, setStar] = useState(false);
 
   // useEffect(() => {
@@ -133,69 +130,6 @@ const WatchRoom = ({ navigation, route, truthy }) => {
     <>
       <SafeAreaView
         style={{
-<<<<<<< HEAD
-          color: "white",
-          fontSize: 32,
-          marginTop: -10,
-          marginBottom: 30,
-        }}
-      >
-        {title}
-      </Text>
-      {Platform.OS === "android" ? (
-        <Video
-          style={styles.video}
-          ref={videoRef}
-          source={{ uri: videoUrl }}
-          resizeMode={ResizeMode.CONTAIN}
-          useNativeControls={true}
-          onFullscreenUpdate={onFullscreenUpdate}
-        />
-      ) : (
-        <Video
-          ref={video}
-          source={{ uri: videoUrl }}
-          rate={1.0}
-          volume={1.0}
-          isMuted={false}
-          resizeMode="cover"
-          shouldPlay={false}
-          isLooping={false}
-          useNativeControls={true}
-          style={styles.video}
-          onPlaybackStatusUpdate={(status) => setStatus(() => status)}
-        />
-      )}
-      {/* <TouchableOpacity
-        onPress={() => {
-          status.isPlaying
-            ? video.current.pauseAsync()
-            : video.current.playAsync();
-        }}
-        style={{ position: "absolute", top: height / 2.4, left: width / 2.2 }}
-      >
-        <Ionicons
-          name={status.isPlaying ? "" : "play"}
-          size={55}
-          color="#fff"
-        />
-      </TouchableOpacity> */}
-      <View style={styles.back}>
-        <Ionicons
-          onPress={() => navigation.goBack()}
-          name="chevron-back-sharp"
-          size={35}
-          color="#5c94dd"
-        />
-      </View>
-      <Button title={buttonTitle} onPress={downloadVideo}></Button>
-      {
-        isDownloading ? (
-          <>
-        <Text style={{color: "white"}}> Size: {totalSize} </Text>
-        <Text style={{color: "white"}}>Progress: {progressValue} %</Text>
-        </>
-=======
           flex: 0,
           backgroundColor: "#000",
         }}
@@ -220,7 +154,6 @@ const WatchRoom = ({ navigation, route, truthy }) => {
             useNativeControls={true}
             onFullscreenUpdate={onFullscreenUpdate}
           />
->>>>>>> 81572c211d29be0203a9e7b697cd95b4a58cff2a
         ) : (
           <Video
             ref={video}
