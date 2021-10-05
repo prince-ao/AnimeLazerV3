@@ -21,8 +21,8 @@ const WatchRoom = ({ navigation, route }) => {
   const [progressValue, setProgressValue] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false)
   const [totalSize, setTotalSize] = useState(0);
-  const video = React.useRef(null);
-  const [status, setStatus] = React.useState({});
+  const video = useRef(null);
+  const [status, setStatus] = useState({});
   const title = route.params.title
   const [star, setStar] = useState(false);
 
@@ -51,6 +51,7 @@ const WatchRoom = ({ navigation, route }) => {
   // }, []);
 
   const videoRef = useRef();
+  console.log(videoUrl)
 
   function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return "0 Bytes";
@@ -101,6 +102,7 @@ const WatchRoom = ({ navigation, route }) => {
       console.log("Finished downloading to ", uri);
       setButtonTitle("Downloaded");
     } catch (e) {
+      setIsDownloading(false)
       console.error(e);
     }
   }
@@ -164,7 +166,7 @@ const WatchRoom = ({ navigation, route }) => {
           onPlaybackStatusUpdate={(status) => setStatus(() => status)}
         />
       )}
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={() => {
           status.isPlaying
             ? video.current.pauseAsync()
@@ -177,7 +179,7 @@ const WatchRoom = ({ navigation, route }) => {
           size={55}
           color="#fff"
         />
-      </TouchableOpacity>
+      </TouchableOpacity> */}
       <View style={styles.back}>
         <Ionicons
           onPress={() => navigation.goBack()}

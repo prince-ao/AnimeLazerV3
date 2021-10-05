@@ -44,10 +44,10 @@ const EpisodeRoom = ({ navigation, route }) => {
   }, []);
 
   return (
-    <SafeAreaView style={styles.container}>
+    <SafeAreaView style={styles(isLoading).container}>
       <StatusBar barStyle="light-content" />
-      <View style={styles.headerContainer}>
-        <Image style={styles.logo} source={require("../assets/Logo.png")} />
+      <View style={styles(isLoading).headerContainer}>
+        <Image style={styles(isLoading).logo} source={require("../assets/Logo.png")} />
         {/* <TouchableOpacity
           style={{left: 170, top: 0, margin: 0}}
         >
@@ -62,47 +62,47 @@ const EpisodeRoom = ({ navigation, route }) => {
           <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
         </TouchableOpacity>
       </View>
-      <View style={styles.infoContainer}>
-        <View style={styles.genInfoContainer}>
+      <View style={styles(isLoading).infoContainer}>
+        <View style={styles(isLoading).genInfoContainer}>
           <Image
             source={{ uri: route.params.animeCover }}
             alt="poster"
-            style={styles.poster}
+            style={styles(isLoading).poster}
           />
-          <View style={styles.textInfoContainer}>
-            <Text numberOfLines={2} ellipsizeMode="tail" style={styles.title}>
+          <View style={styles(isLoading).textInfoContainer}>
+            <Text numberOfLines={2} ellipsizeMode="tail" style={styles(isLoading).title}>
               {route.params.animeTitle}
             </Text>
-            <View style={styles.genDesc}>
-              <Text style={styles.white}>
-                Type: <Text style={styles.innerText}>{route.params.type} </Text>
+            <View style={styles(isLoading).genDesc}>
+              <Text style={styles(isLoading).white}>
+                Type: <Text style={styles(isLoading).innerText}>{route.params.type} </Text>
               </Text>
-              <Text numberOfLines={1} ellipsizeMode="tail" style={styles.white}>
+              <Text numberOfLines={1} ellipsizeMode="tail" style={styles(isLoading).white}>
                 Released:{" "}
-                <Text style={styles.innerText}>
+                <Text style={styles(isLoading).innerText}>
                   {route.params.season.includes("Anime")
                     ? route.params.season.replace("Anime", "")
                     : route.params.season}{" "}
                 </Text>{" "}
               </Text>
-              <Text style={styles.white}>
+              <Text style={styles(isLoading).white}>
                 Episodes:{" "}
-                <Text style={styles.innerText}>{route.params.episodes} </Text>
+                <Text style={styles(isLoading).innerText}>{route.params.episodes} </Text>
               </Text>
-              <Text style={styles.white}>
+              <Text style={styles(isLoading).white}>
                 Status:{" "}
-                <Text style={styles.innerText}>{route.params.status} </Text>
+                <Text style={styles(isLoading).innerText}>{route.params.status} </Text>
               </Text>
             </View>
             <ScrollView
               overScrollMode="never"
               showsVerticalScrollIndicator={false}
-              style={styles.genres}
+              style={styles(isLoading).genres}
             >
               <View>
                 {route.params.genres.map((data, key) => {
                   return (
-                    <Text style={styles.genresCard} key={key}>
+                    <Text style={styles(isLoading).genresCard} key={key}>
                       {data.Genre}
                     </Text>
                   );
@@ -111,13 +111,13 @@ const EpisodeRoom = ({ navigation, route }) => {
             </ScrollView>
           </View>
         </View>
-        <View ref={inputEl} style={styles.descContainer}>
+        <View ref={inputEl} style={styles(isLoading).descContainer}>
           {/*TODO later version: find a way to calculate the size of a the Text */}
           <Text style={{ height: descLength, color: "white" }}>
             {route.params.summary}
           </Text>
           <TouchableOpacity
-            style={styles.white}
+            style={styles(isLoading).white}
             onPress={() => {
               descLength === 30 ? setDescLength(200) : setDescLength(30);
               setDrop(!drop);
@@ -136,11 +136,11 @@ const EpisodeRoom = ({ navigation, route }) => {
         showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
       >
-        <View style={styles.episodesList}>
+        <View style={styles(isLoading).episodesList}>
           {route.params.episodesList.map((data, key) => {
             return (
               <Text
-                style={styles.episodeCard}
+                style={styles(isLoading).episodeCard}
                 key={key}
                 onPress={() => {
                   setIsLoading(true);
@@ -161,7 +161,7 @@ const EpisodeRoom = ({ navigation, route }) => {
                           },
                         })
                         .then(async function (res1) {
-                          setIsLoading(true);
+                          setIsLoading(false);
                           if (
                             res1.data.data.length === 0 ||
                             (typeof res1.data.data === undefined) | null
@@ -213,7 +213,7 @@ const EpisodeRoom = ({ navigation, route }) => {
       <ActivityIndicator
         animating={isLoading}
         color="#0367fc"
-        style={styles.loading}
+        style={styles(isLoading).loading}
         size={Platform.OS === "android" ? 51 : "large"}
       />
     </SafeAreaView>
@@ -222,7 +222,7 @@ const EpisodeRoom = ({ navigation, route }) => {
 
 export default EpisodeRoom;
 
-const styles = StyleSheet.create({
+const styles = (isLoading) => StyleSheet.create({
   container: {
     backgroundColor: "#1b1b1b",
     width: "100%",
@@ -329,5 +329,14 @@ const styles = StyleSheet.create({
     top: 10,
     width: 400,
     height: 300,
+  },
+  loading: {
+    position: "absolute",
+    top: 300,
+    left: 170,
+    width: 70,
+    height: 70,
+    backgroundColor: isLoading ? "#585858" : "transparent",
+    borderRadius: 8,
   },
 });

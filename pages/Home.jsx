@@ -292,7 +292,8 @@ const Home = ({ navigation, navigate, truth }) => {
                                 setIsLoading(false);
                                 console.log(res1.data.data);
                                 navigate.navigate("WatchRoom", {
-                                  src: res1,
+                                  title: data.animeTitle + " " + data.episode,
+                                  src: res1.data.data,
                                 });
                               });
                           })
