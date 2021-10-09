@@ -5,6 +5,7 @@
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
+    "sdkVersion": "42.0.0",
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "cover",
@@ -33,6 +34,7 @@
       }
     },
     "android": {
+
       "package": "com.animelazer.heroku",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

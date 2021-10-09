@@ -101,10 +101,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                   style={styles(truthy).white}
                 >
                   Released:{" "}
-                  <Text style={styles(truthy).innerText}>
-                    {route.params.season.includes("Anime")
-                      ? route.params.season.replace("Anime", "")
-                      : route.params.season}{" "}
+                  <Text numberOfLines={1} ellipsizeMode="tail" style={styles(truthy).innerText}>
+                      {route.params.season}
                   </Text>{" "}
                 </Text>
                 <Text style={styles(truthy).white}>

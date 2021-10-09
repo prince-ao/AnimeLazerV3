@@ -261,7 +261,7 @@ const Home = ({ navigation, navigate, truth }) => {
       >
         <StatusBar barStyle="light-content" />
         <Header />
-        <ScrollView>
+        <ScrollView overScrollMode="never">
           <View style={styles(truth).padding} />
           <View style={styles(truth).shows}>
             <Text style={styles(truth).showText}>Recent</Text>
@@ -695,7 +695,7 @@ const styles = (truth, isLoading) => {
       height: 250,
     },
     padding: {
-      marginTop: 50,
+      marginTop: 20,
     },
     loading: {
       position: "absolute",
