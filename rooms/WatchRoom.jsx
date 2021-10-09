@@ -26,6 +26,8 @@ const WatchRoom = ({ navigation, route, truthy }) => {
   const video = useRef(null);
   const [status, setStatus] = useState({});
   const title = route.params.title
+  console.log("title: " + title)
+  console.log("src: " + videoUrl)
 
 
   const [star, setStar] = useState(false);
@@ -55,7 +57,6 @@ const WatchRoom = ({ navigation, route, truthy }) => {
   // }, []);
 
   const videoRef = useRef();
-  console.log(videoUrl)
 
   function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return "0 Bytes";
@@ -136,10 +137,12 @@ const WatchRoom = ({ navigation, route, truthy }) => {
       />
       <View style={styles(truthy).container}>
         <Text
+        numberOfLines={2}
+        ellipsizeMode="tail"
           style={{
             color: "white",
-            fontSize: 32,
-            marginTop: -10,
+            fontSize: 20,
+            marginTop: height / 200,
             marginBottom: 30,
           }}
         >
@@ -169,7 +172,7 @@ const WatchRoom = ({ navigation, route, truthy }) => {
             onPlaybackStatusUpdate={(status) => setStatus(() => status)}
           />
         )}
-        <TouchableOpacity
+        {/* <TouchableOpacity
           onPress={() => {
             status.isPlaying
               ? video.current.pauseAsync()
@@ -182,7 +185,7 @@ const WatchRoom = ({ navigation, route, truthy }) => {
             size={55}
             color="#fff"
           />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         {/* <TouchableOpacity onPress={() => console.log(status.getStatusAsync)}>
           <Ionicons name="play-forward" size={35} color="#527ef5" />
         </TouchableOpacity> */}

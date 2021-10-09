@@ -142,7 +142,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
             <Text
               style={{ height: descLength, color: truthy ? "white" : "black" }}
             >
-              {route.params.summary}
+              {route.params.synopsis}
             </Text>
             <TouchableOpacity
               style={styles(truthy).white}
@@ -185,11 +185,11 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             headers: {
                               "Content-Type": "application/json",
                               Authorization: `${API.key}${res.data.token}`,
-                              src: data.url,
+                              src: data.epUrl,
                             },
                           })
                           .then(async function (res1) {
-                            setIsLoading(true);
+                            setIsLoading(false);
                             if (
                               res1.data.data.length === 0 ||
                               (typeof res1.data.data === undefined) | null
@@ -218,7 +218,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             } else {
                               navigation.navigate("WatchRoom", {
                                 title:
-                                  route.params.animeTitle + " " + data.episode,
+                                  route.params.animeTitle + " " + data.epNum,
                                 src: res1,
                               });
                             }
@@ -231,7 +231,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                   }}
                 >
                   {" "}
-                  {"Episode " + data.episode}
+                  {"Episode " + data.epNum}
                 </Text>
               );
             })}
@@ -364,10 +364,12 @@ const styles = (truthy, isLoading) =>
     },
     loading: {
       position: "absolute",
-      top: 300,
-      left: 170,
+      top: Dimensions.get("window").height / 2.3,
+      right: Dimensions.get("window").width / 2.43,
       width: 70,
       height: 70,
+      alignItems: 'center',
+      justifyContent: 'center',
       backgroundColor: isLoading ? "#585858" : "transparent",
       borderRadius: 8,
     },

@@ -290,9 +290,8 @@ const Home = ({ navigation, navigate, truth }) => {
                               })
                               .then(async function (res1) {
                                 setIsLoading(false);
-                                console.log(res1.data.data);
                                 navigate.navigate("WatchRoom", {
-                                  title: data.animeTitle + " " + data.episode,
+                                  title: data.animeName + " " + data.epNum,
                                   src: res1.data.data,
                                 });
                               });
@@ -345,7 +344,7 @@ const Home = ({ navigation, navigate, truth }) => {
                                   setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
                                     type: data.type,
-                                    summary: data.summary,
+                                    synopsis: data.synopsis,
                                     animeCover: data.animeCover,
                                     animeTitle: data.animeEnglishTitle,
                                     episodes: data.episodesAvaliable,
@@ -700,10 +699,12 @@ const styles = (truth, isLoading) => {
     },
     loading: {
       position: "absolute",
-      top: 300,
-      left: 170,
+      top: Dimensions.get("window").height / 2.3,
+      right: Dimensions.get("window").width / 2.43,
       width: 70,
       height: 70,
+      alignItems: 'center',
+      justifyContent: 'center',
       backgroundColor: isLoading ? "#585858" : "transparent",
       borderRadius: 8,
     },
