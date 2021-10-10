@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from "react";
 import {
   StyleSheet,
@@ -8,6 +9,10 @@ import {
   SafeAreaView,
   Button,
   Platform,
+  BackHandler,
+  Alert,
+  StatusBar,
+  
 } from "react-native";
 import { Video, ResizeMode } from "expo-av";
 import * as FileSystem from "expo-file-system";
@@ -22,41 +27,34 @@ const WatchRoom = ({ navigation, route, truthy }) => {
   const [progressValue, setProgressValue] = useState(0);
   const [isDownloading, setIsDownloading] = useState(false);
   const [totalSize, setTotalSize] = useState(0);
-  
-  const video = useRef(null);
+  const videoRef = useRef();
   const [status, setStatus] = useState({});
   const title = route.params.title
-  console.log("title: " + title)
-  console.log("src: " + videoUrl)
+  
+  async function changeScreenOrientation() {
+    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_LEFT);
+  }
+  async function changeToPortrait() {
+    await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT_UP);
+  }
+
+  // console.log("title: " + title)
+  // console.log("src: " + videoUrl)
 
 
   const [star, setStar] = useState(false);
 
-  // useEffect(() => {
-  //   let count = 0;
-  //   let title = "";
-  //   let realTitle = "";
-  //   for (let i = 0; i < route.params.src.config.headers.src.length; i++) {
-  //     if (route.params.src.config.headers.src[i] === "/") {
-  //       count++;
-  //     }
-  //     if (count === 4) {
-  //       title += route.params.src.config.headers.src[i];
-  //     }
-  //   }
-  //   for (let i = 0; i < title.length; i++) {
-  //     if (title[i] === "/") {
-  //       continue;
-  //     } else if (title[i] === "-") {
-  //       realTitle += " ";
-  //     } else {
-  //       realTitle += title[i];
-  //     }
-  //   }
-  //   setTitle(realTitle);
-  // }, []);
+  useEffect(() => {
+    StatusBar.setHidden(true)
+    const backAction = async() => {
+      await changeToPortrait()
+      navigation.goBack()
+      return true;
+    };
 
-  const videoRef = useRef();
+    BackHandler.addEventListener('hardwareBackPress', backAction);
+
+  }, []);
 
   function formatBytes(bytes, decimals = 2) {
     if (bytes === 0) return "0 Bytes";
@@ -111,21 +109,29 @@ const WatchRoom = ({ navigation, route, truthy }) => {
       console.error(e);
     }
   }
-  const onFullscreenUpdate = async ({ fullscreenUpdate }) => {
-    switch (fullscreenUpdate) {
-      case Video.FULLSCREEN_UPDATE_PLAYER_DID_PRESENT:
-        await ScreenOrientation.unlockAsync(); // only on Android required
-        break;
-      case Video.FULLSCREEN_UPDATE_PLAYER_WILL_DISMISS:
-        await ScreenOrientation.lockAsync(
-          ScreenOrientation.OrientationLock.PORTRAIT
-        ); // only on Android required
-        break;
-    }
-  };
+  // const onFullscreenUpdate = async ({ fullscreenUpdate }) => {
+  //   switch (fullscreenUpdate) {
+  //     case Video.FULLSCREEN_UPDATE_PLAYER_DID_PRESENT:
+  //       await ScreenOrientation.unlockAsync(); // only on Android required
+  //       break;
+  //     case Video.FULLSCREEN_UPDATE_PLAYER_WILL_DISMISS:
+  //       await ScreenOrientation.lockAsync(
+  //         ScreenOrientation.OrientationLock.PORTRAIT
+  //       ); // only on Android required
+  //       break;
+  //   }
+  // };
   const showVideoInFullscreen = async () => {
     await videoRef.current.presentFullscreenPlayer();
   };
+
+  const playVideo = async() => {
+    await videoRef.current.playAsync()
+  }
+
+  const pauseVideo = async() => {
+    await videoRef.current.pauseAsync()
+  }
 
   return (
     <>
@@ -147,36 +153,51 @@ const WatchRoom = ({ navigation, route, truthy }) => {
           }}
         >
           {title}
+            
         </Text>
         {Platform.OS === "android" ? (
           <Video
             style={styles(truthy).video}
             ref={videoRef}
-            source={{ uri: videoUrl }}
+            source={{ uri: videoUrl,
+                      headers:{
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
+                        "Referer" : "https://goload.one"
+                      },
+                  }}
             resizeMode={ResizeMode.CONTAIN}
             useNativeControls={true}
-            onFullscreenUpdate={onFullscreenUpdate}
+            shouldPlay={false}
+            usePoster={true}
+            onError={(err) => console.log(err)}
+            onReadyForDisplay={async(param) => {
+              await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT)
+            }}
+            onPlaybackStatusUpdate={(status) => setStatus(() => status)}
           />
         ) : (
           <Video
             ref={video}
-            source={{ uri: videoUrl }}
+            source={{ uri: videoUrl, headers:{"Referer" : "https://goload.one"}, overrideFileExtensionAndroid: 'm3u8' }}
             rate={1.0}
             volume={1.0}
             isMuted={false}
             resizeMode="cover"
-            shouldPlay={false}
+            shouldPlay={true}
             isLooping={false}
+            onReadyForDisplay={async(param) => {
+              await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT)
+            }}
             useNativeControls={true}
             style={styles(truthy).video}
             onPlaybackStatusUpdate={(status) => setStatus(() => status)}
           />
         )}
-        {/* <TouchableOpacity
+        <TouchableOpacity
           onPress={() => {
             status.isPlaying
-              ? video.current.pauseAsync()
-              : video.current.playAsync();
+            ? videoRef.current.pauseAsync() 
+            : videoRef.current.playAsync()
           }}
           style={{ position: "absolute", top: height / 2.4, left: width / 2.2 }}
         >
@@ -185,13 +206,16 @@ const WatchRoom = ({ navigation, route, truthy }) => {
             size={55}
             color="#fff"
           />
-        </TouchableOpacity> */}
-        {/* <TouchableOpacity onPress={() => console.log(status.getStatusAsync)}>
+        </TouchableOpacity>
+         {/* <TouchableOpacity onPress={() => console.log(status.getStatusAsync)}>
           <Ionicons name="play-forward" size={35} color="#527ef5" />
         </TouchableOpacity> */}
         <View style={styles(truthy).back}>
           <Ionicons
-            onPress={() => navigation.goBack()}
+            onPress={async() => {
+              await changeToPortrait()
+              navigation.goBack()
+            }}
             name="chevron-back-sharp"
             size={35}
             color="#5c94dd"
@@ -232,91 +256,128 @@ const styles = (truthy) =>
     },
   });
 
-// import React, { useState, useRef } from 'react';
-// import { StyleSheet, View, Platform, Button, NativeModules, useWindowDimensions } from 'react-native';
-// import * as ScreenOrientation from 'expo-screen-orientation'
-// import {ResizeMode, Video} from 'expo-av'
 
-// const WatchRoom = ({navigation, route}) => {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// import React, { useState, useRef } from 'react';
+// import { StyleSheet, View, Platform, Button, NativeModules, Dimensions} from 'react-native';
+// import * as ScreenOrientation from 'expo-screen-orientation'
+// import Video from 'react-native-video'
+
+
+// const { width, height } = Dimensions.get("window");
+
+
+// const WatchRoom = ({navigation, route, truthy}) => {
 //     const video = React.useRef(null);
 //     const [status, setStatus] = React.useState({});
+//     const videoUrl = route.params.src;
 
-//     const window = useWindowDimensions()
+//     const videoRef = useRef();
 
-//     const onFullScreenUpdate = async({fullScreenUpdate}) => {
-//         switch(fullScreenUpdate) {
-//             case Video.FULLSCREEN_UPDATE_PLAYER_DID_PRESENT:
-//                 await ScreenOrientation.unlockAsync() // only on android requires
-//                 break
-//             case Video.FULLSCREEN_UPDATE_PLAYER_WILL_DISMISS:
-//                 await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.PORTRAIT) // only requires on android
-//         }
-//     }
+//   //   const onFullscreenUpdate = async ({ fullscreenUpdate }) => {
+//   //     switch (fullscreenUpdate) {
+//   //       case Video.FULLSCREEN_UPDATE_PLAYER_DID_PRESENT:
+//   //         await ScreenOrientation.unlockAsync(); // only on Android required
+//   //         break;
+//   //       case Video.FULLSCREEN_UPDATE_PLAYER_WILL_DISMISS:
+//   //         await ScreenOrientation.lockAsync(
+//   //           ScreenOrientation.OrientationLock.PORTRAIT
+//   //         ); // only on Android required
+//   //         break;
+//   //   }
+//   // };
+//   console.log('src: ' + videoUrl)
+//   // const showVideoInFullscreen = async () => {
+//   //   await videoRef.current.presentFullscreenPlayer();
+//   // };
 //     return (
 //         <>
 //         {
-//             (Platform.OS === 'ios') ? (
-//                 <View style={{transform: [{rotate: '90deg'}]}}>
-//                 <Video
-//                     ref={video}
-//                     style={{backgroundColor: '#000',alignSelf: 'center' ,width: window.width, height: window.height}}
-//                     source={{
-//                     uri: `${route.params.src}`,
-//                     }}
-//                     resizeMode={ResizeMode.CONTAIN}
-//                     useNativeControls={true}
-//                     fullscreenUpdate={onFullScreenUpdate}
-//                     onReadyForDisplay={params => {
-//                         params.naturalSize.orientation = "landscape"
-//                     }}
-//                     onPlaybackStatusUpdate={status => setStatus(() => status)}
-//                 />
-//                 </View>
+//             (Platform.OS === 'android') ? (
+//               <Video
+//                 style={styles(truthy).video}
+//                 ref={videoRef}
+//                 source={{ uri: "http://techslides.com/demos/sample-videos/small.mp4"}}
+//                 useNativeControls={true}
+//                 shouldPlay={true}
+//                 onReadyForDisplay={params => {
+//                   params.naturalSize.orientation = "landscape"
+//               }}
+//               />
 
 //             ) : (
-//                 <View style={styles.container}>
-//                 <Video
-//                     ref={video}
-//                     style={styles.video}
-//                     source={{
-//                     uri: `${route.params.src}`,
-//                     }}
-//                     useNativeControls
-//                     resizeMode={ResizeMode.CONTAIN}
-//                     useNativeControls={true}
-//                     // fullscreenUpdate={onFullScreenUpdate}
-//                     onReadyForDisplay={params => {
-//                         params.naturalSize.orientation = "landscape"
-//                     }}
-//                     onPlaybackStatusUpdate={status => setStatus(() => status)}
-//                 />
-//                 {/* <View style={styles.buttons}>
-//                     <Button
-//                     title={status.isPlaying ? 'Pause' : 'Play'}
-//                     onPress={() =>
-//                         status.isPlaying ? video.current.pauseAsync() : video.current.playAsync()
-//                     }
-//                     />
-//                 </View> */}
-//                 </View>
+//               <Video
+//               ref={video}
+//               style={{backgroundColor: '#000',alignSelf: 'center'}}
+//               source={{
+//               uri: `${route.params.src}`,
+//               }}
+//               resizeMode={ResizeMode.CONTAIN}
+//               useNativeControls={true}
+//               fullscreenUpdate={onFullscreenUpdate}
+//               onReadyForDisplay={params => {
+//                   params.naturalSize.orientation = "landscape"
+//               }}
+//               onPlaybackStatusUpdate={status => setStatus(() => status)}
+//           />
 
 //             )
 //         }
 //         </>
 //     );
 // }
-// const styles = StyleSheet.create({
-//     container: {
-//         // transform: [{rotate: '90deg'}],
-//         flex: 1,
-//         justifyContent: 'center',
-//         backgroundColor: '#ecf0f1',
-//     },
+// const styles = (truthy) =>
+//   StyleSheet.create({
 //     video: {
-//     alignSelf: 'center',
-//     width: 300,
-//     height: 300
-//     }
-// })
+//       width: width,
+//       height: height / 2.5,
+//     },
+//     back: {
+//       position: "absolute",
+//       padding: 10,
+//       left: 20,
+//       top: 10,
+//     },
+
+//     container: {
+//       flex: 1,
+//       backgroundColor: truthy ? "#000" : "#eeeeee",
+//       alignItems: "center",
+//       justifyContent: "center",
+//     },
+//   });
+
 
 // export default WatchRoom;
+
+
+
+
+
+
+
+
+
+
+

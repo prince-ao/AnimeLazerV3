@@ -34,7 +34,6 @@
       }
     },
     "android": {
-
       "package": "com.animelazer.heroku",
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",

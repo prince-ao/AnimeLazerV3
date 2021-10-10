@@ -216,8 +216,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             } else {
                               navigation.navigate("WatchRoom", {
                                 title:
-                                  route.params.animeTitle + " " + data.epNum,
-                                src: res1,
+                                  route.params.animeTitle + " Ep " + data.epNum,
+                                src: res1.data.data,
                               });
                             }
                           });

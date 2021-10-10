@@ -242,6 +242,8 @@ const styles = (truth, isLoading) =>
       width: Dimensions.get("window").width / 0.1,
       height: Dimensions.get("window").height / 4.90,
       marginTop: Dimensions.get("window").height / 100,
+      flex: 1,
+      marginBottom: 0
     },
     AnimeImage: {
       width: 130,

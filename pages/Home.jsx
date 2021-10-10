@@ -291,7 +291,7 @@ const Home = ({ navigation, navigate, truth }) => {
                               .then(async function (res1) {
                                 setIsLoading(false);
                                 navigate.navigate("WatchRoom", {
-                                  title: data.animeName + " " + data.epNum,
+                                  title: data.animeName + " Ep " + data.epNum,
                                   src: res1.data.data,
                                 });
                               });

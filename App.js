@@ -9,6 +9,7 @@ import { Home, Search, Favorites, Settings } from "./pages/index";
 import { createStackNavigator } from "@react-navigation/stack";
 import EpisodeRoom from "./rooms/EpisodeRoom";
 import WatchRoom from "./rooms/WatchRoom";
+import { Orientation } from "expo-screen-orientation";
 
 const Stack = createStackNavigator();
 
@@ -83,7 +84,7 @@ export default function App() {
         <Stack.Screen name="EpisodeRoom">
           {(props) => <EpisodeRoom {...props} truthy={truthy} />}
         </Stack.Screen>
-        <Stack.Screen name="WatchRoom">
+        <Stack.Screen name="WatchRoom" >
           {(props) => <WatchRoom {...props} truthy={truthy} />}
         </Stack.Screen>
       </Stack.Navigator>

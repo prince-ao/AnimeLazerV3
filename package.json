@@ -25,6 +25,7 @@
     "react-native-email-link": "^1.11.3",
     "react-native-gesture-handler": "~1.10.2",
     "react-native-screens": "~3.4.0",
+    "react-native-video": "^5.1.1",
     "react-native-web": "~0.13.12"
   },
   "devDependencies": {
