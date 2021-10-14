@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   StyleSheet,
   Text,
@@ -6,10 +6,24 @@ import {
   StatusBar,
   View,
   TouchableOpacity,
+  Image,
 } from "react-native";
+import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { Header } from "../components/index";
+const axios = require("axios");
+import { Complete, OnHold, Dropped, Plan, Watching } from "../screens";
 
-const Favorites = ({ truth, logged }) => {
+const Tab = createMaterialTopTabNavigator();
+
+const Favorites = ({ truth }) => {
+  const [logged, setLogged] = useState(false);
+  /*useEffect(() => {
+    fetch(
+      `https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=12345&state=NY&code_challenge=${string}&code_challenge_method=plain`
+    )
+      .then((res) => console.log(res))
+      .catch((err) => console.log(err));
+  }, []); */
   return (
     <>
       <SafeAreaView
@@ -27,7 +41,55 @@ const Favorites = ({ truth, logged }) => {
       >
         <StatusBar barStyle="light-content" />
         <Header />
-        <Text style={styles(truth).title}>Favorites</Text>
+        {!logged ? (
+          <View
+            style={{
+              marginBottom: 10,
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
+            <TouchableOpacity
+              style={{
+                marginTop: 10,
+                marginLeft: 140,
+                backgroundColor: "#2450e2",
+                width: 120,
+                height: 50,
+                borderRadius: 8,
+                display: "flex",
+                flexDirection: "row",
+              }}
+            >
+              <Text
+                style={{
+                  color: "white",
+                  textAlign: "center",
+                  marginTop: 15,
+                  marginLeft: 9,
+                }}
+              >
+                Sign in
+              </Text>
+              <Image
+                style={{ width: 40, height: 40, marginLeft: 9, marginTop: 5 }}
+                source={require("../assets/mal.png")}
+              />
+            </TouchableOpacity>
+          </View>
+        ) : null}
+        <Tab.Navigator
+          screenOptions={{
+            tabBarItemStyle: { width: 200 },
+            tabBarScrollEnabled: true,
+          }}
+        >
+          <Tab.Screen name="CURRENTLY WATCHING" component={Watching} />
+          <Tab.Screen name="PLAN TO WATCH" component={Plan} />
+          <Tab.Screen name="ON HOLD" component={OnHold} />
+          <Tab.Screen name="COMPLETED" component={Complete} />
+          <Tab.Screen name="DROPPED" component={Dropped} />
+        </Tab.Navigator>
       </SafeAreaView>
     </>
   );
