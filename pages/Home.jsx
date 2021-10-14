@@ -350,7 +350,7 @@ const Home = ({ navigation, navigate, truth }) => {
                                     episodes: data.episodesAvaliable,
                                     season: data.season,
                                     language: data.language,
-                                    genres: data.genresList,
+                                    genres: data.genres,
                                     status: data.status,
                                     episodesList: data.episodesList,
                                     // there is more options such as animeJapaneseTitle, studio.
@@ -365,11 +365,11 @@ const Home = ({ navigation, navigate, truth }) => {
                       }}
                     >
                       <Image
-                        source={{ uri: data.uri }}
+                        source={{ uri: data.animeImg }}
                         style={styles(truth).poster}
                       />
                       <Text numberOfLines={2} style={styles(truth).posterText}>
-                        {data.animeName}
+                        {data.animeTitle}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -407,13 +407,13 @@ const Home = ({ navigation, navigate, truth }) => {
                                   setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
                                     type: data.type,
-                                    summary: data.summary,
+                                    synopsis: data.synopsis,
                                     animeCover: data.animeCover,
                                     animeTitle: data.animeEnglishTitle,
                                     episodes: data.episodesAvaliable,
                                     season: data.season,
                                     language: data.language,
-                                    genres: data.genresList,
+                                    genres: data.genres,
                                     status: data.status,
                                     episodesList: data.episodesList,
                                     // there is more options such as animeJapaneseTitle, studio.
@@ -428,11 +428,11 @@ const Home = ({ navigation, navigate, truth }) => {
                       }}
                     >
                       <Image
-                        source={{ uri: data.uri }}
+                        source={{ uri: data.animeImg }}
                         style={styles(truth).poster}
                       />
                       <Text numberOfLines={2} style={styles(truth).posterText}>
-                        {data.animeName}
+                        {data.animeTitle}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -470,13 +470,13 @@ const Home = ({ navigation, navigate, truth }) => {
                                   setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
                                     type: data.type,
-                                    summary: data.summary,
+                                    synopsis: data.synopsis,
                                     animeCover: data.animeCover,
                                     animeTitle: data.animeEnglishTitle,
                                     episodes: data.episodesAvaliable,
                                     season: data.season,
                                     language: data.language,
-                                    genres: data.genresList,
+                                    genres: data.genres,
                                     status: data.status,
                                     episodesList: data.episodesList,
                                     // there is more options such as animeJapaneseTitle, studio.
@@ -491,11 +491,11 @@ const Home = ({ navigation, navigate, truth }) => {
                       }}
                     >
                       <Image
-                        source={{ uri: data.uri }}
+                        source={{ uri: data.animeImg }}
                         style={styles(truth).poster}
                       />
                       <Text numberOfLines={2} style={styles(truth).posterText}>
-                        {data.animeName}
+                        {data.animeTitle}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -504,7 +504,7 @@ const Home = ({ navigation, navigate, truth }) => {
             </ScrollView>
           </View>
           <View style={styles(truth).shows}>
-            <Text style={styles(truth).showText}>Monsters</Text>
+            <Text style={styles(truth).showText}>Horror</Text>
             <ScrollView horizontal style={styles(truth).mapContainer}>
               {monsters.map((data, key) => {
                 return (
@@ -533,13 +533,13 @@ const Home = ({ navigation, navigate, truth }) => {
                                   setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
                                     type: data.type,
-                                    summary: data.summary,
+                                    synopsis: data.synopsis,
                                     animeCover: data.animeCover,
                                     animeTitle: data.animeEnglishTitle,
                                     episodes: data.episodesAvaliable,
                                     season: data.season,
                                     language: data.language,
-                                    genres: data.genresList,
+                                    genres: data.genres,
                                     status: data.status,
                                     episodesList: data.episodesList,
                                     // there is more options such as animeJapaneseTitle, studio.
@@ -554,11 +554,11 @@ const Home = ({ navigation, navigate, truth }) => {
                       }}
                     >
                       <Image
-                        source={{ uri: data.uri }}
+                        source={{ uri: data.animeImg }}
                         style={styles(truth).poster}
                       />
                       <Text numberOfLines={2} style={styles(truth).posterText}>
-                        {data.animeName}
+                        {data.animeTitle}
                       </Text>
                     </TouchableOpacity>
                   </View>
@@ -567,7 +567,7 @@ const Home = ({ navigation, navigate, truth }) => {
             </ScrollView>
           </View>
           <View style={styles(truth).shows}>
-            <Text style={styles(truth).showText}>Top Rated</Text>
+            <Text style={styles(truth).showText}>Popular</Text>
             <ScrollView horizontal style={styles(truth).mapContainer}>
               {topRated.map((data, key) => {
                 return (
@@ -596,13 +596,13 @@ const Home = ({ navigation, navigate, truth }) => {
                                   setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
                                     type: data.type,
-                                    summary: data.summary,
+                                    synopsis: data.synopsis,
                                     animeCover: data.animeCover,
                                     animeTitle: data.animeEnglishTitle,
                                     episodes: data.episodesAvaliable,
                                     season: data.season,
                                     language: data.language,
-                                    genres: data.genresList,
+                                    genres: data.genres,
                                     status: data.status,
                                     episodesList: data.episodesList,
                                     // there is more options such as animeJapaneseTitle, studio.
@@ -617,17 +617,21 @@ const Home = ({ navigation, navigate, truth }) => {
                       }}
                     >
                       <Image
-                        source={{ uri: data.uri }}
+                        source={{ uri: data.animeImg }}
                         style={styles(truth).poster}
                       />
                       <Text numberOfLines={2} style={styles(truth).posterText}>
-                        {data.animeName}
+                        {data.animeTitle}
                       </Text>
                     </TouchableOpacity>
                   </View>
                 );
               })}
             </ScrollView>
+          </View>
+          <View  style={styles(truth).shows}>
+            <Text style={styles(truth).showText}>Movies TODO</Text>
+
           </View>
         </ScrollView>
         <ActivityIndicator

@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from "react";
+import React, { useState, useRef, useEffect} from "react";
 import {
   StyleSheet,
   Text,
@@ -12,6 +12,8 @@ import {
   BackHandler,
   Alert,
   StatusBar,
+  ActivityIndicator,
+  StatusBarIOS
   
 } from "react-native";
 import { Video, ResizeMode } from "expo-av";
@@ -142,20 +144,8 @@ const WatchRoom = ({ navigation, route, truthy }) => {
         }}
       />
       <View style={styles(truthy).container}>
-        <Text
-        numberOfLines={2}
-        ellipsizeMode="tail"
-          style={{
-            color: "white",
-            fontSize: 20,
-            marginTop: height / 200,
-            marginBottom: 30,
-          }}
-        >
-          {title}
-            
-        </Text>
         {Platform.OS === "android" ? (
+          <>
           <Video
             style={styles(truthy).video}
             ref={videoRef}
@@ -165,20 +155,43 @@ const WatchRoom = ({ navigation, route, truthy }) => {
                         "Referer" : "https://goload.one"
                       },
                   }}
-            resizeMode={ResizeMode.CONTAIN}
-            useNativeControls={true}
+            resizeMode={ResizeMode.STRETCH}
             shouldPlay={false}
-            usePoster={true}
+            usePoster={false}
+            isLooping={false}
+            isMuted={false}
+            useNativeControls={true}
             onError={(err) => console.log(err)}
             onReadyForDisplay={async(param) => {
               await ScreenOrientation.lockAsync(ScreenOrientation.OrientationLock.LANDSCAPE_RIGHT)
+              param.naturalSize.height = 200
+              param.naturalSize.width = 200
             }}
-            onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+            onPlaybackStatusUpdate={(status) => {
+              setStatus(() => status)
+              console.log(status.positionMillis)
+            }}
           />
+          <ActivityIndicator animating={status.isBuffering ? true : false} style={styles().loading} size={60} color="red"/>
+          <TouchableOpacity
+            onPress={() => {
+              status.isPlaying
+              ? videoRef.current.pauseAsync()
+              : videoRef.current.playAsync()
+            }}
+            style={{ position: "absolute"}}
+          >
+            <Ionicons
+              name={status.isPlaying ? "pause" : "play"}
+              size={55}
+              color="#fff"
+            />
+          </TouchableOpacity>
+          </>
         ) : (
           <Video
-            ref={video}
-            source={{ uri: videoUrl, headers:{"Referer" : "https://goload.one"}, overrideFileExtensionAndroid: 'm3u8' }}
+            ref={videoRef}
+            source={{ uri: videoUrl, headers:{"Referer" : "https://goload.one"}}}
             rate={1.0}
             volume={1.0}
             isMuted={false}
@@ -190,23 +203,25 @@ const WatchRoom = ({ navigation, route, truthy }) => {
             }}
             useNativeControls={true}
             style={styles(truthy).video}
-            onPlaybackStatusUpdate={(status) => setStatus(() => status)}
+            onPlaybackStatusUpdate={(status) => {setStatus(() => status)}}
+            
           />
         )}
-        <TouchableOpacity
-          onPress={() => {
-            status.isPlaying
-            ? videoRef.current.pauseAsync() 
-            : videoRef.current.playAsync()
+         <Text
+        numberOfLines={2}
+        ellipsizeMode="tail"
+          style={{
+            position: "absolute",
+            fontSize: 20,
+            color: "black",
+            padding: 10,
+            left: width / 3,
+            top: height / 28,
           }}
-          style={{ position: "absolute", top: height / 2.4, left: width / 2.2 }}
         >
-          <Ionicons
-            name={status.isPlaying ? "" : "play"}
-            size={55}
-            color="#fff"
-          />
-        </TouchableOpacity>
+          {title}
+            
+        </Text>
          {/* <TouchableOpacity onPress={() => console.log(status.getStatusAsync)}>
           <Ionicons name="play-forward" size={35} color="#527ef5" />
         </TouchableOpacity> */}
@@ -221,13 +236,13 @@ const WatchRoom = ({ navigation, route, truthy }) => {
             color="#5c94dd"
           />
         </View>
-        <Button title={buttonTitle} onPress={downloadVideo}></Button>
+        {/* <Button title={buttonTitle} onPress={downloadVideo}></Button>
         {isDownloading ? (
           <>
             <Text style={{ color: "white" }}> Size: {totalSize} </Text>
             <Text style={{ color: "white" }}>Progress: {progressValue} %</Text>
           </>
-        ) : null}
+        ) : null} */}
       </View>
     </>
   );
@@ -238,8 +253,9 @@ export default WatchRoom;
 const styles = (truthy) =>
   StyleSheet.create({
     video: {
-      width: width,
-      height: height / 2.5,
+      width: "100%",
+      height:"100%",
+      
     },
     back: {
       position: "absolute",
@@ -253,6 +269,16 @@ const styles = (truthy) =>
       backgroundColor: truthy ? "#000" : "#eeeeee",
       alignItems: "center",
       justifyContent: "center",
+    },
+    loading: {
+      position: "absolute",
+      top: height / 2.3,
+      right: width / 2.43,
+      width: width / 5.3,
+      height: height / 7.8,
+      alignItems: 'center',
+      justifyContent: 'center',
+      borderRadius: 8,
     },
   });
 

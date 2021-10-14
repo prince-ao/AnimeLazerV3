@@ -11,6 +11,7 @@ import {
   TouchableOpacity,
   Linking,
   Share,
+  Dimensions
 } from "react-native";
 import {
   Ionicons,
@@ -18,6 +19,10 @@ import {
   MaterialCommunityIcons,
   FontAwesome5,
 } from "@expo/vector-icons";
+
+
+const {width, height} = Dimensions.get('window')
+
 
 const Settings = ({ truth, truthSet }) => {
   const [isEnabled, setIsEnabled] = useState(true);
@@ -78,9 +83,9 @@ const Settings = ({ truth, truthSet }) => {
               flexDirection: "column",
               backgroundColor: "#4d4d4d",
               heigth: "100%",
-              marginLeft: 30,
-              marginRight: 30,
-              marginTop: 40,
+              marginLeft: width / 13,
+              marginRight: width / 13,
+              marginTop: height / 23,
               borderRadius: 5,
             }}
           >
@@ -94,16 +99,16 @@ const Settings = ({ truth, truthSet }) => {
               }
             >
               <AntDesign
-                name="customerservice"
+                name="mail"
                 size={27}
-                color="#bdbdbd"
+                color="white"
                 style={{ marginLeft: 20 }}
               />
               <Text
                 style={{
                   marginLeft: 20,
                   fontSize: 15,
-                  marginTop: 5,
+                  alignSelf: "center",
                   color: "white",
                 }}
               >
@@ -121,7 +126,7 @@ const Settings = ({ truth, truthSet }) => {
                 style={{
                   marginLeft: 20,
                   fontSize: 15,
-                  marginTop: 5,
+                  alignSelf: "center",
                   color: "white",
                 }}
               >
@@ -139,7 +144,7 @@ const Settings = ({ truth, truthSet }) => {
                 style={{
                   marginLeft: 20,
                   fontSize: 15,
-                  marginTop: 5,
+                  alignSelf: "center",
                   color: "white",
                 }}
               >
@@ -157,14 +162,14 @@ const Settings = ({ truth, truthSet }) => {
               <AntDesign
                 name="star"
                 size={26}
-                color="#bdbdbd"
+                color="gold"
                 style={{ marginLeft: 20 }}
               />
               <Text
                 style={{
                   marginLeft: 20,
                   fontSize: 15,
-                  marginTop: 5,
+                  alignSelf: "center",
                   color: "white",
                 }}
               >
@@ -184,7 +189,7 @@ const Settings = ({ truth, truthSet }) => {
               style={{
                 marginLeft: 20,
                 fontSize: 15,
-                marginTop: 5,
+                alignSelf: "center",
                 color: "white",
               }}
             >
@@ -197,9 +202,9 @@ const Settings = ({ truth, truthSet }) => {
               flexDirection: "column",
               backgroundColor: "#4d4d4d",
               heigth: "100%",
-              marginLeft: 30,
-              marginRight: 30,
-              marginTop: 40,
+              marginLeft: width / 13,
+              marginRight: width / 13,
+              marginTop: height / 23,
               borderRadius: 5,
             }}
           >
@@ -207,14 +212,14 @@ const Settings = ({ truth, truthSet }) => {
               <AntDesign
                 name="instagram"
                 size={24}
-                color="#bdbdbd"
+                color="#bc2a8d"
                 style={{ marginLeft: 20 }}
               />
               <Text
                 style={{
                   marginLeft: 20,
                   fontSize: 15,
-                  marginTop: 5,
+                  alignSelf: "center",
                   color: "white",
                 }}
               >
@@ -228,14 +233,14 @@ const Settings = ({ truth, truthSet }) => {
               <AntDesign
                 name="twitter"
                 size={21}
-                color="#bdbdbd"
+                color="#1DA1F2"
                 style={{ marginLeft: 20 }}
               />
               <Text
                 style={{
                   marginLeft: 20,
                   fontSize: 15,
-                  marginTop: 5,
+                  alignSelf: "center",
                   color: "white",
                 }}
               >
@@ -261,10 +266,10 @@ const styles = StyleSheet.create({
     backgroundColor: "#4d4d4d",
     display: "flex",
     flexDirection: "row",
-    marginLeft: 30,
-    marginRight: 30,
+    marginLeft: width / 13,
+    marginRight: width / 13,
     borderRadius: 5,
-    marginTop: 40,
+    marginTop: height / 22,
     height: 40,
     alignItems: "center",
   },
@@ -275,12 +280,12 @@ const styles = StyleSheet.create({
   },
   settingText: {
     color: "white",
-    marginLeft: 20,
+    marginLeft: width / 17,
   },
   settingIcon: {
-    marginLeft: 20,
+    marginLeft: width / 18,
   },
   settingSwitch: {
-    marginLeft: 110,
+    marginLeft: width / 4.2,
   },
 });

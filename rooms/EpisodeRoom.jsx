@@ -72,6 +72,16 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
           >
             <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
           </TouchableOpacity>
+          <TouchableOpacity style={{ position: "absolute", top: 10, right: 15 }} 
+          onPress={() => {
+            
+          }}>
+          <Ionicons
+                name={"add"}
+                size={30}
+                color={truthy ? "white" : "black"}
+              />
+          </TouchableOpacity>
         </View>
         <View style={styles(truthy).infoContainer}>
           <View style={styles(truthy).genInfoContainer}>
@@ -263,7 +273,7 @@ const styles = (truthy, isLoading) =>
       display: "flex",
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: "#000",
+      backgroundColor: "#1a1a1a",
       height: 50,
     },
     genresCard: {
@@ -352,6 +362,7 @@ const styles = (truthy, isLoading) =>
       marginTop: 5,
       width: 150,
       height: 30,
+      backgroundColor: "#1a1a1a"
     },
     back: {
       position: "absolute",
