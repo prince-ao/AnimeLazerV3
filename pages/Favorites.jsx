@@ -10,34 +10,24 @@ import {
 } from "react-native";
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { Header } from "../components/index";
-const axios = require("axios");
 import { Complete, OnHold, Dropped, Plan, Watching } from "../screens";
-import { firebase } from "@firebase/app"
-import "@firebase/auth"
+import { firebase } from "@firebase/app";
+import "@firebase/auth";
 import { WebView } from "react-native-webview";
-
-//Client-id: ad890e37ef61deb935fe6e8afc7eed5a
+import { clientID, codeChallenge } from "@env";
 
 const Tab = createMaterialTopTabNavigator();
+const BASE_URL = "https://myanimelist.net/v1/oauth2/";
 
 const Favorites = ({ truth }) => {
-  const [logged, setLogged] = useState(false);
   const [webview, setWebview] = useState(true);
-  const [cody, setCody] = useState({
+  const authRef = useRef({
     auth: "",
     access: "",
     refresh: "",
     expires: 0,
   });
-  const [auth, setAuth] = useState("");
-  const webRef = useRef();
-  /*useEffect(() => {
-    fetch(
-      `https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=12345&state=NY&code_challenge=${string}&code_challenge_method=plain`
-    )
-      .then((res) => console.log(res))
-      .catch((err) => console.log(err));
-  }, []); */
+  const loggedRef = useRef(false);
   const handleNav = async (newNavState) => {
     console.log(newNavState);
     if (
@@ -57,70 +47,30 @@ const Favorites = ({ truth }) => {
           auth += newNavState.url[i];
         }
       }
-      setWebview(true);
       console.log(auth);
-      const run = async () => {
-        const bod = {
-          grant_type: "authorization_code",
-          code: `${auth}`,
-          client_id: "ad890e37ef61deb935fe6e8afc7eed5a",
-          code_verifier: "S4kFlQhwPAjOboud2A33KfeXEJbTJWR5FyDI1IfcsaGJWODzkK",
-        };
-        const response = await fetch(
-          "https://myanimelist.net/v1/oauth2/token",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: `grant_type=authorization_code&code=${auth}&client_id=ad890e37ef61deb935fe6e8afc7eed5a&code_verifier=S4kFlQhwPAjOboud2A33KfeXEJbTJWR5FyDI1IfcsaGJWODzkK`,
-          }
-        );
-        const response_s = await response.json();
-        //console.log(response_s);
-        setCody({
-          auth: auth,
-          access: response_s.access_token,
-          refresh: response_s.refresh_token,
-          expires: response_s.expires_in,
-        });
-        setLogged(true);
-      };
+      const response = await fetch(`${BASE_URL}token`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+        },
+        body: `grant_type=authorization_code&code=${auth}&client_id=${clientID}&code_verifier=${codeChallenge}`,
+      });
+      const response_s = await response.json();
+      console.log(response_s);
+      authRef.current.auth = auth;
+      authRef.current.access = response_s.access_token;
+      authRef.current.refresh = response_s.refresh_token;
+      authRef.current.expires = response_s.expires_in;
+      loggedRef.current = true;
+      setWebview(true);
+      useForceUpdate();
     }
   };
-  useEffect(() => {
-    if (webview) {
-      console.log(auth);
-      const run = async () => {
-        const bod = {
-          grant_type: "authorization_code",
-          code: `${auth}`,
-          client_id: "ad890e37ef61deb935fe6e8afc7eed5a",
-          code_verifier: "S4kFlQhwPAjOboud2A33KfeXEJbTJWR5FyDI1IfcsaGJWODzkK",
-        };
-        const response = await fetch(
-          "https://myanimelist.net/v1/oauth2/token",
-          {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded",
-            },
-            body: `grant_type=authorization_code&code=${auth}&client_id=ad890e37ef61deb935fe6e8afc7eed5a&code_verifier=S4kFlQhwPAjOboud2A33KfeXEJbTJWR5FyDI1IfcsaGJWODzkK`,
-          }
-        );
-        const response_s = await response.json();
-        //console.log(response_s);
-        setCody({
-          auth: auth,
-          access: response_s.access_token,
-          refresh: response_s.refresh_token,
-          expires: response_s.expires_in,
-        });
-        setLogged(true);
-      };
-      run();
-    }
-  }, [webview]);
+
+  function useForceUpdate() {
+    const [value, setValue] = useState(0);
+    return () => setValue((value) => value + 1);
+  }
 
   if (webview) {
     return (
@@ -141,7 +91,7 @@ const Favorites = ({ truth }) => {
         >
           <StatusBar barStyle="light-content" />
           <Header />
-          {!logged ? (
+          {!loggedRef.current ? (
             <View
               style={{
                 marginBottom: 10,
@@ -188,7 +138,7 @@ const Favorites = ({ truth }) => {
             <Tab.Screen
               name="CURRENTLY WATCHING"
               component={Watching}
-              initialParams={{ cody, setCody }}
+              initialParams={{ authRef, webview }}
             />
             <Tab.Screen name="PLAN TO WATCH" component={Plan} />
             <Tab.Screen name="ON HOLD" component={OnHold} />
@@ -201,9 +151,8 @@ const Favorites = ({ truth }) => {
   } else {
     return (
       <WebView
-        ref={webRef}
         source={{
-          uri: "https://myanimelist.net/v1/oauth2/authorize?response_type=code&client_id=ad890e37ef61deb935fe6e8afc7eed5a&state=NY&code_challenge=S4kFlQhwPAjOboud2A33KfeXEJbTJWR5FyDI1IfcsaGJWODzkK&code_challenge_method=plain",
+          uri: `${BASE_URL}authorize?response_type=code&client_id=${clientID}&code_challenge=${codeChallenge}&code_challenge_method=plain`,
         }}
         onNavigationStateChange={handleNav}
       />

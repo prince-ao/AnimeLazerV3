@@ -10,8 +10,11 @@ import { createStackNavigator } from "@react-navigation/stack";
 import EpisodeRoom from "./rooms/EpisodeRoom";
 import WatchRoom from "./rooms/WatchRoom";
 import { Orientation } from "expo-screen-orientation";
-import { isInialized, firebaseConfig, signInAnonymously} from "./src/firebase.js";
-
+import {
+  isInialized,
+  firebaseConfig,
+  signInAnonymously,
+} from "./src/firebase.js";
 
 const Stack = createStackNavigator();
 
@@ -73,11 +76,11 @@ const BottomTab = ({ navigation, truthy, setTruthy }) => {
 export default function App() {
   const [truthy, setTruthy] = useState(true);
 
-  isInialized(firebaseConfig)
+  isInialized(firebaseConfig);
 
   useEffect(() => {
     signInAnonymously();
-  })
+  });
 
   return (
     <NavigationContainer>
@@ -93,7 +96,7 @@ export default function App() {
         <Stack.Screen name="EpisodeRoom">
           {(props) => <EpisodeRoom {...props} truthy={truthy} />}
         </Stack.Screen>
-        <Stack.Screen name="WatchRoom" >
+        <Stack.Screen name="WatchRoom">
           {(props) => <WatchRoom {...props} truthy={truthy} />}
         </Stack.Screen>
       </Stack.Navigator>
