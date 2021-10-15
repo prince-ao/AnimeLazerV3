@@ -1,11 +1,13 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { StyleSheet, Text, View } from "react-native";
 
 const Watching = (props) => {
-  console.log(props);
+  useEffect(() => {
+    console.log(props);
+  }, [props.webview]);
   return (
     <View>
-      <Text>watching</Text>
+      <Text></Text>
     </View>
   );
 };
