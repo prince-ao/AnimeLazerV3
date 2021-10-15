@@ -1,6 +1,7 @@
 import { firebase } from '@firebase/app'
+import "@firebase/database"
 import "@firebase/auth";
-  
+
 
 export const firebaseConfig = {
     apiKey: process.env.apiKey,
@@ -11,14 +12,14 @@ export const firebaseConfig = {
     messagingSenderId: process.env.messagingSenderId,
     appId: process.env.appId,
     measurementId: process.env.measurementId
-  };
+};
 
 export function isInialized(firebaseConfig) {
     if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-  } else {
-    firebase.app(); // if already initialized
-  }
+        firebase.initializeApp(firebaseConfig);
+    } else {
+        firebase.app(); // if already initialized
+    }
 }
 
 export async function signInAnonymously() {
@@ -32,12 +33,10 @@ export async function signInAnonymously() {
         }
     })
 
-} 
+}
 
 export function currentUser() {
     firebase.auth().onAuthStateChanged(function() {
         return firebase.auth().currentUser
-      })
+    })
 }
-
-

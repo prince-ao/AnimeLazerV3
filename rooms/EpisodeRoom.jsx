@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Menu, MenuProvider, MenuOptions, MenuOption, MenuTrigger} from "react-native-popup-menu";
+import { Menu, MenuProvider, MenuOptions, MenuOption, MenuTrigger } from "react-native-popup-menu";
 import {
   StyleSheet,
   Text,
@@ -18,7 +18,7 @@ import {
 } from "react-native";
 import { Header } from "../components/index";
 import { Ionicons } from "@expo/vector-icons";
-import { firebase} from "@firebase/app"
+import { firebase } from "@firebase/app"
 import "@firebase/database"
 import "@firebase/auth"
 
@@ -49,6 +49,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     setLengthMore(e.nativeEvent.lines.length > MAX_LINES);
   }, []);
 
+
   return (
     <>
       <SafeAreaView
@@ -77,34 +78,34 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
           >
             <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
           </TouchableOpacity>
-          <MenuProvider style={{ flexDirection: "column", padding: 30 }}>
-          <Menu onSelect={value => alert(`You Clicked : ${value}`)}>
-          <MenuTrigger  >
-          <TouchableOpacity style={{ position: "absolute", top: 10, right: 15 }} 
-          onPress={() => {
-            setIsLoading(true)
-            firebase.auth().onAuthStateChanged(async function(user) {
-              const isAdded = false;
-              const userRef = firebase.database().ref(`Users/${user.uid}/AnimeList`)
-              userRef.orderByKey().on('value', function(snapshot) {
-                snapshot.forEach(function(data) {
-                  if (data.child('animeName').val() === route.params.animeTitle) {
-                    data.child('animeName').val()
-                    console.log('are u here')
-                    isAdded = true
-                  }
+          {/* <MenuProvider >
+            <Menu onSelect={value => alert(`You Clicked : ${value}`)}>
+              <MenuTrigger > */}
+          <TouchableOpacity style={{ position: "absolute", right: 15 }}
+            onPress={() => {
+              setIsLoading(true)
+              firebase.auth().onAuthStateChanged(async function (user) {
+                const isAdded = false;
+                const userRef = firebase.database().ref(`Users/${user.uid}/AnimeList`).orderByKey()
+                userRef.on("value", (snapshot) => {
+                  snapshot.forEach((childSnapshot) => {
+                    if (childSnapshot.child('animeName').val() === route.params.animeTitle) {
+                      console.log('are u here')
+                      isAdded = true
+                    }
+                  })
+
                 })
-              })
-              if (!isAdded) {
-                const timeStamp = + new Date;
-                const ref = firebase.database().ref(`Users/${user.uid}/AnimeList/${timeStamp}/AnimeDetails`)
-                ref.set({
-                  userUID: user.uid,
-                  animeName: route.params.animeTitle,
-                  animeImage: route.params.animeCover,
-                  animeUrl: route.params.animeUrl,
-                  timeStamp: timeStamp
-                  }).then(function() {
+                if (!isAdded) {
+                  const timeStamp = + new Date;
+                  const ref = firebase.database().ref(`Users/${user.uid}/AnimeList/${timeStamp}/AnimeDetails`)
+                  ref.set({
+                    userUID: user.uid,
+                    animeName: route.params.animeTitle,
+                    animeImage: route.params.animeCover,
+                    animeUrl: route.params.animeUrl,
+                    timeStamp: timeStamp
+                  }).then(function () {
                     setIsLoading(false)
                     if (Platform.OS === 'android') {
                       ToastAndroid.showWithGravity(
@@ -124,38 +125,39 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                     }
                     console.log(err)
                   })
-              }
-            })
-          }}>
-          <Ionicons
-                name={"add"}
-                size={30}
-                color={truthy ? "white" : "black"}
-              />
+                }
+
+              })
+            }}>
+            <Ionicons
+              name={"add"}
+              size={30}
+              color={truthy ? "white" : "black"}
+            />
           </TouchableOpacity>
-          </MenuTrigger  >
-          <MenuOptions>
-            <MenuOption value={"Watching"}>
-              <Text style={styles(truthy).menuContent}>Watching</Text>
-            </MenuOption>
-            <MenuOption value={"Plan to watch"}>
-              <Text style={styles(truthy).menuContent}>Plan To Watch</Text>
-            </MenuOption>
-            <MenuOption value={"On Hold"}>
-              <Text style={styles(truthy).menuContent}>On Hold</Text>
-            </MenuOption>
-            <MenuOption value={"Completed"}>
-              <Text style={styles(truthy).menuContent}>Completed</Text>
-            </MenuOption>
-            <MenuOption value={"Dropped"}>
-              <Text style={styles(truthy).menuContent}>Dropped</Text>
-            </MenuOption>
-            {/* <MenuOption value={3} disabled={true}>
+          {/* </MenuTrigger  >
+              <MenuOptions>
+                <MenuOption value={"Watching"}>
+                  <Text style={styles(truthy).menuContent}>Watching</Text>
+                </MenuOption>
+                <MenuOption value={"Plan to watch"}>
+                  <Text style={styles(truthy).menuContent}>Plan To Watch</Text>
+                </MenuOption>
+                <MenuOption value={"On Hold"}>
+                  <Text style={styles(truthy).menuContent}>On Hold</Text>
+                </MenuOption>
+                <MenuOption value={"Completed"}>
+                  <Text style={styles(truthy).menuContent}>Completed</Text>
+                </MenuOption>
+                <MenuOption value={"Dropped"}>
+                  <Text style={styles(truthy).menuContent}>Dropped</Text>
+                </MenuOption>
+                 <MenuOption value={3} disabled={true}>
               <Text style={styles(truthy).menuContent}>Disabled Menu</Text>
-            </MenuOption> */}
-          </MenuOptions>
-          </Menu>
-          </MenuProvider>
+            </MenuOption>
+              </MenuOptions>
+            </Menu>
+          </MenuProvider> */}
         </View>
         <View style={styles(truthy).infoContainer}>
           <View style={styles(truthy).genInfoContainer}>
@@ -186,7 +188,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                 >
                   Released:{" "}
                   <Text numberOfLines={1} ellipsizeMode="tail" style={styles(truthy).innerText}>
-                      {route.params.season}
+                    {route.params.season}
                   </Text>{" "}
                 </Text>
                 <Text style={styles(truthy).white}>
@@ -278,25 +280,25 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             ) {
                               Platform.OS === "android"
                                 ? ToastAndroid.showWithGravity(
-                                    "This video file cannot be played.",
-                                    2000,
-                                    ToastAndroid.BOTTOM
-                                  )
+                                  "This video file cannot be played.",
+                                  2000,
+                                  ToastAndroid.BOTTOM
+                                )
                                 : Alert.alert(
-                                    "Warning",
-                                    "This video file cannot be played",
-                                    [
-                                      {
-                                        text: "Cancel",
-                                        onPress: () => setIsLoading(false),
-                                        style: "cancel",
-                                      },
-                                      {
-                                        text: "OK",
-                                        onPress: () => setIsLoading(false),
-                                      },
-                                    ]
-                                  );
+                                  "Warning",
+                                  "This video file cannot be played",
+                                  [
+                                    {
+                                      text: "Cancel",
+                                      onPress: () => setIsLoading(false),
+                                      style: "cancel",
+                                    },
+                                    {
+                                      text: "OK",
+                                      onPress: () => setIsLoading(false),
+                                    },
+                                  ]
+                                );
                             } else {
                               navigation.navigate("WatchRoom", {
                                 title:
@@ -457,9 +459,12 @@ const styles = (truthy, isLoading) =>
       borderRadius: 8,
     },
     menuContent: {
-      color: "#000",
+      color: "white",
       fontWeight: "bold",
       padding: 2,
-      fontSize: 20
+      fontSize: 20,
+      position: "absolute",
+      top: 10,
+      right: 15
     }
   });

@@ -36,9 +36,9 @@ const Statusbar = ({ backgroundColor, barStyle = "dark-content" }) => {
   );
 };
 
+
 const Home = ({ navigation, navigate, truth }) => {
   const [isLoading, setIsLoading] = useState(false);
-
   const [episodes, setEpisodes] = useState([]);
   const [action, setAction] = useState([]);
   const [fiction, setFiction] = useState([]);
@@ -60,6 +60,8 @@ const Home = ({ navigation, navigate, truth }) => {
   //   const res = await newAPI.get('')
   //   console.log(res.data)
   // }
+
+
   function getActionAnimes() {
     setIsLoading(true);
     axios
@@ -227,6 +229,7 @@ const Home = ({ navigation, navigate, truth }) => {
         console.log(err);
       });
   }
+
 
   if (!episodes) {
     return null;
@@ -407,19 +410,20 @@ const Home = ({ navigation, navigate, truth }) => {
                                 },
                               })
                               .then(async function (res1) {
-                                res1.data.data.map((data) => {
+                                res1.data.data.map((info) => {
                                   setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
-                                    type: data.type,
-                                    synopsis: data.synopsis,
-                                    animeCover: data.animeCover,
-                                    animeTitle: data.animeEnglishTitle,
-                                    episodes: data.episodesAvaliable,
-                                    season: data.season,
-                                    language: data.language,
-                                    genres: data.genres,
-                                    status: data.status,
-                                    episodesList: data.episodesList,
+                                    type: info.type,
+                                    synopsis: info.synopsis,
+                                    animeCover: info.animeCover,
+                                    animeTitle: info.animeEnglishTitle,
+                                    episodes: info.episodesAvaliable,
+                                    season: info.season,
+                                    language: info.language,
+                                    genres: info.genres,
+                                    status: info.status,
+                                    episodesList: info.episodesList,
+                                    animeUrl: data.animeUrl
                                     // there is more options such as animeJapaneseTitle, studio.
                                   });
                                 });
@@ -470,19 +474,20 @@ const Home = ({ navigation, navigate, truth }) => {
                                 },
                               })
                               .then(async function (res1) {
-                                res1.data.data.map((data) => {
+                                res1.data.data.map((info) => {
                                   setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
-                                    type: data.type,
-                                    synopsis: data.synopsis,
-                                    animeCover: data.animeCover,
-                                    animeTitle: data.animeEnglishTitle,
-                                    episodes: data.episodesAvaliable,
-                                    season: data.season,
-                                    language: data.language,
-                                    genres: data.genres,
-                                    status: data.status,
-                                    episodesList: data.episodesList,
+                                    type: info.type,
+                                    synopsis: info.synopsis,
+                                    animeCover: info.animeCover,
+                                    animeTitle: info.animeEnglishTitle,
+                                    episodes: info.episodesAvaliable,
+                                    season: info.season,
+                                    language: info.language,
+                                    genres: info.genres,
+                                    status: info.status,
+                                    episodesList: info.episodesList,
+                                    animeUrl: data.animeUrl
                                     // there is more options such as animeJapaneseTitle, studio.
                                   });
                                 });
@@ -533,19 +538,20 @@ const Home = ({ navigation, navigate, truth }) => {
                                 },
                               })
                               .then(async function (res1) {
-                                res1.data.data.map((data) => {
+                                res1.data.data.map((info) => {
                                   setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
-                                    type: data.type,
-                                    synopsis: data.synopsis,
-                                    animeCover: data.animeCover,
-                                    animeTitle: data.animeEnglishTitle,
-                                    episodes: data.episodesAvaliable,
-                                    season: data.season,
-                                    language: data.language,
-                                    genres: data.genres,
-                                    status: data.status,
-                                    episodesList: data.episodesList,
+                                    type: info.type,
+                                    synopsis: info.synopsis,
+                                    animeCover: info.animeCover,
+                                    animeTitle: info.animeEnglishTitle,
+                                    episodes: info.episodesAvaliable,
+                                    season: info.season,
+                                    language: info.language,
+                                    genres: info.genres,
+                                    status: info.status,
+                                    episodesList: info.episodesList,
+                                    animeUrl: data.animeUrl
                                     // there is more options such as animeJapaneseTitle, studio.
                                   });
                                 });
@@ -596,19 +602,20 @@ const Home = ({ navigation, navigate, truth }) => {
                                 },
                               })
                               .then(async function (res1) {
-                                res1.data.data.map((data) => {
+                                res1.data.data.map((info) => {
                                   setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
-                                    type: data.type,
-                                    synopsis: data.synopsis,
-                                    animeCover: data.animeCover,
-                                    animeTitle: data.animeEnglishTitle,
-                                    episodes: data.episodesAvaliable,
-                                    season: data.season,
-                                    language: data.language,
-                                    genres: data.genres,
-                                    status: data.status,
-                                    episodesList: data.episodesList,
+                                    type: info.type,
+                                    synopsis: info.synopsis,
+                                    animeCover: info.animeCover,
+                                    animeTitle: info.animeEnglishTitle,
+                                    episodes: info.episodesAvaliable,
+                                    season: info.season,
+                                    language: info.language,
+                                    genres: info.genres,
+                                    status: info.status,
+                                    episodesList: info.episodesList,
+                                    animeUrl: data.animeUrl
                                     // there is more options such as animeJapaneseTitle, studio.
                                   });
                                 });
@@ -633,7 +640,7 @@ const Home = ({ navigation, navigate, truth }) => {
               })}
             </ScrollView>
           </View>
-          <View  style={styles(truth).shows}>
+          <View style={styles(truth).shows}>
             <Text style={styles(truth).showText}>Movies TODO</Text>
 
           </View>
@@ -718,3 +725,5 @@ const styles = (truth, isLoading) => {
     },
   });
 };
+
+

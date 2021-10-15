@@ -54,7 +54,7 @@ const Search = ({ navigation, navigate, truth }) => {
             setIsLoading(false);
             if (
               (typeof res1.data.data !== "undefined" &&
-              res1.data.data.length === 0) || (typeof res1.data.data === "string")
+                res1.data.data.length === 0) || (typeof res1.data.data === "string")
             ) {
               /*Platform.OS === "android"
                 ? ToastAndroid.showWithGravity(
@@ -115,7 +115,7 @@ const Search = ({ navigation, navigate, truth }) => {
           onChangeText={onChangeSearch}
           value={searchQuery}
         />
-        <ScrollView overScrollMode="never" contentContainerStyle={{flexGrow: 1}}>
+        <ScrollView overScrollMode="never" contentContainerStyle={{ flexGrow: 1 }}>
           {searchResult.map((data, i) => {
             return (
               <View style={styles(truth).searchContainer} key={i}>
@@ -140,40 +140,42 @@ const Search = ({ navigation, navigate, truth }) => {
                             },
                           })
                           .then(async function (res1) {
-                            res1.data.data.map((data) => {
+                            res1.data.data.map((info) => {
                               setIsLoading(false);
                               if (data === null) {
                                 Platform.OS === "android"
                                   ? ToastAndroid.showWithGravity(
-                                      res1.data.data,
-                                      1500,
-                                      ToastAndroid.BOTTOM
-                                    )
+                                    res1.data.data,
+                                    1500,
+                                    ToastAndroid.BOTTOM
+                                  )
                                   : Alert.alert("Warning", res1.data.data, [
-                                      {
-                                        text: "Cancel",
-                                        onPress: () =>
-                                          console.log("Cancel Pressed"),
-                                        style: "cancel",
-                                      },
-                                      {
-                                        text: "OK",
-                                        onPress: () =>
-                                          console.log("OK Pressed"),
-                                      },
-                                    ]);
+                                    {
+                                      text: "Cancel",
+                                      onPress: () =>
+                                        console.log("Cancel Pressed"),
+                                      style: "cancel",
+                                    },
+                                    {
+                                      text: "OK",
+                                      onPress: () =>
+                                        console.log("OK Pressed"),
+                                    },
+                                  ]);
                               } else {
                                 navigation.navigate("EpisodeRoom", {
-                                  type: data.type,
-                                  synopsis: data.synopsis,
-                                  animeCover: data.animeCover,
-                                  animeTitle: data.animeEnglishTitle,
-                                  episodes: data.episodesAvaliable,
-                                  season: data.season,
-                                  language: data.language,
-                                  genres: data.genres,
-                                  status: data.status,
-                                  episodesList: data.episodesList,
+                                  type: info.type,
+                                  synopsis: info.synopsis,
+                                  animeCover: info.animeCover,
+                                  animeTitle: info.animeEnglishTitle,
+                                  episodes: info.episodesAvaliable,
+                                  season: info.season,
+                                  language: info.language,
+                                  genres: info.genres,
+                                  status: info.status,
+                                  episodesList: info.episodesList,
+                                  animeUrl: data.animeUrl
+
                                   // there is more options such as animeJapaneseTitle, studio.
                                 });
                               }
@@ -187,7 +189,7 @@ const Search = ({ navigation, navigate, truth }) => {
                   }}
                 >
                   <Image
-            
+
                     source={{ uri: data.uri }}
                     style={styles(truth).AnimeImage}
                   />
