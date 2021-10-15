@@ -1,10 +1,10 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-const Complete = () => {
+const Complete = ({ cody }) => {
   return (
     <View>
-      <Text>Completed</Text>
+      <Text>{cody}</Text>
     </View>
   );
 };

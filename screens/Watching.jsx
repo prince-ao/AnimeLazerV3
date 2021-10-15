@@ -1,10 +1,11 @@
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 
-const Watching = () => {
+const Watching = (props) => {
+  console.log(props);
   return (
     <View>
-      <Text>Watching</Text>
+      <Text>watching</Text>
     </View>
   );
 };
