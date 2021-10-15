@@ -9,6 +9,8 @@ npm-debug.*
 *.orig.*
 web-build/
 yarn.lock
+*.env
+
 
 # macOS
 .DS_Store

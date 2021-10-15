@@ -33,21 +33,33 @@ const API = {
 
 const EpisodeRoom = ({ navigation, route, truthy }) => {
   const MAX_LINES = 3;
-  const [showLess, setShowLess] = useState(false);
-  const [lengthMore, setLengthMore] = useState(false);
-  const [descLength, setDescLength] = useState(30);
-  const [drop, setDrop] = useState(false);
-  const inputEl = useRef(null);
+  // const [showLess, setShowLess] = useState(false);
+  // const [lengthMore, setLengthMore] = useState(false);
+  // const [descLength, setDescLength] = useState(30);
+  // const [drop, setDrop] = useState(false);
+  // const inputEl = useRef(null);
 
   const [isLoading, setIsLoading] = useState(false);
 
-  const toggleNumberOfLines = () => {
-    setShowLess(!showLess);
-  };
+  const [showText, setShowText] = useState(false);
+  const [numberOfLines, setNumberOfLines] = useState(undefined);
+  const [showMoreButton, setShowMoreButton] = useState(false);
 
-  const onTextLayout = useCallback((e) => {
-    setLengthMore(e.nativeEvent.lines.length > MAX_LINES);
-  }, []);
+  const onTextLayout = useCallback(
+    (e) => {
+      if (e.nativeEvent.lines.length > MAX_LINES && !showText) {
+        setShowMoreButton(true);
+        setNumberOfLines(MAX_LINES);
+      }
+    },
+    [showText]
+  );
+
+  useEffect(() => {
+    if (showMoreButton) {
+      setNumberOfLines(showText ? undefined : MAX_LINES);
+    }
+  }, [showText, showMoreButton]);
 
 
   return (
@@ -159,168 +171,177 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
             </Menu>
           </MenuProvider> */}
         </View>
-        <View style={styles(truthy).infoContainer}>
-          <View style={styles(truthy).genInfoContainer}>
-            <Image
-              source={{ uri: route.params.animeCover }}
-              alt="poster"
-              style={styles(truthy).poster}
-            />
-            <View style={styles(truthy).textInfoContainer}>
-              <Text
-                numberOfLines={2}
-                ellipsizeMode="tail"
-                style={styles(truthy).title}
-              >
-                {route.params.animeTitle}
-              </Text>
-              <View style={styles(truthy).genDesc}>
-                <Text style={styles(truthy).white}>
-                  Type:{" "}
-                  <Text style={styles(truthy).innerText}>
-                    {route.params.type}{" "}
+        <View>
+          <ScrollView overScrollMode="never" contentContainerStyle={{ marginTop: 0 }}>
+            <View style={styles(truthy).infoContainer}>
+              <View style={styles(truthy).genInfoContainer}>
+                <Image
+                  source={{ uri: route.params.animeCover }}
+                  alt="poster"
+                  style={styles(truthy).poster}
+                />
+                <View style={styles(truthy).textInfoContainer}>
+                  <Text
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                    style={styles(truthy).title}
+                  >
+                    {route.params.animeTitle}
                   </Text>
-                </Text>
-                <Text
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                  style={styles(truthy).white}
-                >
-                  Released:{" "}
-                  <Text numberOfLines={1} ellipsizeMode="tail" style={styles(truthy).innerText}>
-                    {route.params.season}
-                  </Text>{" "}
-                </Text>
-                <Text style={styles(truthy).white}>
-                  Episodes:{" "}
-                  <Text style={styles(truthy).innerText}>
-                    {route.params.episodes}{" "}
-                  </Text>
-                </Text>
-                <Text style={styles(truthy).white}>
-                  Status:{" "}
-                  <Text style={styles(truthy).innerText}>
-                    {route.params.status}{" "}
-                  </Text>
-                </Text>
-              </View>
-              <ScrollView
-                overScrollMode="never"
-                showsVerticalScrollIndicator={false}
-                style={styles(truthy).genres}
-              >
-                <View>
-                  {route.params.genres.map((data, key) => {
-                    return (
-                      <Text style={styles(truthy).genresCard} key={key}>
-                        {data.Genre}
+                  <View style={styles(truthy).genDesc}>
+                    <Text style={styles(truthy).white}>
+                      Type:{" "}
+                      <Text style={styles(truthy).innerText}>
+                        {route.params.type}{" "}
                       </Text>
-                    );
-                  })}
+                    </Text>
+                    <Text
+                      numberOfLines={1}
+                      ellipsizeMode="tail"
+                      style={styles(truthy).white}
+                    >
+                      Released:{" "}
+                      <Text numberOfLines={1} ellipsizeMode="tail" style={styles(truthy).innerText}>
+                        {route.params.season}
+                      </Text>{" "}
+                    </Text>
+                    <Text style={styles(truthy).white}>
+                      Episodes:{" "}
+                      <Text style={styles(truthy).innerText}>
+                        {route.params.episodes}{" "}
+                      </Text>
+                    </Text>
+                    <Text style={styles(truthy).white}>
+                      Status:{" "}
+                      <Text style={styles(truthy).innerText}>
+                        {route.params.status}{" "}
+                      </Text>
+                    </Text>
+                  </View>
+                  <ScrollView
+                    nestedScrollEnabled={true}
+                    overScrollMode="never"
+                    showsVerticalScrollIndicator={false}
+                    style={styles(truthy).genres}
+                  >
+                    <View>
+                      {route.params.genres.map((data, key) => {
+                        return (
+                          <Text style={styles(truthy).genresCard} key={key}>
+                            {data.Genre}
+                          </Text>
+                        );
+                      })}
+                    </View>
+                  </ScrollView>
                 </View>
-              </ScrollView>
-            </View>
-          </View>
-          <View ref={inputEl} style={styles(truthy).descContainer}>
-            {/*TODO later version: find a way to calculate the size of a the Text */}
-            <Text
-              style={{ height: descLength, color: truthy ? "white" : "black" }}
-            >
-              {route.params.synopsis}
-            </Text>
-            <TouchableOpacity
-              style={styles(truthy).white}
-              onPress={() => {
-                descLength === 30 ? setDescLength(200) : setDescLength(30);
-                setDrop(!drop);
-              }}
-            >
-              <Ionicons
-                name={drop ? "chevron-up" : "chevron-down"}
-                size={25}
-                color={truthy ? "white" : "black"}
-              />
-            </TouchableOpacity>
-          </View>
-        </View>
-        <ScrollView
-          overScrollMode="never"
-          showsVerticalScrollIndicator={false}
-          showsHorizontalScrollIndicator={false}
-        >
-          <View style={styles(truthy).episodesList}>
-            {route.params.episodesList.map((data, key) => {
-              return (
+              </View>
+              <View style={styles(truthy).descContainer}>
                 <Text
-                  style={styles(truthy).episodeCard}
-                  key={key}
-                  onPress={() => {
-                    setIsLoading(true);
-                    axios
-                      .get(`${API.url}/AnimeLazer/Login`, {
-                        headers: {
-                          "Content-Type": "application/json",
-                          id: API.id,
-                        },
-                      })
-                      .then(async function (res) {
+                  onTextLayout={onTextLayout}
+                  style={{ color: truthy ? "white" : "black" }}
+                  numberOfLines={numberOfLines}
+                  ellipsizeMode="tail"
+                >
+                  {route.params.synopsis}
+                </Text>
+                {showMoreButton && (
+                  <TouchableOpacity
+                    style={styles(truthy).white}
+                    onPress={() => {
+                      setShowText((showText) => !showText)
+                    }}
+                  >
+                    <Ionicons
+                      name={showText ? "chevron-up" : "chevron-down"}
+                      size={25}
+                      color={truthy ? "white" : "black"}
+                    />
+                  </TouchableOpacity>
+                )}
+              </View>
+            </View>
+            <ScrollView
+              nestedScrollEnabled={true}
+              overScrollMode="never"
+              showsVerticalScrollIndicator={false}
+              showsHorizontalScrollIndicator={false}
+            >
+              <View style={styles(truthy).episodesList}>
+                {route.params.episodesList.map((data, key) => {
+                  return (
+                    <Text
+                      style={styles(truthy).episodeCard}
+                      key={key}
+                      onPress={() => {
+                        setIsLoading(true);
                         axios
-                          .get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
+                          .get(`${API.url}/AnimeLazer/Login`, {
                             headers: {
                               "Content-Type": "application/json",
-                              Authorization: `${API.key}${res.data.token}`,
-                              src: data.epUrl,
+                              id: API.id,
                             },
                           })
-                          .then(async function (res1) {
-                            setIsLoading(false);
-                            if (
-                              res1.data.data.length === 0 ||
-                              (typeof res1.data.data === undefined) | null
-                            ) {
-                              Platform.OS === "android"
-                                ? ToastAndroid.showWithGravity(
-                                  "This video file cannot be played.",
-                                  2000,
-                                  ToastAndroid.BOTTOM
-                                )
-                                : Alert.alert(
-                                  "Warning",
-                                  "This video file cannot be played",
-                                  [
-                                    {
-                                      text: "Cancel",
-                                      onPress: () => setIsLoading(false),
-                                      style: "cancel",
-                                    },
-                                    {
-                                      text: "OK",
-                                      onPress: () => setIsLoading(false),
-                                    },
-                                  ]
-                                );
-                            } else {
-                              navigation.navigate("WatchRoom", {
-                                title:
-                                  route.params.animeTitle + " Ep " + data.epNum,
-                                src: res1.data.data,
+                          .then(async function (res) {
+                            axios
+                              .get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `${API.key}${res.data.token}`,
+                                  src: data.epUrl,
+                                },
+                              })
+                              .then(async function (res1) {
+                                setIsLoading(false);
+                                if (
+                                  res1.data.data.length === 0 ||
+                                  (typeof res1.data.data === undefined) | null
+                                ) {
+                                  Platform.OS === "android"
+                                    ? ToastAndroid.showWithGravity(
+                                      "This video file cannot be played.",
+                                      2000,
+                                      ToastAndroid.BOTTOM
+                                    )
+                                    : Alert.alert(
+                                      "Warning",
+                                      "This video file cannot be played",
+                                      [
+                                        {
+                                          text: "Cancel",
+                                          onPress: () => setIsLoading(false),
+                                          style: "cancel",
+                                        },
+                                        {
+                                          text: "OK",
+                                          onPress: () => setIsLoading(false),
+                                        },
+                                      ]
+                                    );
+                                } else {
+                                  navigation.navigate("WatchRoom", {
+                                    title:
+                                      route.params.animeTitle + " Ep " + data.epNum,
+                                    src: res1.data.data,
+                                  });
+                                }
                               });
-                            }
+                          })
+                          .catch(function (err) {
+                            setIsLoading(false);
+                            console.log(err);
                           });
-                      })
-                      .catch(function (err) {
-                        setIsLoading(false);
-                        console.log(err);
-                      });
-                  }}
-                >
-                  {" "}
-                  {"Episode " + data.epNum}
-                </Text>
-              );
-            })}
-          </View>
-        </ScrollView>
+                      }}
+                    >
+                      {" "}
+                      {"Episode " + data.epNum}
+                    </Text>
+                  );
+                })}
+              </View>
+            </ScrollView>
+          </ScrollView>
+        </View>
         <ActivityIndicator
           animating={isLoading}
           color="#0367fc"
@@ -364,14 +385,14 @@ const styles = (truthy, isLoading) =>
       borderBottomLeftRadius: 15,
       borderBottomRightRadius: 15,
       marginBottom: 6,
-      marginEnd: 8,
-      display: "flex",
+
     },
     genres: {
       top: 10,
       flexDirection: "row",
       flexWrap: "wrap",
       flex: 1,
+      flexShrink: 1
     },
     episodesList: {
       marginLeft: 21,
@@ -451,8 +472,8 @@ const styles = (truthy, isLoading) =>
       position: "absolute",
       top: Dimensions.get("window").height / 2.3,
       right: Dimensions.get("window").width / 2.43,
-      width: 70,
-      height: 70,
+      width: Dimensions.get("window").width / 5.5,
+      height: Dimensions.get("window").height / 10.5,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: isLoading ? "#585858" : "transparent",

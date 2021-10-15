@@ -115,7 +115,7 @@ const Search = ({ navigation, navigate, truth }) => {
           onChangeText={onChangeSearch}
           value={searchQuery}
         />
-        <ScrollView overScrollMode="never" contentContainerStyle={{ flexGrow: 1 }}>
+        <ScrollView overScrollMode="never" contentContainerStyle={{ flexGrow: 1, paddingBottom: 15, alignItems: "baseline" }}>
           {searchResult.map((data, i) => {
             return (
               <View style={styles(truth).searchContainer} key={i}>
@@ -244,8 +244,6 @@ const styles = (truth, isLoading) =>
       width: Dimensions.get("window").width / 0.1,
       height: Dimensions.get("window").height / 4.90,
       marginTop: Dimensions.get("window").height / 100,
-      flex: 1,
-      marginBottom: 0
     },
     AnimeImage: {
       width: 130,
@@ -279,8 +277,8 @@ const styles = (truth, isLoading) =>
       position: "absolute",
       top: Dimensions.get("window").height / 2.3,
       right: Dimensions.get("window").width / 2.43,
-      width: 70,
-      height: 70,
+      width: Dimensions.get("window").width / 5.5,
+      height: Dimensions.get("window").height / 10.5,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: isLoading ? "#585858" : "transparent",
