@@ -14,6 +14,8 @@ import {
   Platform,
 } from "react-native";
 import { Header } from "../components/index";
+
+
 const axios = require("axios");
 
 const API = {
@@ -44,15 +46,16 @@ const Home = ({ navigation, navigate, truth }) => {
   const [monsters, setMonsters] = useState([]);
   const [topRated, setTopRated] = useState([]);
 
+
+
   useEffect(() => {
-    getFictionAnimes();
     getRecentEp();
     getActionAnimes();
+    getFictionAnimes();
     getSchoolAnimes();
     getMonstersAnimes();
     getTopRatedAnimes();
   }, []);
-
   // const newRes = async() => {
   //   const res = await newAPI.get('')
   //   console.log(res.data)
@@ -340,19 +343,20 @@ const Home = ({ navigation, navigate, truth }) => {
                                 },
                               })
                               .then(async function (res1) {
-                                res1.data.data.map((data) => {
+                                res1.data.data.map((info) => {
                                   setIsLoading(false);
                                   navigate.navigate("EpisodeRoom", {
-                                    type: data.type,
-                                    synopsis: data.synopsis,
-                                    animeCover: data.animeCover,
-                                    animeTitle: data.animeEnglishTitle,
-                                    episodes: data.episodesAvaliable,
-                                    season: data.season,
-                                    language: data.language,
-                                    genres: data.genres,
-                                    status: data.status,
-                                    episodesList: data.episodesList,
+                                    type: info.type,
+                                    synopsis: info.synopsis,
+                                    animeCover: info.animeCover,
+                                    animeTitle: info.animeEnglishTitle,
+                                    episodes: info.episodesAvaliable,
+                                    season: info.season,
+                                    language: info.language,
+                                    genres: info.genres,
+                                    status: info.status,
+                                    episodesList: info.episodesList,
+                                    animeUrl: data.animeUrl
                                     // there is more options such as animeJapaneseTitle, studio.
                                   });
                                 });

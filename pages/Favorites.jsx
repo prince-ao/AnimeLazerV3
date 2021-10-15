@@ -12,6 +12,8 @@ import { createMaterialTopTabNavigator } from "@react-navigation/material-top-ta
 import { Header } from "../components/index";
 const axios = require("axios");
 import { Complete, OnHold, Dropped, Plan, Watching } from "../screens";
+import { firebase } from "@firebase/app"
+import "@firebase/auth"
 
 const Tab = createMaterialTopTabNavigator();
 

@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
+import { Menu, MenuProvider, MenuOptions, MenuOption, MenuTrigger} from "react-native-popup-menu";
 import {
   StyleSheet,
   Text,
@@ -17,6 +18,10 @@ import {
 } from "react-native";
 import { Header } from "../components/index";
 import { Ionicons } from "@expo/vector-icons";
+import { firebase} from "@firebase/app"
+import "@firebase/database"
+import "@firebase/auth"
+
 
 const axios = require("axios");
 
@@ -72,9 +77,55 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
           >
             <Text style={{ color: "white", fontSize: 20 }}>Back</Text>
           </TouchableOpacity>
+          <MenuProvider style={{ flexDirection: "column", padding: 30 }}>
+          <Menu onSelect={value => alert(`You Clicked : ${value}`)}>
+          <MenuTrigger  >
           <TouchableOpacity style={{ position: "absolute", top: 10, right: 15 }} 
           onPress={() => {
-            
+            setIsLoading(true)
+            firebase.auth().onAuthStateChanged(async function(user) {
+              const isAdded = false;
+              const userRef = firebase.database().ref(`Users/${user.uid}/AnimeList`)
+              userRef.orderByKey().on('value', function(snapshot) {
+                snapshot.forEach(function(data) {
+                  if (data.child('animeName').val() === route.params.animeTitle) {
+                    data.child('animeName').val()
+                    console.log('are u here')
+                    isAdded = true
+                  }
+                })
+              })
+              if (!isAdded) {
+                const timeStamp = + new Date;
+                const ref = firebase.database().ref(`Users/${user.uid}/AnimeList/${timeStamp}/AnimeDetails`)
+                ref.set({
+                  userUID: user.uid,
+                  animeName: route.params.animeTitle,
+                  animeImage: route.params.animeCover,
+                  animeUrl: route.params.animeUrl,
+                  timeStamp: timeStamp
+                  }).then(function() {
+                    setIsLoading(false)
+                    if (Platform.OS === 'android') {
+                      ToastAndroid.showWithGravity(
+                        `${route.params.animeTitle} just got added to your list.`,
+                        2000,
+                        ToastAndroid.BOTTOM
+                      )
+                    }
+                  }).catch(function (err) {
+                    setIsLoading(false)
+                    if (Platform.OS === 'android') {
+                      ToastAndroid.showWithGravity(
+                        `Some error occured`,
+                        2000,
+                        ToastAndroid.BOTTOM
+                      )
+                    }
+                    console.log(err)
+                  })
+              }
+            })
           }}>
           <Ionicons
                 name={"add"}
@@ -82,6 +133,29 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                 color={truthy ? "white" : "black"}
               />
           </TouchableOpacity>
+          </MenuTrigger  >
+          <MenuOptions>
+            <MenuOption value={"Watching"}>
+              <Text style={styles(truthy).menuContent}>Watching</Text>
+            </MenuOption>
+            <MenuOption value={"Plan to watch"}>
+              <Text style={styles(truthy).menuContent}>Plan To Watch</Text>
+            </MenuOption>
+            <MenuOption value={"On Hold"}>
+              <Text style={styles(truthy).menuContent}>On Hold</Text>
+            </MenuOption>
+            <MenuOption value={"Completed"}>
+              <Text style={styles(truthy).menuContent}>Completed</Text>
+            </MenuOption>
+            <MenuOption value={"Dropped"}>
+              <Text style={styles(truthy).menuContent}>Dropped</Text>
+            </MenuOption>
+            {/* <MenuOption value={3} disabled={true}>
+              <Text style={styles(truthy).menuContent}>Disabled Menu</Text>
+            </MenuOption> */}
+          </MenuOptions>
+          </Menu>
+          </MenuProvider>
         </View>
         <View style={styles(truthy).infoContainer}>
           <View style={styles(truthy).genInfoContainer}>
@@ -382,4 +456,10 @@ const styles = (truthy, isLoading) =>
       backgroundColor: isLoading ? "#585858" : "transparent",
       borderRadius: 8,
     },
+    menuContent: {
+      color: "#000",
+      fontWeight: "bold",
+      padding: 2,
+      fontSize: 20
+    }
   });

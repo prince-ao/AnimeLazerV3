@@ -2,7 +2,7 @@ import { StatusBar } from "expo-status-bar";
 import "react-native-gesture-handler";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import { NavigationContainer } from "@react-navigation/native";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 import { Home, Search, Favorites, Settings } from "./pages/index";
@@ -10,6 +10,8 @@ import { createStackNavigator } from "@react-navigation/stack";
 import EpisodeRoom from "./rooms/EpisodeRoom";
 import WatchRoom from "./rooms/WatchRoom";
 import { Orientation } from "expo-screen-orientation";
+import { isInialized, firebaseConfig, signInAnonymously} from "./src/firebase.js";
+
 
 const Stack = createStackNavigator();
 
@@ -70,6 +72,13 @@ const BottomTab = ({ navigation, truthy, setTruthy }) => {
 
 export default function App() {
   const [truthy, setTruthy] = useState(true);
+
+  isInialized(firebaseConfig)
+
+  useEffect(() => {
+    signInAnonymously();
+  })
+
   return (
     <NavigationContainer>
       <Stack.Navigator
