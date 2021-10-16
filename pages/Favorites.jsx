@@ -21,6 +21,7 @@ const BASE_URL = "https://myanimelist.net/v1/oauth2/";
 
 const Favorites = ({ truth }) => {
   const [webview, setWebview] = useState(true);
+  const webviewRef = useRef(true);
   const authRef = useRef({
     auth: "",
     access: "",
@@ -29,7 +30,7 @@ const Favorites = ({ truth }) => {
   });
   const loggedRef = useRef(false);
   const handleNav = async (newNavState) => {
-    console.log(newNavState);
+    //console.log(newNavState);
     if (
       newNavState.url.includes("https://animelazerapi.herokuapp.com/api/MAL")
     ) {
@@ -47,7 +48,7 @@ const Favorites = ({ truth }) => {
           auth += newNavState.url[i];
         }
       }
-      console.log(auth);
+      //console.log(auth);
       const response = await fetch(`${BASE_URL}token`, {
         method: "POST",
         headers: {
@@ -56,6 +57,7 @@ const Favorites = ({ truth }) => {
         body: `grant_type=authorization_code&code=${auth}&client_id=${clientID}&code_verifier=${codeChallenge}`,
       });
       const response_s = await response.json();
+      //console.log(response_s);
       console.log(response_s);
       authRef.current.auth = auth;
       authRef.current.access = response_s.access_token;
@@ -63,14 +65,8 @@ const Favorites = ({ truth }) => {
       authRef.current.expires = response_s.expires_in;
       loggedRef.current = true;
       setWebview(true);
-      useForceUpdate();
     }
   };
-
-  function useForceUpdate() {
-    const [value, setValue] = useState(0);
-    return () => setValue((value) => value + 1);
-  }
 
   if (webview) {
     return (
@@ -110,7 +106,9 @@ const Favorites = ({ truth }) => {
                   display: "flex",
                   flexDirection: "row",
                 }}
-                onPress={() => setWebview(false)}
+                onPress={() => {
+                  setWebview(false);
+                }}
               >
                 <Text
                   style={{
