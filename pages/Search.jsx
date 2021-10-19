@@ -51,10 +51,12 @@ const Search = ({ navigation, navigate, truth }) => {
             },
           })
           .then(async function (res1) {
+            console.log(res1);
             setIsLoading(false);
             if (
               (typeof res1.data.data !== "undefined" &&
-                res1.data.data.length === 0) || (typeof res1.data.data === "string")
+                res1.data.data.length === 0) ||
+              typeof res1.data.data === "string"
             ) {
               /*Platform.OS === "android"
                 ? ToastAndroid.showWithGravity(
@@ -109,13 +111,19 @@ const Search = ({ navigation, navigate, truth }) => {
             backgroundColor: "#1a1a1a",
             borderBottomWidth: 1,
           }}
-
           style={styles(truth).searchBar}
           placeholder="Search..."
           onChangeText={onChangeSearch}
           value={searchQuery}
         />
-        <ScrollView overScrollMode="never" contentContainerStyle={{ flexGrow: 1, paddingBottom: 15, alignItems: "baseline" }}>
+        <ScrollView
+          overScrollMode="never"
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 15,
+            alignItems: "baseline",
+          }}
+        >
           {searchResult.map((data, i) => {
             return (
               <View style={styles(truth).searchContainer} key={i}>
@@ -145,23 +153,23 @@ const Search = ({ navigation, navigate, truth }) => {
                               if (data === null) {
                                 Platform.OS === "android"
                                   ? ToastAndroid.showWithGravity(
-                                    res1.data.data,
-                                    1500,
-                                    ToastAndroid.BOTTOM
-                                  )
+                                      res1.data.data,
+                                      1500,
+                                      ToastAndroid.BOTTOM
+                                    )
                                   : Alert.alert("Warning", res1.data.data, [
-                                    {
-                                      text: "Cancel",
-                                      onPress: () =>
-                                        console.log("Cancel Pressed"),
-                                      style: "cancel",
-                                    },
-                                    {
-                                      text: "OK",
-                                      onPress: () =>
-                                        console.log("OK Pressed"),
-                                    },
-                                  ]);
+                                      {
+                                        text: "Cancel",
+                                        onPress: () =>
+                                          console.log("Cancel Pressed"),
+                                        style: "cancel",
+                                      },
+                                      {
+                                        text: "OK",
+                                        onPress: () =>
+                                          console.log("OK Pressed"),
+                                      },
+                                    ]);
                               } else {
                                 navigation.navigate("EpisodeRoom", {
                                   type: info.type,
@@ -174,7 +182,7 @@ const Search = ({ navigation, navigate, truth }) => {
                                   genres: info.genres,
                                   status: info.status,
                                   episodesList: info.episodesList,
-                                  animeUrl: data.animeUrl
+                                  animeUrl: data.animeUrl,
 
                                   // there is more options such as animeJapaneseTitle, studio.
                                 });
@@ -189,7 +197,6 @@ const Search = ({ navigation, navigate, truth }) => {
                   }}
                 >
                   <Image
-
                     source={{ uri: data.uri }}
                     style={styles(truth).AnimeImage}
                   />
@@ -205,8 +212,7 @@ const Search = ({ navigation, navigate, truth }) => {
                       numberOfLines={2}
                       ellipsizeMode="tail"
                       style={styles(truth).JapaneseText}
-                    >
-                    </Text>
+                    ></Text>
                     <Text
                       numberOfLines={1}
                       ellipsizeMode="tail"
@@ -242,7 +248,7 @@ const styles = (truth, isLoading) =>
       marginRight: Dimensions.get("window").width / 100e1,
       alignItems: "center",
       width: Dimensions.get("window").width / 0.1,
-      height: Dimensions.get("window").height / 4.90,
+      height: Dimensions.get("window").height / 4.9,
       marginTop: Dimensions.get("window").height / 100,
     },
     AnimeImage: {
@@ -250,7 +256,7 @@ const styles = (truth, isLoading) =>
       height: 150,
       marginRight: 15,
       borderRadius: 6,
-      resizeMode: "cover"
+      resizeMode: "cover",
     },
     status: {
       marginTop: 20,
@@ -277,10 +283,10 @@ const styles = (truth, isLoading) =>
       position: "absolute",
       top: Dimensions.get("window").height / 2.3,
       right: Dimensions.get("window").width / 2.43,
-      width: 70,
-      height: 70,
-      alignItems: 'center',
-      justifyContent: 'center',
+      width: Dimensions.get("window").width / 5.5,
+      height: Dimensions.get("window").height / 10.5,
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: isLoading ? "#585858" : "transparent",
       borderRadius: 8,
     },
