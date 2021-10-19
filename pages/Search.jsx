@@ -12,13 +12,13 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SearchBar } from "react-native-elements";
+import {key, url} from "@env"
 
 const axios = require("axios");
-
 const API = {
   id: "_" + Math.random().toString(36).substr(2, 9),
-  url: process.env.url,
-  key: process.env.key,
+  url: url,
+  key: key + " ",
 };
 
 const Search = ({ navigation, navigate, truth }) => {

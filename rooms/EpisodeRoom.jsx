@@ -20,6 +20,7 @@ import {
 import { Header } from "../components/index";
 import { Ionicons } from "@expo/vector-icons";
 import { firebase } from "@firebase/app"
+import {key, url} from "@env"
 import "@firebase/database"
 import "@firebase/auth"
 
@@ -28,8 +29,8 @@ const axios = require("axios");
 
 const API = {
   id: "_" + Math.random().toString(36).substr(2, 9),
-  url: "https://animelazerapi.herokuapp.com",
-  key: "Bearer ",
+  url: url,
+  key: key + " ",
 };
 
 
