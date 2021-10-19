@@ -283,17 +283,10 @@ const styles = (truth, isLoading) =>
       position: "absolute",
       top: Dimensions.get("window").height / 2.3,
       right: Dimensions.get("window").width / 2.43,
-<<<<<<< HEAD
       width: Dimensions.get("window").width / 5.5,
       height: Dimensions.get("window").height / 10.5,
       alignItems: "center",
       justifyContent: "center",
-=======
-      width: 70,
-      height: 70,
-      alignItems: 'center',
-      justifyContent: 'center',
->>>>>>> 93e2ce1a50ba80dcd38702600f5f8de83e1310a6
       backgroundColor: isLoading ? "#585858" : "transparent",
       borderRadius: 8,
     },
