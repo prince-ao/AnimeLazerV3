@@ -283,7 +283,6 @@ const styles = (truth, isLoading) =>
       position: "absolute",
       top: Dimensions.get("window").height / 2.3,
       right: Dimensions.get("window").width / 2.43,
-      watching-logic
       width: Dimensions.get("window").width / 5.5,
       height: Dimensions.get("window").height / 10.5,
       alignItems: "center",
