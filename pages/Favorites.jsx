@@ -138,10 +138,26 @@ const Favorites = ({ truth }) => {
               component={Watching}
               initialParams={{ authRef, webview }}
             />
-            <Tab.Screen name="PLAN TO WATCH" component={Plan} />
-            <Tab.Screen name="ON HOLD" component={OnHold} />
-            <Tab.Screen name="COMPLETED" component={Complete} />
-            <Tab.Screen name="DROPPED" component={Dropped} />
+            <Tab.Screen
+              name="PLAN TO WATCH"
+              component={Plan}
+              initialParams={{ authRef, webview }}
+            />
+            <Tab.Screen
+              name="ON HOLD"
+              component={OnHold}
+              initialParams={{ authRef, webview }}
+            />
+            <Tab.Screen
+              name="COMPLETED"
+              component={Complete}
+              initialParams={{ authRef, webview }}
+            />
+            <Tab.Screen
+              name="DROPPED"
+              component={Dropped}
+              initialParams={{ authRef, webview }}
+            />
           </Tab.Navigator>
         </SafeAreaView>
       </>
