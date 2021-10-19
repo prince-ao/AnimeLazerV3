@@ -1,5 +1,7 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Menu, MenuProvider, MenuOptions, MenuOption, MenuTrigger } from "react-native-popup-menu";
+import { Menu, MenuProvider, MenuOptions, MenuOption, MenuTrigger, renderers } from "react-native-popup-menu";
+import { Paragraph, Button, Portal, Dialog, Colors, Provider } from 'react-native-paper';
+import Icon from 'react-native-vector-icons/FontAwesome';
 import {
   StyleSheet,
   Text,
@@ -9,7 +11,6 @@ import {
   StatusBar,
   ScrollView,
   Image,
-  Button,
   Dimensions,
   ToastAndroid,
   ActivityIndicator,
@@ -31,19 +32,20 @@ const API = {
   key: "Bearer ",
 };
 
+
+
 const EpisodeRoom = ({ navigation, route, truthy }) => {
   const MAX_LINES = 3;
-  // const [showLess, setShowLess] = useState(false);
-  // const [lengthMore, setLengthMore] = useState(false);
-  // const [descLength, setDescLength] = useState(30);
-  // const [drop, setDrop] = useState(false);
-  // const inputEl = useRef(null);
 
   const [isLoading, setIsLoading] = useState(false);
 
   const [showText, setShowText] = useState(false);
   const [numberOfLines, setNumberOfLines] = useState(undefined);
   const [showMoreButton, setShowMoreButton] = useState(false);
+  const [list, setList] = useState(route.params.episodesList)
+  const [isAsc, setIsAsc] = useState(true);
+
+
 
   const onTextLayout = useCallback(
     (e) => {
@@ -59,6 +61,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     if (showMoreButton) {
       setNumberOfLines(showText ? undefined : MAX_LINES);
     }
+
+
   }, [showText, showMoreButton]);
 
 
@@ -95,57 +99,100 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
               <MenuTrigger > */}
           <TouchableOpacity style={{ position: "absolute", right: 15 }}
             onPress={() => {
-              setIsLoading(true)
-              firebase.auth().onAuthStateChanged(async function (user) {
-                const isAdded = false;
-                const userRef = firebase.database().ref(`Users/${user.uid}/AnimeList`).orderByKey()
-                userRef.on("value", (snapshot) => {
-                  snapshot.forEach((childSnapshot) => {
-                    if (childSnapshot.child('animeName').val() === route.params.animeTitle) {
-                      console.log('are u here')
-                      isAdded = true
-                    }
-                  })
+              // TODO: Add advanced search; make sorting smooth
 
-                })
-                if (!isAdded) {
-                  const timeStamp = + new Date;
-                  const ref = firebase.database().ref(`Users/${user.uid}/AnimeList/${timeStamp}/AnimeDetails`)
-                  ref.set({
-                    userUID: user.uid,
-                    animeName: route.params.animeTitle,
-                    animeImage: route.params.animeCover,
-                    animeUrl: route.params.animeUrl,
-                    timeStamp: timeStamp
-                  }).then(function () {
-                    setIsLoading(false)
-                    if (Platform.OS === 'android') {
-                      ToastAndroid.showWithGravity(
-                        `${route.params.animeTitle} just got added to your list.`,
-                        2000,
-                        ToastAndroid.BOTTOM
-                      )
-                    }
-                  }).catch(function (err) {
-                    setIsLoading(false)
-                    if (Platform.OS === 'android') {
-                      ToastAndroid.showWithGravity(
-                        `Some error occured`,
-                        2000,
-                        ToastAndroid.BOTTOM
-                      )
-                    }
-                    console.log(err)
-                  })
-                }
+              if (isAsc) {
+                setList(list.reverse())
+                setIsAsc(false)
+              } else {
+                setList(list)
+                setIsAsc(true)
+              }
+              // Alert.alert('Fil ter',
+              //   "Episode sort order - Select your favorite order.\n\nSearch episode - Enter the number of the episode you want to watch.",
+              //   [
+              //     {
+              //       text: 'Cancel', onPress: (se) => console.log(se)
+              //     },
+              //     {
+              //       text: 'Search episode', onPress: () => console.log('serach Episode')
+              //     },
+              //     {
+              //       text: 'Episode sort order', onPress: () => console.log('closed')
+              //     },
+              //   ]
 
-              })
+
+
+              // )
+              // setIsLoading(true)
+              // firebase.auth().onAuthStateChanged(async function (user) {
+              //   const isAdded = false;
+              //   const userRef = firebase.database().ref(`Users/${user.uid}/AnimeList`).orderByKey()
+              //   userRef.on("value", (snapshot) => {
+              //     snapshot.forEach((childSnapshot) => {
+              //       if (childSnapshot.child('animeName').val() === route.params.animeTitle) {
+              //         console.log('are u here')
+              //         isAdded = true
+              //       }
+              //     })
+
+              //   })
+              //   if (!isAdded) {
+              //     const timeStamp = + new Date;
+              //     const ref = firebase.database().ref(`Users/${user.uid}/AnimeList/${timeStamp}/AnimeDetails`)
+              //     ref.set({
+              //       userUID: user.uid,
+              //       animeName: route.params.animeTitle,
+              //       animeImage: route.params.animeCover,
+              //       animeUrl: route.params.animeUrl,
+              //       timeStamp: timeStamp
+              //     }).then(function () {
+              //       setIsLoading(false)
+              //       if (Platform.OS === 'android') {
+              //         ToastAndroid.showWithGravity(
+              //           `${route.params.animeTitle} just got added to your list.`,
+              //           2000,
+              //           ToastAndroid.BOTTOM
+              //         )
+              //       }
+              //     }).catch(function (err) {
+              //       setIsLoading(false)
+              //       if (Platform.OS === 'android') {
+              //         ToastAndroid.showWithGravity(
+              //           `Some error occured`,
+              //           2000,
+              //           ToastAndroid.BOTTOM
+              //         )
+              //       }
+              //       console.log(err)
+              //     })
+              //   }
+
+              // })
             }}>
+            {/* <MenuProvider>
+              <Menu
+                style={{ right: 15, flexDirection: "column" }}
+                onSelect={value => alert(`Selected number: ${value}`)}
+                renderer={renderers.NotAnimatedContextMenu}
+              >
+                <MenuTrigger> */}
             <Ionicons
-              name={"add"}
+              name={"filter"}
               size={30}
               color={truthy ? "white" : "black"}
             />
+            {/* </MenuTrigger>
+                <MenuOptions>
+                  <CheckedOption value={1} text='One' />
+                  <CheckedOption checked value={2} text='Two' />
+                  <IconOption value={3} text='Three' />
+                </MenuOptions>
+              </Menu>
+
+            </MenuProvider> */}
+
           </TouchableOpacity>
           {/* </MenuTrigger  >
               <MenuOptions>
@@ -218,13 +265,23 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       </Text>
                     </Text>
                   </View>
-                  <ScrollView
-                    nestedScrollEnabled={true}
-                    overScrollMode="never"
-                    showsVerticalScrollIndicator={false}
-                    style={styles(truthy).genres}
-                  >
-                    <View>
+                  <View style={{ top: 10, flex: 1 }}>
+                    <ScrollView
+                      nestedScrollEnabled={true}
+                      overScrollMode="never"
+                      showsVerticalScrollIndicator={false}
+                      contentContainerStyle={{
+                        alignItems: "flex-start",
+                        alignContent: "flex-start",
+                        flexWrap: 'wrap',
+                        flexDirection: "row",
+                        alignSelf: "flex-start",
+                        position: "absolute",
+
+
+                      }}
+
+                    >
                       {route.params.genres.map((data, key) => {
                         return (
                           <Text style={styles(truthy).genresCard} key={key}>
@@ -232,8 +289,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                           </Text>
                         );
                       })}
-                    </View>
-                  </ScrollView>
+                    </ScrollView>
+                  </View>
                 </View>
               </View>
               <View style={styles(truthy).descContainer}>
@@ -268,7 +325,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
               showsHorizontalScrollIndicator={false}
             >
               <View style={styles(truthy).episodesList}>
-                {route.params.episodesList.map((data, key) => {
+
+                {list.map((data, key) => {
                   return (
                     <Text
                       style={styles(truthy).episodeCard}
@@ -336,8 +394,11 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       {" "}
                       {"Episode " + data.epNum}
                     </Text>
-                  );
-                })}
+                  )
+                })
+
+                }
+
               </View>
             </ScrollView>
           </ScrollView>
@@ -385,14 +446,12 @@ const styles = (truthy, isLoading) =>
       borderBottomLeftRadius: 15,
       borderBottomRightRadius: 15,
       marginBottom: 6,
+      flexWrap: "wrap",
+      marginEnd: 4
 
     },
     genres: {
       top: 10,
-      flexDirection: "row",
-      flexWrap: "wrap",
-      flex: 1,
-      flexShrink: 1
     },
     episodesList: {
       marginLeft: 21,
@@ -472,8 +531,8 @@ const styles = (truthy, isLoading) =>
       position: "absolute",
       top: Dimensions.get("window").height / 2.3,
       right: Dimensions.get("window").width / 2.43,
-      width: Dimensions.get("window").width / 5.5,
-      height: Dimensions.get("window").height / 10.5,
+      width: 70,
+      height: 70,
       alignItems: 'center',
       justifyContent: 'center',
       backgroundColor: isLoading ? "#585858" : "transparent",
