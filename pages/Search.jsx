@@ -17,8 +17,8 @@ const axios = require("axios");
 
 const API = {
   id: "_" + Math.random().toString(36).substr(2, 9),
-  url: "https://animelazerapi.herokuapp.com",
-  key: "Bearer ",
+  url: process.env.url,
+  key: process.env.key,
 };
 
 const Search = ({ navigation, navigate, truth }) => {

@@ -208,7 +208,10 @@ const Settings = ({ truth, truthSet }) => {
               borderRadius: 5,
             }}
           >
-            <TouchableOpacity style={{ ...styles.settingCont2, marginTop: 20 }}>
+            <TouchableOpacity 
+            style={{ ...styles.settingCont2, marginTop: 20 }}
+            onPress={() => Linking.openURL("https://www.instagram.com/animelazer_")}
+            >
               <AntDesign
                 name="instagram"
                 size={24}
