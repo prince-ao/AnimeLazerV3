@@ -44,6 +44,7 @@ const Home = ({ navigation, navigate, truth }) => {
   const [school, setSchool] = useState([]);
   const [monsters, setMonsters] = useState([]);
   const [topRated, setTopRated] = useState([]);
+  const [onGoing, setOnGoing] = useState([]);
 
 
 
@@ -54,11 +55,40 @@ const Home = ({ navigation, navigate, truth }) => {
     getSchoolAnimes();
     getMonstersAnimes();
     getTopRatedAnimes();
+    getOnGoingAnime();
   }, []);
   // const newRes = async() => {
   //   const res = await newAPI.get('')
   //   console.log(res.data)
   // }
+
+  function getOnGoingAnime() {
+    setIsLoading(true);
+    axios
+      .get(`${API.url}/AnimeLazer/Login`, {
+        headers: {
+          "Content-Type": "application/json",
+          id: API.id,
+        },
+      })
+      .then(async function (res) {
+        axios
+          .get(`${API.url}/Animes/onGoingAnime`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${API.key}${res.data.token}`,
+            },
+          })
+          .then(async function (res1) {
+            setIsLoading(false);
+            setOnGoing(res1.data.data);
+          });
+      })
+      .catch(function (err) {
+        setIsLoading(false);
+        console.log(err);
+      });
+  }
 
 
   function getActionAnimes() {
@@ -313,6 +343,7 @@ const Home = ({ navigation, navigate, truth }) => {
                       <Text numberOfLines={2} style={styles(truth).posterText}>
                         {data.animeName}
                       </Text>
+                      <Text style={styles(truth).epText}>Episode {data.epNum}</Text>
                     </TouchableOpacity>
                   </View>
                 );
@@ -358,7 +389,8 @@ const Home = ({ navigation, navigate, truth }) => {
                                     genres: info.genres,
                                     status: info.status,
                                     episodesList: info.episodesList,
-                                    animeUrl: data.animeUrl
+                                    animeUrl: data.animeUrl,
+                                    otherNames: info.otherNames
                                     // there is more options such as animeJapaneseTitle, studio.
                                   });
                                 });
@@ -422,7 +454,8 @@ const Home = ({ navigation, navigate, truth }) => {
                                     genres: info.genres,
                                     status: info.status,
                                     episodesList: info.episodesList,
-                                    animeUrl: data.animeUrl
+                                    animeUrl: data.animeUrl,
+                                    otherNames: info.otherNames
                                     // there is more options such as animeJapaneseTitle, studio.
                                   });
                                 });
@@ -486,7 +519,8 @@ const Home = ({ navigation, navigate, truth }) => {
                                     genres: info.genres,
                                     status: info.status,
                                     episodesList: info.episodesList,
-                                    animeUrl: data.animeUrl
+                                    animeUrl: data.animeUrl,
+                                    otherNames: info.otherNames
                                     // there is more options such as animeJapaneseTitle, studio.
                                   });
                                 });
@@ -550,7 +584,8 @@ const Home = ({ navigation, navigate, truth }) => {
                                     genres: info.genres,
                                     status: info.status,
                                     episodesList: info.episodesList,
-                                    animeUrl: data.animeUrl
+                                    animeUrl: data.animeUrl,
+                                    otherNames: info.otherNames
                                     // there is more options such as animeJapaneseTitle, studio.
                                   });
                                 });
@@ -614,7 +649,8 @@ const Home = ({ navigation, navigate, truth }) => {
                                     genres: info.genres,
                                     status: info.status,
                                     episodesList: info.episodesList,
-                                    animeUrl: data.animeUrl
+                                    animeUrl: data.animeUrl,
+                                    otherNames: info.otherNames
                                     // there is more options such as animeJapaneseTitle, studio.
                                   });
                                 });
@@ -640,8 +676,75 @@ const Home = ({ navigation, navigate, truth }) => {
             </ScrollView>
           </View>
           <View style={styles(truth).shows}>
-            <Text style={styles(truth).showText}>Movies TODO</Text>
+            <Text style={styles(truth).showText}>Top Airing</Text>
+              {onGoing.map((data, key) => {
+                return(
+                  <View key={key}>
+                    <TouchableOpacity style={styles(truth).topAiringView}
+                      onPress={() => {
+                        console.log(data.animeUrl)
+                        setIsLoading(true);
+                        axios
+                          .get(`${API.url}/AnimeLazer/Login`, {
+                            headers: {
+                              "Content-Type": "application/json",
+                              id: API.id,
+                            },
+                          })
+                          .then(async function (res) {
+                            axios
+                              .get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                                headers: {
+                                  "Content-Type": "application/json",
+                                  Authorization: `${API.key}${res.data.token}`,
+                                  url: data.animeUrl,
+                                },
+                              })
+                              .then(async function (res1) {
+                                res1.data.data.map((info) => {
+                                  setIsLoading(false);
+                                  navigate.navigate("EpisodeRoom", {
+                                    type: info.type,
+                                    synopsis: info.synopsis,
+                                    animeCover: info.animeCover,
+                                    animeTitle: info.animeEnglishTitle,
+                                    episodes: info.episodesAvaliable,
+                                    season: info.season,
+                                    language: info.language,
+                                    genres: info.genres,
+                                    status: info.status,
+                                    episodesList: info.episodesList,
+                                    animeUrl: data.animeUrl,
+                                    otherNames: info.otherNames
+                                    // there is more options such as animeJapaneseTitle, studio.
+                                  });
+                                });
+                              });
+                          })
+                          .catch(function (err) {
+                            setIsLoading(false);
+                            console.log(err);
+                          });
 
+                      }}>
+                      <Image style={styles(truth).imageView} source={{uri: data.animeImg}}/>
+                        <View style={styles(truth).infoView}>
+                          <Text style={styles(truth).boldText} numberOfLines={2} ellipsizeMode="tail">{data.animeTitle}</Text>
+                          <View style={styles(truth).genreView}>
+                            {data.genreList.map((data, key) => {
+                              return (
+                                <Text style={styles(truth).genreText} key={key}>
+                                  {data.Genre}
+                                </Text>
+                              );
+                            })}
+                          </View>
+                          <Text style={{top: 10,color: "white"}}>Latest: <Text style={{color: "gray"}}>{data.latestEp}</Text></Text>
+                        </View>
+                    </TouchableOpacity>
+                  </View>
+                )
+              })}
           </View>
         </ScrollView>
         <ActivityIndicator
@@ -722,6 +825,71 @@ const styles = (truth, isLoading) => {
       backgroundColor: isLoading ? "#585858" : "transparent",
       borderRadius: 8,
     },
+    epText: {
+      marginLeft: 10,
+      paddingTop: 6,
+      paddingLeft: 6,
+      paddingRight: 6,
+      paddingBottom: 6,
+      fontWeight: "bold",
+      color: truth ? "#e6e6e6eb" : "#222222",
+      position: "absolute",
+      backgroundColor: 'rgba(52, 52, 52, 0.6)',
+      borderRadius: 10,
+      textAlign: "center"
+    },
+    genreText: {
+      color: "white",
+      fontSize: 11,
+      padding: 7,
+      textAlign: "center",
+      backgroundColor: "#383838",
+      borderRadius: 14,
+      borderTopRightRadius: 15,
+      borderTopLeftRadius: 15,
+      borderBottomLeftRadius: 15,
+      borderBottomRightRadius: 15,
+      marginBottom: 6,
+      flexWrap: "wrap",
+      marginEnd: 4,
+    },
+    genreView: {
+      top: 10,
+      alignItems: "flex-start",
+      alignContent: "flex-start",
+      flexWrap: 'wrap',
+      flexDirection: "row",
+      alignSelf: "flex-start",
+      position: "relative"
+    },
+    boldText: { 
+      fontSize: 17,
+      marginTop: 2,
+      marginRight: Dimensions.get("window").width / 120,
+      fontWeight: "bold",
+      color: truth ? "#dddddd" : "#1b1b1b"
+    },
+    infoView: {
+      flexDirection: "column",
+      width: Dimensions.get("window").width / 1.6,
+      height: 210 
+    },
+    imageView: {
+      width: 130,
+      height: 150,
+      marginRight: 15,
+      borderRadius: 6,
+      resizeMode: "cover"
+    },
+    topAiringView: {    
+      display: "flex",
+      flexWrap: "wrap",
+      marginRight: Dimensions.get("window").width / 100e1,
+      alignItems: "center",
+      width: Dimensions.get("window").width / 0.1,
+      height: Dimensions.get("window").height / 4.9,
+      marginTop: Dimensions.get("window").height / 100
+    }
   });
 };
 
