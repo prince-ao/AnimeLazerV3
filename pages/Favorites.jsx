@@ -14,13 +14,16 @@ import { Complete, OnHold, Dropped, Plan, Watching } from "../screens";
 import { firebase } from "@firebase/app";
 import "@firebase/auth";
 import { WebView } from "react-native-webview";
-import { clientID, codeChallenge } from "@env";
+import { clientID, codeChallenge, BASE_URL_V1 } from "@env";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Tab = createMaterialTopTabNavigator();
-const BASE_URL = "https://myanimelist.net/v1/oauth2/";
+const BASE_URL = `${BASE_URL_V1}`;
 
 const Favorites = ({ truth }) => {
+  //console.log(truth);
   const [webview, setWebview] = useState(true);
+  const [again, setAgain] = useState("");
   const webviewRef = useRef(true);
   const authRef = useRef({
     auth: "",
@@ -29,6 +32,38 @@ const Favorites = ({ truth }) => {
     expires: 0,
   });
   const loggedRef = useRef(false);
+  const checkItem = async () => {
+    const aToken = await AsyncStorage.getItem("accessToken");
+    //console.log(aToken);
+    if (aToken !== undefined || aToken !== null) {
+      return true;
+    }
+    return false;
+  };
+  const setItem = async () => {
+    authRef.current.access = await AsyncStorage.getItem("accessToken");
+    authRef.current.refresh = await AsyncStorage.getItem("refreshToken");
+    loggedRef.current = true;
+    setWebview(true);
+  };
+  const handleDelete = async () => {
+    await AsyncStorage.removeItem("accessToken");
+    await AsyncStorage.removeItem("refreshToken");
+  };
+  useEffect(() => {
+    const checkItem = async () => {
+      const aToken = await AsyncStorage.getItem("accessToken");
+      if (aToken !== null) {
+        loggedRef.current = true;
+        setItem();
+        setAgain(true);
+      } else {
+        loggedRef.current = false;
+        setAgain("reload please");
+      }
+    };
+    checkItem();
+  }, []);
   const handleNav = async (newNavState) => {
     //console.log(newNavState);
     if (
@@ -49,6 +84,7 @@ const Favorites = ({ truth }) => {
         }
       }
       //console.log(auth);
+
       const response = await fetch(`${BASE_URL}token`, {
         method: "POST",
         headers: {
@@ -58,7 +94,12 @@ const Favorites = ({ truth }) => {
       });
       const response_s = await response.json();
       //console.log(response_s);
-      console.log(response_s);
+      try {
+        await AsyncStorage.setItem("accessToken", response_s.access_token);
+        await AsyncStorage.setItem("refreshToken", response_s.refresh_token);
+      } catch (e) {
+        console.log(e);
+      }
       authRef.current.auth = auth;
       authRef.current.access = response_s.access_token;
       authRef.current.refresh = response_s.refresh_token;
@@ -136,27 +177,27 @@ const Favorites = ({ truth }) => {
             <Tab.Screen
               name="CURRENTLY WATCHING"
               component={Watching}
-              initialParams={{ authRef, webview }}
+              initialParams={{ authRef, webview, truth, again }}
             />
             <Tab.Screen
               name="PLAN TO WATCH"
               component={Plan}
-              initialParams={{ authRef, webview }}
+              initialParams={{ authRef, webview, truth, again }}
             />
             <Tab.Screen
               name="ON HOLD"
               component={OnHold}
-              initialParams={{ authRef, webview }}
+              initialParams={{ authRef, webview, truth, again }}
             />
             <Tab.Screen
               name="COMPLETED"
               component={Complete}
-              initialParams={{ authRef, webview }}
+              initialParams={{ authRef, webview, truth, again }}
             />
             <Tab.Screen
               name="DROPPED"
               component={Dropped}
-              initialParams={{ authRef, webview }}
+              initialParams={{ authRef, webview, truth, again }}
             />
           </Tab.Navigator>
         </SafeAreaView>
