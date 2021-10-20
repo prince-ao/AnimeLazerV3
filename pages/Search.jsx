@@ -12,13 +12,13 @@ import {
   ActivityIndicator,
 } from "react-native";
 import { SearchBar } from "react-native-elements";
+import {key, url} from "@env"
 
 const axios = require("axios");
-
 const API = {
   id: "_" + Math.random().toString(36).substr(2, 9),
-  url: "https://animelazerapi.herokuapp.com",
-  key: "Bearer ",
+  url: url,
+  key: key + " ",
 };
 
 const Search = ({ navigation, navigate, truth }) => {
@@ -183,6 +183,7 @@ const Search = ({ navigation, navigate, truth }) => {
                                   status: info.status,
                                   episodesList: info.episodesList,
                                   animeUrl: data.animeUrl,
+                                  otherNames: info.otherNames
 
                                   // there is more options such as animeJapaneseTitle, studio.
                                 });
@@ -228,7 +229,7 @@ const Search = ({ navigation, navigate, truth }) => {
         </ScrollView>
         <ActivityIndicator
           animating={isLoading}
-          color="#0367fc"
+          color="#d5e6ff"
           style={styles(truth, isLoading).loading}
           size={Platform.OS === "android" ? 51 : "large"}
         />
