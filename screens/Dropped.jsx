@@ -6,19 +6,24 @@ import {
   Image,
   ScrollView,
   TouchableOpacity,
+  Dimensions,
   Alert,
 } from "react-native";
+import { Ionicons } from "@expo/vector-icons";
 const axios = require("axios");
+import { key, url, BASE_URL_V2 } from "@env";
 
 const Dropped = (props) => {
   const [data, setData] = useState([]);
   const [gotData, setGotData] = useState(false);
-  const BASE_URL = "https://api.myanimelist.net/v2/";
+  const [refresh, setRefresh] = useState("");
+  const BASE_URL = BASE_URL_V2;
   const API = {
     id: "_" + Math.random().toString(36).substr(2, 9),
-    url: "https://animelazerapi.herokuapp.com",
-    key: "Bearer ",
+    url: url,
+    key: key + " ",
   };
+
   useEffect(() => {
     const fetc = async () => {
       try {
@@ -43,7 +48,7 @@ const Dropped = (props) => {
     };
     fetc();
     //console.log(props.route.params);
-  }, [props.route.params.webview]);
+  }, [props.route.params.webview, props.route.params.again, refresh]);
   const handlePress = (title) => {
     axios
       .get(`${API.url}/AnimeLazer/Login`, {
@@ -140,36 +145,50 @@ const Dropped = (props) => {
   };
   if (gotData) {
     return (
-      <ScrollView
-        style={styles.mapContainer}
-        overScrollMode="never"
-        showsHorizontalScrollIndicator={false}
-        showsVerticalScrollIndicator={false}
-      >
-        <View style={styles.container}>
-          {data.data.map((item, key) => {
-            return (
-              <View style={styles.map} key={key}>
-                <TouchableOpacity
-                  onPress={() => handlePress(item.node.title)}
-                  key={item.node.title}
-                >
-                  <Image
-                    style={styles.mapImage}
-                    source={{ uri: String(item.node.main_picture.large) }}
-                  />
-                </TouchableOpacity>
-                <Text style={styles.mapText}>{item.node.title}</Text>
-              </View>
-            );
-          })}
-        </View>
-      </ScrollView>
+      <>
+        <TouchableOpacity
+          onPress={() => setRefresh("inclusivelord")}
+          style={styles.floatRefresh}
+        >
+          <Ionicons name="refresh-outline" size={24} color="black" />
+        </TouchableOpacity>
+        <ScrollView
+          style={styles.mapContainer}
+          overScrollMode="never"
+          showsHorizontalScrollIndicator={false}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.container}>
+            {data.data.map((item, key) => {
+              return (
+                <View style={styles.map} key={key}>
+                  <TouchableOpacity
+                    onPress={() => handlePress(item.node.title)}
+                    key={item.node.title}
+                  >
+                    <Image
+                      style={styles.mapImage}
+                      source={{ uri: String(item.node.main_picture.large) }}
+                    />
+                  </TouchableOpacity>
+                  <Text style={styles.mapText}>{item.node.title}</Text>
+                </View>
+              );
+            })}
+          </View>
+        </ScrollView>
+      </>
     );
   } else {
     return (
       <View>
-        <Text>Nothing</Text>
+        <TouchableOpacity
+          style={styles.noDataContainer}
+          onPress={() => setRefresh("inclusivelord")}
+        >
+          <Ionicons name="refresh-outline" size={60} color="black" />
+        </TouchableOpacity>
+        <Text style={styles.noDataText}>If already logged in, refresh</Text>
       </View>
     );
   }
@@ -205,5 +224,22 @@ const styles = StyleSheet.create({
     width: 150,
     height: 200,
     borderRadius: 5,
+  },
+  noDataContainer: {
+    display: "flex",
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
+    marginTop: 200,
+  },
+  noDataText: {
+    fontSize: 20,
+    marginTop: 10,
+    textAlign: "center",
+  },
+  floatRefresh: {
+    position: "absolute",
+    right: 10,
+    top: 10,
   },
 });
