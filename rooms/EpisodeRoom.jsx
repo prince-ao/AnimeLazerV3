@@ -1,7 +1,21 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Menu, MenuProvider, MenuOptions, MenuOption, MenuTrigger, renderers } from "react-native-popup-menu";
-import { Paragraph, Button, Portal, Dialog, Colors, Provider } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import {
+  Menu,
+  MenuProvider,
+  MenuOptions,
+  MenuOption,
+  MenuTrigger,
+  renderers,
+} from "react-native-popup-menu";
+import {
+  Paragraph,
+  Button,
+  Portal,
+  Dialog,
+  Colors,
+  Provider,
+} from "react-native-paper";
+import Icon from "react-native-vector-icons/FontAwesome";
 import {
   StyleSheet,
   Text,
@@ -19,11 +33,11 @@ import {
 } from "react-native";
 import { Header } from "../components/index";
 import { Ionicons } from "@expo/vector-icons";
-import { firebase } from "@firebase/app"
-import {key, url} from "@env"
-import "@firebase/database"
-import "@firebase/auth"
-
+import { firebase } from "@firebase/app";
+import { key, url, BASE_URL_V2 } from "@env";
+import "@firebase/database";
+import "@firebase/auth";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const axios = require("axios");
 
@@ -33,8 +47,6 @@ const API = {
   key: key + " ",
 };
 
-
-
 const EpisodeRoom = ({ navigation, route, truthy }) => {
   const MAX_LINES = 3;
 
@@ -43,10 +55,10 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   const [showText, setShowText] = useState(false);
   const [numberOfLines, setNumberOfLines] = useState(undefined);
   const [showMoreButton, setShowMoreButton] = useState(false);
-  const [list, setList] = useState(route.params.episodesList)
+  const [list, setList] = useState(route.params.episodesList);
   const [isAsc, setIsAsc] = useState(true);
-
-
+  const [show, setShow] = useState(false);
+  const [status, setStatus] = useState("");
 
   const onTextLayout = useCallback(
     (e) => {
@@ -62,10 +74,83 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     if (showMoreButton) {
       setNumberOfLines(showText ? undefined : MAX_LINES);
     }
-
-
   }, [showText, showMoreButton]);
 
+  const getStatus = async () => {
+    const aToken = await AsyncStorage.getItem("accessToken");
+    if (aToken == null) {
+      //Do something
+    }
+    try {
+      const response = await fetch(
+        `${BASE_URL_V2}users/@me/animelist?fields=list_status&limit=1000`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${aToken}`,
+          },
+        }
+      );
+      const s_response = await response.text();
+      const ss_response = await JSON.parse(s_response);
+      const ar = [];
+      for (let i = 0; i < ss_response.data.length; i++) {
+        if (route.params.animeTitle.includes(ss_response.data[i].node.title)) {
+          ar.push(ss_response.data[i]);
+        }
+      }
+      if (ar.length > 1) {
+        for (let i = 0; i < ar.length; i++) {
+          if (route.params.animeTitle == ar[i].node.title) {
+            setStatus(ar[i].list_status.status);
+            return;
+          }
+        }
+      } else {
+        setStatus(ar[0].list_status.status);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    getStatus();
+  }, []);
+
+  const handlePress = async (prop) => {
+    try {
+      const aToken = await AsyncStorage.getItem("accessToken");
+      const response1 = await fetch(
+        `https://api.myanimelist.net/v2/anime?q=${route.params.animeTitle}&limit=100`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${aToken}`,
+          },
+        }
+      );
+      const s_response1 = await response1.text();
+      const ss_response1 = await JSON.parse(s_response1);
+      const id = ss_response1.data[0].node.id;
+      const response2 = await fetch(
+        `https://api.myanimelist.net/v2/anime/${id}/my_list_status?status=${prop}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${aToken}`,
+          },
+          body: `status=${prop}`,
+        }
+      );
+      const s_response2 = await response2.text();
+      const ss_response2 = await JSON.parse(s_response2);
+      setStatus(ss_response2.status);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   return (
     <>
@@ -98,16 +183,17 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
           {/* <MenuProvider >
             <Menu onSelect={value => alert(`You Clicked : ${value}`)}>
               <MenuTrigger > */}
-          <TouchableOpacity style={{ position: "absolute", right: 15 }}
+          <TouchableOpacity
+            style={{ position: "absolute", right: 15 }}
             onPress={() => {
               // TODO: Add advanced search; make sorting smooth
 
               if (isAsc) {
-                setList(list.reverse())
-                setIsAsc(false)
+                setList(list.reverse());
+                setIsAsc(false);
               } else {
-                setList(list)
-                setIsAsc(true)
+                setList(list);
+                setIsAsc(true);
               }
               // Alert.alert('Fil ter',
               //   "Episode sort order - Select your favorite order.\n\nSearch episode - Enter the number of the episode you want to watch.",
@@ -122,8 +208,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
               //       text: 'Episode sort order', onPress: () => console.log('closed')
               //     },
               //   ]
-
-
 
               // )
               // setIsLoading(true)
@@ -171,7 +255,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
               //   }
 
               // })
-            }}>
+            }}
+          >
             {/* <MenuProvider>
               <Menu
                 style={{ right: 15, flexDirection: "column" }}
@@ -193,8 +278,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
               </Menu>
 
             </MenuProvider> */}
-
           </TouchableOpacity>
+
           {/* </MenuTrigger  >
               <MenuOptions>
                 <MenuOption value={"Watching"}>
@@ -219,8 +304,174 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
             </Menu>
           </MenuProvider> */}
         </View>
-        <View>
-          <ScrollView overScrollMode="never" contentContainerStyle={{ marginTop: 0 }}>
+        <View style={{ zIndex: 1 }}>
+          <TouchableOpacity
+            style={{ position: "absolute", right: 10, top: 5, zIndex: 100 }}
+            onPress={() => setShow(!show)}
+          >
+            <Ionicons name="add-outline" size={40} color="white" />
+          </TouchableOpacity>
+          {show ? (
+            <View
+              style={{
+                backgroundColor: "#fff",
+                zIndex: 20,
+                position: "absolute",
+                top: 50,
+                right: 10,
+                borderRadius: 5,
+                width: 170,
+                height: 190,
+              }}
+            >
+              <ScrollView>
+                <View style={styles().listContainer}>
+                  <TouchableOpacity
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      marginLeft: 12,
+                    }}
+                    onPress={async () => await handlePress("watching")}
+                  >
+                    <Ionicons
+                      name="checkmark-sharp"
+                      size={24}
+                      color="green"
+                      style={{
+                        display: status === "watching" ? "flex" : "none",
+                      }}
+                    />
+                    <Text
+                      style={{
+                        ...styles().listText,
+                        color: status === "watching" ? "green" : "black",
+                        marginLeft: status === "watching" ? 8 : 0,
+                      }}
+                    >
+                      Watching
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles().listContainer}>
+                  <TouchableOpacity
+                    onPress={async () => handlePress("completed")}
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      marginLeft: 12,
+                    }}
+                  >
+                    <Ionicons
+                      name="checkmark-sharp"
+                      size={24}
+                      color="green"
+                      style={{
+                        display: status === "completed" ? "flex" : "none",
+                      }}
+                    />
+                    <Text
+                      style={{
+                        ...styles().listText,
+                        color: status === "completed" ? "green" : "black",
+                        marginLeft: status === "completed" ? 8 : 0,
+                      }}
+                    >
+                      Completed
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles().listContainer}>
+                  <TouchableOpacity
+                    onPress={async () => handlePress("on_hold")}
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      marginLeft: 12,
+                    }}
+                  >
+                    <Ionicons
+                      name="checkmark-sharp"
+                      size={24}
+                      color="#979500"
+                      style={{
+                        display: status === "on_hold" ? "flex" : "none",
+                      }}
+                    />
+                    <Text
+                      style={{
+                        ...styles().listText,
+                        color: status === "on_hold" ? "#979500" : "black",
+                        marginLeft: status === "on_hold" ? 8 : 0,
+                      }}
+                    >
+                      On Hold
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles().listContainer}>
+                  <TouchableOpacity
+                    onPress={async () => handlePress("dropped")}
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      marginLeft: 12,
+                    }}
+                  >
+                    <Ionicons
+                      name="checkmark-sharp"
+                      size={24}
+                      color="red"
+                      style={{
+                        display: status === "dropped" ? "flex" : "none",
+                      }}
+                    />
+                    <Text
+                      style={{
+                        ...styles().listText,
+                        color: status === "dropped" ? "red" : "black",
+                        marginLeft: status === "dropped" ? 8 : 0,
+                      }}
+                    >
+                      Dropped
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+                <View style={styles().listContainer}>
+                  <TouchableOpacity
+                    onPress={async () => handlePress("plan_to_watch")}
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      marginLeft: 12,
+                    }}
+                  >
+                    <Ionicons
+                      name="checkmark-sharp"
+                      size={24}
+                      color="blue"
+                      style={{
+                        display: status === "plan_to_watch" ? "flex" : "none",
+                      }}
+                    />
+                    <Text
+                      style={{
+                        ...styles().listText,
+                        color: status === "plan_to_watch" ? "blue" : "black",
+                      }}
+                    >
+                      Plan To Watch
+                    </Text>
+                  </TouchableOpacity>
+                </View>
+              </ScrollView>
+            </View>
+          ) : null}
+          <ScrollView
+            overScrollMode="never"
+            contentContainerStyle={{ marginTop: 0 }}
+            style={{ zIndex: 1 }}
+          >
             <View style={styles(truthy).infoContainer}>
               <View style={styles(truthy).genInfoContainer}>
                 <Image
@@ -249,7 +500,11 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       style={styles(truthy).white}
                     >
                       Released:{" "}
-                      <Text numberOfLines={1} ellipsizeMode="tail" style={styles(truthy).innerText}>
+                      <Text
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        style={styles(truthy).innerText}
+                      >
                         {route.params.season}
                       </Text>{" "}
                     </Text>
@@ -274,14 +529,11 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       contentContainerStyle={{
                         alignItems: "flex-start",
                         alignContent: "flex-start",
-                        flexWrap: 'wrap',
+                        flexWrap: "wrap",
                         flexDirection: "row",
                         alignSelf: "flex-start",
                         position: "absolute",
-
-
                       }}
-
                     >
                       {route.params.genres.map((data, key) => {
                         return (
@@ -294,7 +546,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                   </View>
                 </View>
               </View>
-              <View style={styles(truthy).descContainer}>
+              <View style={{ ...styles(truthy).descContainer, zIndex: 1 }}>
                 <Text
                   onTextLayout={onTextLayout}
                   style={{ color: truthy ? "white" : "black" }}
@@ -307,7 +559,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                   <TouchableOpacity
                     style={styles(truthy).white}
                     onPress={() => {
-                      setShowText((showText) => !showText)
+                      setShowText((showText) => !showText);
                     }}
                   >
                     <Ionicons
@@ -324,9 +576,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
               overScrollMode="never"
               showsVerticalScrollIndicator={false}
               showsHorizontalScrollIndicator={false}
+              style={{ zIndex: 1 }}
             >
               <View style={styles(truthy).episodesList}>
-
                 {list.map((data, key) => {
                   return (
                     <Text
@@ -358,29 +610,31 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 ) {
                                   Platform.OS === "android"
                                     ? ToastAndroid.showWithGravity(
-                                      "This video file cannot be played.",
-                                      2000,
-                                      ToastAndroid.BOTTOM
-                                    )
+                                        "This video file cannot be played.",
+                                        2000,
+                                        ToastAndroid.BOTTOM
+                                      )
                                     : Alert.alert(
-                                      "Warning",
-                                      "This video file cannot be played",
-                                      [
-                                        {
-                                          text: "Cancel",
-                                          onPress: () => setIsLoading(false),
-                                          style: "cancel",
-                                        },
-                                        {
-                                          text: "OK",
-                                          onPress: () => setIsLoading(false),
-                                        },
-                                      ]
-                                    );
+                                        "Warning",
+                                        "This video file cannot be played",
+                                        [
+                                          {
+                                            text: "Cancel",
+                                            onPress: () => setIsLoading(false),
+                                            style: "cancel",
+                                          },
+                                          {
+                                            text: "OK",
+                                            onPress: () => setIsLoading(false),
+                                          },
+                                        ]
+                                      );
                                 } else {
                                   navigation.navigate("WatchRoom", {
                                     title:
-                                      route.params.animeTitle + " Ep " + data.epNum,
+                                      route.params.animeTitle +
+                                      " Ep " +
+                                      data.epNum,
                                     src: res1.data.data,
                                   });
                                 }
@@ -395,11 +649,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       {" "}
                       {"Episode " + data.epNum}
                     </Text>
-                  )
-                })
-
-                }
-
+                  );
+                })}
               </View>
             </ScrollView>
           </ScrollView>
@@ -448,8 +699,7 @@ const styles = (truthy, isLoading) =>
       borderBottomRightRadius: 15,
       marginBottom: 6,
       flexWrap: "wrap",
-      marginEnd: 4
-
+      marginEnd: 4,
     },
     genres: {
       top: 10,
@@ -519,7 +769,7 @@ const styles = (truthy, isLoading) =>
       marginTop: 5,
       width: 150,
       height: 30,
-      backgroundColor: "#1a1a1a"
+      backgroundColor: "#1a1a1a",
     },
     back: {
       position: "absolute",
@@ -534,8 +784,8 @@ const styles = (truthy, isLoading) =>
       right: Dimensions.get("window").width / 2.43,
       width: 70,
       height: 70,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: isLoading ? "#585858" : "transparent",
       borderRadius: 8,
     },
@@ -546,6 +796,14 @@ const styles = (truthy, isLoading) =>
       fontSize: 20,
       position: "absolute",
       top: 10,
-      right: 15
-    }
+      right: 15,
+    },
+    listText: {
+      fontSize: 20,
+      color: "black",
+      textAlign: "center",
+    },
+    listContainer: {
+      marginTop: 12,
+    },
   });

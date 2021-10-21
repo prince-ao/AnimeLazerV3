@@ -8,10 +8,16 @@ import {
   TouchableOpacity,
   Alert,
   Dimensions,
+  DevSettings,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 const axios = require("axios");
 import { key, url, BASE_URL_V2 } from "@env";
+
+function useForceUpdate() {
+  const [value, setValue] = useState(0); // integer state
+  return () => setValue((value) => value + 1); // update the state to force render
+}
 
 const Complete = (props) => {
   const [data, setData] = useState([]);
@@ -23,6 +29,7 @@ const Complete = (props) => {
     url: url,
     key: key + " ",
   };
+  const forceUpdate = useForceUpdate();
   useEffect(() => {
     const fetc = async () => {
       try {
@@ -147,7 +154,7 @@ const Complete = (props) => {
       <>
         <TouchableOpacity
           style={styles().floatRefresh}
-          onPress={() => setRefresh("pclord")}
+          onPress={() => setRefresh(`${Math.random() * 1000000}`)}
         >
           <Ionicons name="refresh-outline" size={24} color="black" />
         </TouchableOpacity>
@@ -180,7 +187,9 @@ const Complete = (props) => {
   } else {
     return (
       <View style={styles().noDataContainer}>
-        <TouchableOpacity onPress={() => setRefresh("inclusivelord")}>
+        <TouchableOpacity
+          onPress={() => setRefresh(`${Math.random() * 1000000}`)}
+        >
           <Ionicons name="refresh-outline" size={60} color="black" />
         </TouchableOpacity>
         <Text style={styles().noDataText}>If already logged in, refresh</Text>
@@ -233,9 +242,5 @@ const styles = () =>
       marginTop: 10,
       textAlign: "center",
     },
-    floatRefresh: {
-      position: "absolute",
-      right: 10,
-      top: 10,
-    },
+    floatRefresh: {},
   });
