@@ -8,6 +8,7 @@ import {
   TouchableOpacity,
   Alert,
   Dimensions,
+  DevSettings,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 const axios = require("axios");
@@ -148,7 +149,7 @@ const Plan = (props) => {
       <>
         <TouchableOpacity
           style={styles.floatRefresh}
-          onPress={() => setRefresh("inclusivelord")}
+          onPress={() => setRefresh(`${Math.random() * 1000000}`)}
         >
           <Ionicons name="refresh-outline" size={24} color="black" />
         </TouchableOpacity>
@@ -183,7 +184,7 @@ const Plan = (props) => {
       <View>
         <TouchableOpacity
           style={styles.noDataContainer}
-          onPress={() => setRefresh("inclusivelord")}
+          onPress={() => setRefresh(`${Math.random() * 1000000}`)}
         >
           <Ionicons name="refresh-outline" size={60} color="black" />
         </TouchableOpacity>
@@ -236,9 +237,5 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: "center",
   },
-  floatRefresh: {
-    position: "absolute",
-    right: 10,
-    top: 10,
-  },
+  floatRefresh: {},
 });
