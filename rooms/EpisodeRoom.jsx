@@ -19,7 +19,8 @@ import {
   TouchableWithoutFeedback
 } from "react-native";
 import { Ionicons, MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
-import {key, url} from "@env"
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {key, url, BASE_URL_V2 as BASE_URL} from "@env"
 import "@firebase/database"
 import "@firebase/auth"
 
@@ -39,12 +40,24 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // description check
   const [showText, setShowText] = useState(false);
   const [numberOfLines, setNumberOfLines] = useState(undefined);
   const [showMoreButton, setShowMoreButton] = useState(false);
+
+  // reverse filter
   const [list, setList] = useState(route.params.episodesList)
   const [isAsc, setIsAsc] = useState(false);
+
+  // modal view
   const [modalVisible, setModalVisible] = useState(false);
+
+  // anime status
+  const [token, setToken] = useState(route.params.accessToken)
+  const [animeList, setAnimeList] = useState(route.params.animeList)
+  const [isAdded, setIsAdded] = useState(null)
+  const [status, setStatus] = useState(null)
+  const [score, setScore] = useState(null)
 
   // for Advanced episode search
   const [searchQuery, setSearchQuery] = React.useState('');
@@ -69,8 +82,54 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     if (showMoreButton) {
       setNumberOfLines(showText ? undefined : MAX_LINES);
     }
+    animeStatus()
 
   }, [showText, showMoreButton]);
+
+  // const fetchAnimeList = async() => {
+  //   try {
+  //     if (token == null) {
+  //       console.log('sign in first')
+  //     }
+  //     setIsLoading(true)
+  //     const response = await axios.get(
+  //       `${BASE_URL}users/@me/animelist?fields=list_status&limit=1000&sort=list_score`, {
+  //         headers: {
+  //           Authorization: `${API.key}${token}`,
+  //         }
+  //       });
+  //     setIsLoading(false)
+  //     setAnimeList(response.data.data)
+  //     animeStatus()
+  //     if (response.data.data.length > 0) {
+  //       console.log('data avaliable')
+  //     }
+  //   } catch (e) {
+  //     setIsLoading(false)
+  //     console.log(e);
+  //   }
+  // }
+
+  const animeStatus = () => {
+    if (animeList.length > 0) {
+      animeList.map((data, key) => {
+        if(data.node.title == route.params.animeTitle) {
+          setIsAdded(true)
+          setStatus(data.list_status.status)
+          setScore(data.list_status.score)
+          console.log(data.list_status.status)
+        }
+      })
+
+    } else {
+      console.log('Sign in first')
+    }
+    if (!isAdded) {
+      console.log('Not Added')
+    } else {
+      console.log('Is Added')
+    }
+  }
 
 
   return (
@@ -326,53 +385,64 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
               </View>
               <View style={styles(truthy).descContainer}>
               <View style={{marginBottom: 10, flexDirection: "row", alignSelf: "center", position: "relative"}}>
-                <View style={{position: "relative"}}>
-                  <TouchableOpacity
-                        onPress={() => {
-                          console.log('hello')
-                        }}
-                      >
-                        <MaterialCommunityIcons
-                          name={"movie"}
-                          size={25}
-                          color={truthy ? "white" : "black"}
-                          style={{alignSelf: "center", position: "relative"}}
-                        />
-                        <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>None</Text>
-                      </TouchableOpacity>
-                </View>
-                <View style={{paddingEnd: 80, position: "relative"}}>
-                  {/* <TouchableOpacity
-                        onPress={() => {
-                          console.log('hello')
-                        }}
-                      >
-                        <MaterialCommunityIcons
-                          name={"eye"}
-                          size={25}
-                          color={truthy ? "white" : "black"}
-                          style={{alignSelf: "center"}}
-                        /> */}
-                        {/* <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>0/{route.params.episodes}</Text> */}
-                      {/* </TouchableOpacity> */}
-                </View>
-                <View style={{position: "relative"}}>
-                  <TouchableOpacity
-                        onPress={() => {
-                          console.log('hello')
-                        }}
-                      >
-                        <AntDesign
-                          name={"like1"}
-                          size={25}
-                          color={truthy ? "white" : "black"}
-                          style={{ marginBottom: 1, alignSelf: "center"}}
-                        />
-                        <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>None</Text>
-                      </TouchableOpacity>
-                </View>
+                {(isAdded) ? (
+                  <>
+                    <View style={{position: "relative"}}>
+                    <TouchableOpacity
+                          onPress={() => {
+                            console.log('hello')
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name={"movie"}
+                            size={25}
+                            color={truthy ? "white" : "black"}
+                            style={{alignSelf: "center", position: "relative"}}
+                          />
+                          <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>{(status != null) ? status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' ') : "None"}</Text>
+                        </TouchableOpacity>
+                  </View>
+                  <View style={{paddingEnd: 80, position: "relative"}}>
+                    {/* <TouchableOpacity
+                          onPress={() => {
+                            console.log('hello')
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name={"eye"}
+                            size={25}
+                            color={truthy ? "white" : "black"}
+                            style={{alignSelf: "center"}}
+                          /> */}
+                          {/* <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>0/{route.params.episodes}</Text> */}
+                        {/* </TouchableOpacity> */}
+                  </View>
+                  <View style={{position: "relative"}}>
+                    <TouchableOpacity
+                          onPress={() => {
+                            console.log('hello')
+                          }}
+                        >
+                          <AntDesign
+                            name={"like1"}
+                            size={25}
+                            color={truthy ? "white" : "black"}
+                            style={{ marginBottom: 1, alignSelf: "center"}}
+                          />
+                          <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>{(score != null) ? score : "None"}</Text>
+                        </TouchableOpacity>
+                  </View>
+                </>
 
-
+                ) : (
+                <TouchableOpacity onPress={() => console.log("TODO")} style={styles(truthy).isAdded}>
+                    <Ionicons
+                    name={"add"}
+                    color="#fff"
+                    size={25} />
+                  <Text style={styles(truthy).isAddedText}>ADD TO LIST</Text>
+                </TouchableOpacity>
+                )}
               </View>
                 <Text
                   onTextLayout={onTextLayout}
@@ -688,5 +758,21 @@ const styles = (truthy, isLoading) =>
       alignItems: "baseline",
       flexDirection: "row",
       flexWrap: "wrap",
+    },
+    isAdded: {
+      width: '100%',
+      backgroundColor: "#1a1a1a",
+      borderRadius: 10,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderWidth: 2,
+      borderColor: "#fff",
+      flexDirection: "row"
+    },
+    isAddedText: {
+      fontSize: 18,
+      color: "#fff",
+      fontWeight: "bold",
+      marginLeft: 90
     }
   });
