@@ -1,6 +1,5 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import { Menu, MenuProvider, MenuOptions, MenuOption, MenuTrigger, renderers } from "react-native-popup-menu";
-import { Paragraph, Button, Portal, Dialog, Colors, Provider } from 'react-native-paper';
+import {Searchbar } from 'react-native-paper';
 import Icon from 'react-native-vector-icons/FontAwesome';
 import {
   StyleSheet,
@@ -16,11 +15,12 @@ import {
   ActivityIndicator,
   Platform,
   Alert,
+  Modal,
+  TouchableWithoutFeedback
 } from "react-native";
-import { Header } from "../components/index";
-import { Ionicons } from "@expo/vector-icons";
-import { firebase } from "@firebase/app"
-import {key, url} from "@env"
+import { Ionicons, MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import {key, url, BASE_URL_V2 as BASE_URL} from "@env"
 import "@firebase/database"
 import "@firebase/auth"
 
@@ -40,12 +40,32 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
 
   const [isLoading, setIsLoading] = useState(false);
 
+  // description check
   const [showText, setShowText] = useState(false);
   const [numberOfLines, setNumberOfLines] = useState(undefined);
   const [showMoreButton, setShowMoreButton] = useState(false);
-  const [list, setList] = useState(route.params.episodesList)
-  const [isAsc, setIsAsc] = useState(true);
 
+  // reverse filter
+  const [list, setList] = useState(route.params.episodesList)
+  const [isAsc, setIsAsc] = useState(false);
+
+  // modal view
+  const [modalVisible, setModalVisible] = useState(false);
+
+  // anime status
+  const [token, setToken] = useState(route.params.accessToken)
+  const [animeList, setAnimeList] = useState(route.params.animeList)
+  const [isAdded, setIsAdded] = useState(null)
+  const [status, setStatus] = useState(null)
+  const [score, setScore] = useState(null)
+
+  // for Advanced episode search
+  const [searchQuery, setSearchQuery] = React.useState('');
+  const [filteredSearch, setFilteredSearch] = useState([]);
+  const onChangeSearch = (query) => {
+    setFilteredSearch(list.filter((data) => {return data.epNum.startsWith(query)}))
+    setSearchQuery(query)
+  };
 
 
   const onTextLayout = useCallback(
@@ -62,9 +82,54 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     if (showMoreButton) {
       setNumberOfLines(showText ? undefined : MAX_LINES);
     }
-
+    animeStatus()
 
   }, [showText, showMoreButton]);
+
+  // const fetchAnimeList = async() => {
+  //   try {
+  //     if (token == null) {
+  //       console.log('sign in first')
+  //     }
+  //     setIsLoading(true)
+  //     const response = await axios.get(
+  //       `${BASE_URL}users/@me/animelist?fields=list_status&limit=1000&sort=list_score`, {
+  //         headers: {
+  //           Authorization: `${API.key}${token}`,
+  //         }
+  //       });
+  //     setIsLoading(false)
+  //     setAnimeList(response.data.data)
+  //     animeStatus()
+  //     if (response.data.data.length > 0) {
+  //       console.log('data avaliable')
+  //     }
+  //   } catch (e) {
+  //     setIsLoading(false)
+  //     console.log(e);
+  //   }
+  // }
+
+  const animeStatus = () => {
+    if (animeList.length > 0) {
+      animeList.map((data, key) => {
+        if(data.node.title == route.params.animeTitle) {
+          setIsAdded(true)
+          setStatus(data.list_status.status)
+          setScore(data.list_status.score)
+          console.log(data.list_status.status)
+        }
+      })
+
+    } else {
+      console.log('Sign in first')
+    }
+    if (!isAdded) {
+      console.log('Not Added')
+    } else {
+      console.log('Is Added')
+    }
+  }
 
 
   return (
@@ -98,129 +163,153 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
           {/* <MenuProvider >
             <Menu onSelect={value => alert(`You Clicked : ${value}`)}>
               <MenuTrigger > */}
+         <TouchableOpacity style={{ position: "absolute", right: 70 }}
+            onPress={() => {
+              setModalVisible(!modalVisible);
+            }}>
+            <Ionicons
+              name={"search"}
+              size={30}
+              color={truthy ? "white" : "black"}
+            />
+
+          </TouchableOpacity>
+          
           <TouchableOpacity style={{ position: "absolute", right: 15 }}
             onPress={() => {
-              // TODO: Add advanced search; make sorting smooth
-
-              if (isAsc) {
+              if (!isAsc) {
+                setList(list.reverse())
+                setIsAsc(true)
+              } else {
                 setList(list.reverse())
                 setIsAsc(false)
-              } else {
-                setList(list)
-                setIsAsc(true)
               }
-              // Alert.alert('Fil ter',
-              //   "Episode sort order - Select your favorite order.\n\nSearch episode - Enter the number of the episode you want to watch.",
-              //   [
-              //     {
-              //       text: 'Cancel', onPress: (se) => console.log(se)
-              //     },
-              //     {
-              //       text: 'Search episode', onPress: () => console.log('serach Episode')
-              //     },
-              //     {
-              //       text: 'Episode sort order', onPress: () => console.log('closed')
-              //     },
-              //   ]
-
-
-
-              // )
-              // setIsLoading(true)
-              // firebase.auth().onAuthStateChanged(async function (user) {
-              //   const isAdded = false;
-              //   const userRef = firebase.database().ref(`Users/${user.uid}/AnimeList`).orderByKey()
-              //   userRef.on("value", (snapshot) => {
-              //     snapshot.forEach((childSnapshot) => {
-              //       if (childSnapshot.child('animeName').val() === route.params.animeTitle) {
-              //         console.log('are u here')
-              //         isAdded = true
-              //       }
-              //     })
-
-              //   })
-              //   if (!isAdded) {
-              //     const timeStamp = + new Date;
-              //     const ref = firebase.database().ref(`Users/${user.uid}/AnimeList/${timeStamp}/AnimeDetails`)
-              //     ref.set({
-              //       userUID: user.uid,
-              //       animeName: route.params.animeTitle,
-              //       animeImage: route.params.animeCover,
-              //       animeUrl: route.params.animeUrl,
-              //       timeStamp: timeStamp
-              //     }).then(function () {
-              //       setIsLoading(false)
-              //       if (Platform.OS === 'android') {
-              //         ToastAndroid.showWithGravity(
-              //           `${route.params.animeTitle} just got added to your list.`,
-              //           2000,
-              //           ToastAndroid.BOTTOM
-              //         )
-              //       }
-              //     }).catch(function (err) {
-              //       setIsLoading(false)
-              //       if (Platform.OS === 'android') {
-              //         ToastAndroid.showWithGravity(
-              //           `Some error occured`,
-              //           2000,
-              //           ToastAndroid.BOTTOM
-              //         )
-              //       }
-              //       console.log(err)
-              //     })
-              //   }
-
-              // })
             }}>
-            {/* <MenuProvider>
-              <Menu
-                style={{ right: 15, flexDirection: "column" }}
-                onSelect={value => alert(`Selected number: ${value}`)}
-                renderer={renderers.NotAnimatedContextMenu}
-              >
-                <MenuTrigger> */}
             <Ionicons
               name={"filter"}
               size={30}
               color={truthy ? "white" : "black"}
             />
-            {/* </MenuTrigger>
-                <MenuOptions>
-                  <CheckedOption value={1} text='One' />
-                  <CheckedOption checked value={2} text='Two' />
-                  <IconOption value={3} text='Three' />
-                </MenuOptions>
-              </Menu>
-
-            </MenuProvider> */}
 
           </TouchableOpacity>
-          {/* </MenuTrigger  >
-              <MenuOptions>
-                <MenuOption value={"Watching"}>
-                  <Text style={styles(truthy).menuContent}>Watching</Text>
-                </MenuOption>
-                <MenuOption value={"Plan to watch"}>
-                  <Text style={styles(truthy).menuContent}>Plan To Watch</Text>
-                </MenuOption>
-                <MenuOption value={"On Hold"}>
-                  <Text style={styles(truthy).menuContent}>On Hold</Text>
-                </MenuOption>
-                <MenuOption value={"Completed"}>
-                  <Text style={styles(truthy).menuContent}>Completed</Text>
-                </MenuOption>
-                <MenuOption value={"Dropped"}>
-                  <Text style={styles(truthy).menuContent}>Dropped</Text>
-                </MenuOption>
-                 <MenuOption value={3} disabled={true}>
-              <Text style={styles(truthy).menuContent}>Disabled Menu</Text>
-            </MenuOption>
-              </MenuOptions>
-            </Menu>
-          </MenuProvider> */}
         </View>
         <View>
           <ScrollView overScrollMode="never" contentContainerStyle={{ marginTop: 0 }}>
+            <Modal
+              animationType="fade"
+              transparent={true}
+              visible={modalVisible}
+              onRequestClose={() => setModalVisible(!modalVisible)}
+            >
+            {/* <TouchableOpacity 
+            style={styles(truthy).centeredView} 
+            activeOpacity={1} 
+            onPressOut={() => {setModalVisible(!modalVisible)}}
+          > */}
+            <View style={styles(truthy).centeredView}>
+              <View style={styles(truthy).modalView}>
+              <TouchableOpacity
+                style={[styles(truthy).button, styles(truthy).buttonClose]}
+                onPress={() => setModalVisible(!modalVisible)}
+                >
+                  <Ionicons
+                  name={"close"}
+                  size={12}
+                  color={truthy ? "black" : "white"}
+                />
+
+            </TouchableOpacity>
+              <Searchbar
+              placeholder="Search episode number..."
+              onChangeText={onChangeSearch}
+              value={searchQuery}/>
+                <ScrollView
+                nestedScrollEnabled={true}
+                overScrollMode="never"
+                showsVerticalScrollIndicator={false}
+                showsHorizontalScrollIndicator={false}>
+                  <View style={styles(truthy).searchFilterContainer}>
+                      {filteredSearch.map((data, key) => {
+                        return (
+                          <Text
+                            style={styles(truthy).episodeCard}
+                            key={key}
+                            onPress={() => {
+                              setModalVisible(false)
+                              setIsLoading(true);
+                              axios
+                                .get(`${API.url}/AnimeLazer/Login`, {
+                                  headers: {
+                                    "Content-Type": "application/json",
+                                    id: API.id,
+                                  },
+                                })
+                                .then(async function (res) {
+                                  axios
+                                    .get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
+                                      headers: {
+                                        "Content-Type": "application/json",
+                                        Authorization: `${API.key}${res.data.token}`,
+                                        src: data.epUrl,
+                                      },
+                                    })
+                                    .then(async function (res1) {
+                                      setIsLoading(false);
+                                      if (
+                                        res1.data.data.length === 0 ||
+                                        (typeof res1.data.data === undefined) | null
+                                      ) {
+                                        Platform.OS === "android"
+                                          ? ToastAndroid.showWithGravity(
+                                            "This video file cannot be played.",
+                                            2000,
+                                            ToastAndroid.BOTTOM
+                                          )
+                                          : Alert.alert(
+                                            "Warning",
+                                            "This video file cannot be played",
+                                            [
+                                              {
+                                                text: "Cancel",
+                                                onPress: () => setIsLoading(false),
+                                                style: "cancel",
+                                              },
+                                              {
+                                                text: "OK",
+                                                onPress: () => setIsLoading(false),
+                                              },
+                                            ]
+                                          );
+                                      } else {
+                                        navigation.navigate("WatchRoom", {
+                                          title:
+                                            route.params.animeTitle + " Ep " + data.epNum,
+                                          src: res1.data.data,
+                                        });
+                                      }
+                                    });
+                                })
+                                .catch(function (err) {
+                                  setIsLoading(false);
+                                  console.log(err);
+                                });
+                            }}
+                          >
+                            {" "}
+                            {"Episode " + data.epNum}
+                          </Text>
+                        )
+
+                      })
+                      }
+
+                    </View>
+              </ScrollView>
+            </View>
+        </View> 
+        {/* </TouchableOpacity> */}
+              
+            </Modal>
             <View style={styles(truthy).infoContainer}>
               <View style={styles(truthy).genInfoContainer}>
                 <Image
@@ -295,6 +384,66 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                 </View>
               </View>
               <View style={styles(truthy).descContainer}>
+              <View style={{marginBottom: 10, flexDirection: "row", alignSelf: "center", position: "relative"}}>
+                {(isAdded) ? (
+                  <>
+                    <View style={{position: "relative"}}>
+                    <TouchableOpacity
+                          onPress={() => {
+                            console.log('hello')
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name={"movie"}
+                            size={25}
+                            color={truthy ? "white" : "black"}
+                            style={{alignSelf: "center", position: "relative"}}
+                          />
+                          <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>{(status != null) ? status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' ') : "None"}</Text>
+                        </TouchableOpacity>
+                  </View>
+                  <View style={{paddingEnd: 80, position: "relative"}}>
+                    {/* <TouchableOpacity
+                          onPress={() => {
+                            console.log('hello')
+                          }}
+                        >
+                          <MaterialCommunityIcons
+                            name={"eye"}
+                            size={25}
+                            color={truthy ? "white" : "black"}
+                            style={{alignSelf: "center"}}
+                          /> */}
+                          {/* <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>0/{route.params.episodes}</Text> */}
+                        {/* </TouchableOpacity> */}
+                  </View>
+                  <View style={{position: "relative"}}>
+                    <TouchableOpacity
+                          onPress={() => {
+                            console.log('hello')
+                          }}
+                        >
+                          <AntDesign
+                            name={"like1"}
+                            size={25}
+                            color={truthy ? "white" : "black"}
+                            style={{ marginBottom: 1, alignSelf: "center"}}
+                          />
+                          <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>{(score != null) ? score : "None"}</Text>
+                        </TouchableOpacity>
+                  </View>
+                </>
+
+                ) : (
+                <TouchableOpacity onPress={() => console.log("TODO")} style={styles(truthy).isAdded}>
+                    <Ionicons
+                    name={"add"}
+                    color="#fff"
+                    size={25} />
+                  <Text style={styles(truthy).isAddedText}>ADD TO LIST</Text>
+                </TouchableOpacity>
+                )}
+              </View>
                 <Text
                   onTextLayout={onTextLayout}
                   style={{ color: truthy ? "white" : "black" }}
@@ -302,6 +451,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                   ellipsizeMode="tail"
                 >
                   {route.params.synopsis}
+                  {'\n\nOther name(s): '}
+                  {(route.params.otherNames === undefined) ? 'None' : (route.params.otherNames)}
                 </Text>
                 {showMoreButton && (
                   <TouchableOpacity
@@ -406,7 +557,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
         </View>
         <ActivityIndicator
           animating={isLoading}
-          color="#0367fc"
+          color="#d5e6ff"
           style={styles(truthy, isLoading).loading}
           size={Platform.OS === "android" ? 51 : "large"}
         />
@@ -547,5 +698,81 @@ const styles = (truthy, isLoading) =>
       position: "absolute",
       top: 10,
       right: 15
+    },
+    backgroundImage: {
+      height: '100%',
+      width: '100%',
+      flex: 1,
+    },
+    centeredView: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 22
+    },
+    modalView: {
+      margin: 20,
+      borderRadius: 20,
+      backgroundColor: "rgba(20, 20, 20, 0.9)",
+      alignItems: "center",
+      shadowColor: "#000",
+      paddingRight: 20,
+      paddingLeft: 20,
+      paddingBottom: 20,
+      shadowOffset: {
+        width: 0,
+        height: 2
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+      marginTop: 100,
+      marginBottom: 100,
+    },
+    button: {
+      margin: 5,
+      borderRadius: 20,
+      padding: 5,
+      elevation: 2,
+      alignSelf: "flex-end",
+    },
+    buttonOpen: {
+      backgroundColor: "#F194FF",
+    },
+    buttonClose: {
+      backgroundColor: "white",
+    },
+    textStyle: {
+      color: "white",
+      fontWeight: "bold",
+      textAlign: "center"
+    },
+    modalText: {
+      marginBottom: 15,
+      textAlign: "center"
+    },
+    searchFilterContainer: {
+      paddingTop: 20,
+      marginLeft: 20,
+      justifyContent: "center",
+      alignItems: "baseline",
+      flexDirection: "row",
+      flexWrap: "wrap",
+    },
+    isAdded: {
+      width: '100%',
+      backgroundColor: "#1a1a1a",
+      borderRadius: 10,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderWidth: 2,
+      borderColor: "#fff",
+      flexDirection: "row"
+    },
+    isAddedText: {
+      fontSize: 18,
+      color: "#fff",
+      fontWeight: "bold",
+      marginLeft: 90
     }
   });
