@@ -109,6 +109,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   //     console.log(e);
   //   }
   // }
+  const handleStatus = () => {
+
+  }
 
   const animeStatus = () => {
     if (animeList.length > 0) {
@@ -163,7 +166,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
           {/* <MenuProvider >
             <Menu onSelect={value => alert(`You Clicked : ${value}`)}>
               <MenuTrigger > */}
-         <TouchableOpacity style={{ position: "absolute", right: 70 }}
+         <TouchableOpacity style={{ position: "absolute", right: 65 }}
             onPress={() => {
               setModalVisible(!modalVisible);
             }}>
