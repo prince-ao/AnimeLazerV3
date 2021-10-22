@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback, useRef } from "react";
-import {Searchbar } from 'react-native-paper';
-import Icon from 'react-native-vector-icons/FontAwesome';
+import { Searchbar } from "react-native-paper";
+import Icon from "react-native-vector-icons/FontAwesome";
 import {
   StyleSheet,
   Text,
@@ -16,14 +16,17 @@ import {
   Platform,
   Alert,
   Modal,
-  TouchableWithoutFeedback
+  TouchableWithoutFeedback,
 } from "react-native";
-import { Ionicons, MaterialCommunityIcons, AntDesign } from "@expo/vector-icons";
+import {
+  Ionicons,
+  MaterialCommunityIcons,
+  AntDesign,
+} from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import {key, url, BASE_URL_V2 as BASE_URL} from "@env"
-import "@firebase/database"
-import "@firebase/auth"
-
+import { key, url, BASE_URL_V2 as BASE_URL } from "@env";
+import "@firebase/database";
+import "@firebase/auth";
 
 const axios = require("axios");
 
@@ -32,8 +35,6 @@ const API = {
   url: url,
   key: key + " ",
 };
-
-
 
 const EpisodeRoom = ({ navigation, route, truthy }) => {
   const MAX_LINES = 3;
@@ -46,31 +47,34 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   const [showMoreButton, setShowMoreButton] = useState(false);
 
   // reverse filter
-  const [list, setList] = useState(route.params.episodesList)
+  const [list, setList] = useState(route.params.episodesList);
   const [isAsc, setIsAsc] = useState(false);
 
   // search modal view
   const [modalVisible, setModalVisible] = useState(false);
 
   // anime status
-  const [token, setToken] = useState(route.params.accessToken)
-  const [animeList, setAnimeList] = useState(route.params.animeList)
-  const [animeKey, setAnimeKey] = useState(null)
-  const [animeId, setAnimeId] = useState(null)
-  const [statusView, setStatusView] = useState(false)
-  const [scoreView, setScoreView] = useState(false)
-  const [isAdded, setIsAdded] = useState(null)
-  const [status, setStatus] = useState(null)
-  const [score, setScore] = useState(null)
+  const [token, setToken] = useState(route.params.accessToken);
+  const [animeList, setAnimeList] = useState(route.params.animeList);
+  const [animeKey, setAnimeKey] = useState(null);
+  const [animeId, setAnimeId] = useState(null);
+  const [statusView, setStatusView] = useState(false);
+  const [scoreView, setScoreView] = useState(false);
+  const [isAdded, setIsAdded] = useState(null);
+  const [status, setStatus] = useState(null);
+  const [score, setScore] = useState(null);
 
   // for Advanced episode search
-  const [searchQuery, setSearchQuery] = React.useState('');
+  const [searchQuery, setSearchQuery] = React.useState("");
   const [filteredSearch, setFilteredSearch] = useState([]);
   const onChangeSearch = (query) => {
-    setFilteredSearch(list.filter((data) => {return data.epNum.startsWith(query)}))
-    setSearchQuery(query)
+    setFilteredSearch(
+      list.filter((data) => {
+        return data.epNum.startsWith(query);
+      })
+    );
+    setSearchQuery(query);
   };
-
 
   const onTextLayout = useCallback(
     (e) => {
@@ -82,14 +86,50 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     [showText]
   );
 
+  const handleAddToList = async () => {
+    try {
+      const aToken = await AsyncStorage.getItem("accessToken");
+      const response1 = await fetch(
+        `https://api.myanimelist.net/v2/anime?q=${route.params.animeTitle}&limit=100`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${aToken}`,
+          },
+        }
+      );
+      const s_response1 = await response1.text();
+      const ss_response1 = await JSON.parse(s_response1);
+      const id = ss_response1.data[0].node.id;
+      const response2 = await fetch(
+        `https://api.myanimelist.net/v2/anime/${id}/my_list_status?status=plan_to_watch`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${aToken}`,
+          },
+          body: `status=plan_to_watch`,
+        }
+      );
+      const s_response2 = await response2.text();
+      const ss_response2 = await JSON.parse(s_response2);
+      console.log(ss_response2);
+      setIsAdded(true);
+      setAnimeList((prev) => {
+        prev, ss_response2;
+      });
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   useEffect(() => {
     if (showMoreButton) {
       setNumberOfLines(showText ? undefined : MAX_LINES);
     }
-    animeStatus()
-
-
-  }, [showText, showMoreButton]);
+    animeStatus();
+  }, [showText, showMoreButton, isAdded]);
 
   // const fetchAnimeList = async() => {
   //   try {
@@ -115,106 +155,110 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   //   }
   // }
   const handleScore = (score) => {
-    setIsLoading(true)
-    fetch(`${BASE_URL}anime/${animeId}/my_list_status?score=${score}`,
-    {
+    setIsLoading(true);
+    fetch(`${BASE_URL}anime/${animeId}/my_list_status?score=${score}`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/x-www-form-urlencoded",
         Authorization: `Bearer ${token}`,
       },
-      body: `score=${score}`
-    }).then(function (res) {
-      setIsLoading(false)
-      res.json().then((data) => {
-        if (Object.keys(data).length > 2) {
-          setScore(score)
-          if (Platform.OS === 'android') {
-            ToastAndroid.showWithGravity(
-              "Score updated successfully",
-              2500,
-              ToastAndroid.BOTTOM) 
-          }
-        } else {
-          if (Platform.OS === 'android') {
-            ToastAndroid.showWithGravity(
-              "Internal error",
-              2500,
-              ToastAndroid.BOTTOM)
-          }
-        }
-
-      })
-    }).catch((err) => {
-      setIsLoading(false)
-      console.log(err)
+      body: `score=${score}`,
     })
-  }
+      .then(function (res) {
+        setIsLoading(false);
+        res.json().then((data) => {
+          if (Object.keys(data).length > 2) {
+            setScore(score);
+            if (Platform.OS === "android") {
+              ToastAndroid.showWithGravity(
+                "Score updated successfully",
+                2500,
+                ToastAndroid.BOTTOM
+              );
+            }
+          } else {
+            if (Platform.OS === "android") {
+              ToastAndroid.showWithGravity(
+                "Internal error",
+                2500,
+                ToastAndroid.BOTTOM
+              );
+            }
+          }
+        });
+      })
+      .catch((err) => {
+        setIsLoading(false);
+        console.log(err);
+      });
+  };
   const handleStatus = (status) => {
-    setIsLoading(true)
-    fetch(`${BASE_URL}anime/${animeId}/my_list_status?status=${status}`,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
-          Authorization: `Bearer ${token}`,
-        },
-        body: `status=${status}`,
-      }
-    ).then(function (res) {
-      setIsLoading(false)
-      res.json().then((data) => {
-        if (Object.keys(data).length > 2) {
-          setStatus(status)
-          if (Platform.OS === 'android') {
-            ToastAndroid.showWithGravity(
-              "Status updated successfully",
-              2500,
-              ToastAndroid.BOTTOM) 
-          }
-        } else {
-          console.log(data)
-          if (Platform.OS === 'android') {
-            ToastAndroid.showWithGravity(
-              "Internal error",
-              2500,
-              ToastAndroid.BOTTOM)
-          }
-        }
-      })
-    }).catch(function (err) {
-      setIsLoading(false)
-      if (Platform.OS === 'android') {
-        ToastAndroid.showWithGravity(
-          "Internal error",
-          2500,
-          ToastAndroid.BOTTOM)
-      }
-      console.log(err)
+    setIsLoading(true);
+    fetch(`${BASE_URL}anime/${animeId}/my_list_status?status=${status}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+        Authorization: `Bearer ${token}`,
+      },
+      body: `status=${status}`,
     })
-  }
+      .then(function (res) {
+        setIsLoading(false);
+        res.json().then((data) => {
+          if (Object.keys(data).length > 2) {
+            setStatus(status);
+            if (Platform.OS === "android") {
+              ToastAndroid.showWithGravity(
+                "Status updated successfully",
+                2500,
+                ToastAndroid.BOTTOM
+              );
+            }
+          } else {
+            console.log(data);
+            if (Platform.OS === "android") {
+              ToastAndroid.showWithGravity(
+                "Internal error",
+                2500,
+                ToastAndroid.BOTTOM
+              );
+            }
+          }
+        });
+      })
+      .catch(function (err) {
+        setIsLoading(false);
+        if (Platform.OS === "android") {
+          ToastAndroid.showWithGravity(
+            "Internal error",
+            2500,
+            ToastAndroid.BOTTOM
+          );
+        }
+        console.log(err);
+      });
+  };
 
   const animeStatus = () => {
     if (animeList.length > 0) {
       animeList.map((data, key) => {
-        if(data.node.title == route.params.animeTitle) {
-          setIsAdded(true)
-          setStatus(data.list_status.status)
-          setScore(data.list_status.score)
-          setAnimeKey(key)
-          setAnimeId(data.node.id)
+        if (data.node.title == route.params.animeTitle) {
+          setIsAdded(true);
+          setStatus(data.list_status.status);
+          setScore(data.list_status.score);
+          setAnimeKey(key);
+          setAnimeId(data.node.id);
         }
-      })
-
+      });
     } else {
-      console.log('Sign in first')
+      console.log("Sign in first");
     }
     if (!isAdded) {
-      console.log('Not Added')
+      console.log("Not Added");
     } else {
-      console.log('Is Added')
+      console.log("Is Added");
     }
-  }
+  };
 
   return (
     <>
@@ -247,79 +291,85 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
           {/* <MenuProvider >
             <Menu onSelect={value => alert(`You Clicked : ${value}`)}>
               <MenuTrigger > */}
-         <TouchableOpacity style={{ position: "absolute", right: 65 }}
+          <TouchableOpacity
+            style={{ position: "absolute", right: 65 }}
             onPress={() => {
               setModalVisible(!modalVisible);
-            }}>
+            }}
+          >
             <Ionicons
               name={"search"}
               size={30}
               color={truthy ? "white" : "black"}
             />
-
           </TouchableOpacity>
-          
-          <TouchableOpacity style={{ position: "absolute", right: 15 }}
+
+          <TouchableOpacity
+            style={{ position: "absolute", right: 15 }}
             onPress={() => {
               if (!isAsc) {
-                setList(list.reverse())
-                setIsAsc(true)
+                setList(list.reverse());
+                setIsAsc(true);
               } else {
-                setList(list.reverse())
-                setIsAsc(false)
+                setList(list.reverse());
+                setIsAsc(false);
               }
-            }}>
+            }}
+          >
             <Ionicons
               name={"filter"}
               size={30}
               color={truthy ? "white" : "black"}
             />
-
           </TouchableOpacity>
         </View>
         <View>
-          <ScrollView overScrollMode="never" contentContainerStyle={{ marginTop: 0 }}>
+          <ScrollView
+            overScrollMode="never"
+            contentContainerStyle={{ marginTop: 0 }}
+          >
             <Modal
               animationType="fade"
               transparent={true}
               visible={modalVisible}
               onRequestClose={() => setModalVisible(!modalVisible)}
             >
-            {/* <TouchableOpacity 
+              {/* <TouchableOpacity 
             style={styles(truthy).centeredView} 
             activeOpacity={1} 
             onPressOut={() => {setModalVisible(!modalVisible)}}
           > */}
-            <View style={styles(truthy).centeredView}>
-              <View style={styles(truthy).modalView}>
-              <TouchableOpacity
-                style={[styles(truthy).button, styles(truthy).buttonClose]}
-                onPress={() => setModalVisible(!modalVisible)}
-                >
-                  <Ionicons
-                  name={"close"}
-                  size={12}
-                  color={truthy ? "black" : "white"}
-                />
-
-            </TouchableOpacity>
-              <Searchbar
-              placeholder="Search episode number..."
-              onChangeText={onChangeSearch}
-              value={searchQuery}/>
-                <ScrollView
-                nestedScrollEnabled={true}
-                overScrollMode="never"
-                showsVerticalScrollIndicator={false}
-                showsHorizontalScrollIndicator={false}>
-                  <View style={styles(truthy).searchFilterContainer}>
+              <View style={styles(truthy).centeredView}>
+                <View style={styles(truthy).modalView}>
+                  <TouchableOpacity
+                    style={[styles(truthy).button, styles(truthy).buttonClose]}
+                    onPress={() => setModalVisible(!modalVisible)}
+                  >
+                    <Ionicons
+                      name={"close"}
+                      size={12}
+                      color={truthy ? "black" : "white"}
+                    />
+                  </TouchableOpacity>
+                  <Searchbar
+                    placeholder="Search episode number..."
+                    onChangeText={onChangeSearch}
+                    value={searchQuery}
+                  />
+                  <ScrollView
+                    nestedScrollEnabled={true}
+                    overScrollMode="never"
+                    showsVerticalScrollIndicator={false}
+                    showsHorizontalScrollIndicator={false}
+                  >
+                    <View style={styles(truthy).searchFilterContainer}>
                       {filteredSearch.map((data, key) => {
                         return (
                           <Text
                             style={styles(truthy).episodeCard}
                             key={key}
                             onPress={() => {
-                              setModalVisible(false)
+                              setModalVisible(false);
                               setIsLoading(true);
                               axios
                                 .get(`${API.url}/AnimeLazer/Login`, {
@@ -330,44 +380,52 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 })
                                 .then(async function (res) {
                                   axios
-                                    .get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
-                                      headers: {
-                                        "Content-Type": "application/json",
-                                        Authorization: `${API.key}${res.data.token}`,
-                                        src: data.epUrl,
-                                      },
-                                    })
+                                    .get(
+                                      `${API.url}/Animes/RecentEpisodesMp4Src`,
+                                      {
+                                        headers: {
+                                          "Content-Type": "application/json",
+                                          Authorization: `${API.key}${res.data.token}`,
+                                          src: data.epUrl,
+                                        },
+                                      }
+                                    )
                                     .then(async function (res1) {
                                       setIsLoading(false);
                                       if (
                                         res1.data.data.length === 0 ||
-                                        (typeof res1.data.data === undefined) | null
+                                        (typeof res1.data.data === undefined) |
+                                          null
                                       ) {
                                         Platform.OS === "android"
                                           ? ToastAndroid.showWithGravity(
-                                            "This video file cannot be played.",
-                                            2000,
-                                            ToastAndroid.BOTTOM
-                                          )
+                                              "This video file cannot be played.",
+                                              2000,
+                                              ToastAndroid.BOTTOM
+                                            )
                                           : Alert.alert(
-                                            "Warning",
-                                            "This video file cannot be played",
-                                            [
-                                              {
-                                                text: "Cancel",
-                                                onPress: () => setIsLoading(false),
-                                                style: "cancel",
-                                              },
-                                              {
-                                                text: "OK",
-                                                onPress: () => setIsLoading(false),
-                                              },
-                                            ]
-                                          );
+                                              "Warning",
+                                              "This video file cannot be played",
+                                              [
+                                                {
+                                                  text: "Cancel",
+                                                  onPress: () =>
+                                                    setIsLoading(false),
+                                                  style: "cancel",
+                                                },
+                                                {
+                                                  text: "OK",
+                                                  onPress: () =>
+                                                    setIsLoading(false),
+                                                },
+                                              ]
+                                            );
                                       } else {
                                         navigation.navigate("WatchRoom", {
                                           title:
-                                            route.params.animeTitle + " Ep " + data.epNum,
+                                            route.params.animeTitle +
+                                            " Ep " +
+                                            data.epNum,
                                           src: res1.data.data,
                                         });
                                       }
@@ -382,17 +440,13 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             {" "}
                             {"Episode " + data.epNum}
                           </Text>
-                        )
-
-                      })
-                      }
-
+                        );
+                      })}
                     </View>
-              </ScrollView>
-            </View>
-        </View> 
-        {/* </TouchableOpacity> */}
-              
+                  </ScrollView>
+                </View>
+              </View>
+              {/* </TouchableOpacity> */}
             </Modal>
             <View style={styles(truthy).infoContainer}>
               <View style={styles(truthy).genInfoContainer}>
@@ -422,7 +476,11 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       style={styles(truthy).white}
                     >
                       Released:{" "}
-                      <Text numberOfLines={1} ellipsizeMode="tail" style={styles(truthy).innerText}>
+                      <Text
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                        style={styles(truthy).innerText}
+                      >
                         {route.params.season}
                       </Text>{" "}
                     </Text>
@@ -447,14 +505,11 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       contentContainerStyle={{
                         alignItems: "flex-start",
                         alignContent: "flex-start",
-                        flexWrap: 'wrap',
+                        flexWrap: "wrap",
                         flexDirection: "row",
                         alignSelf: "flex-start",
                         position: "absolute",
-
-
                       }}
-
                     >
                       {route.params.genres.map((data, key) => {
                         return (
@@ -468,26 +523,46 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                 </View>
               </View>
               <View style={styles(truthy).descContainer}>
-              <View style={{marginBottom: 10, flexDirection: "row", alignSelf: "center", position: "relative"}}>
-                {(isAdded) ? (
-                  <>
-                    <View style={{position: "relative"}}>
-                    <TouchableOpacity
+                <View
+                  style={{
+                    marginBottom: 10,
+                    flexDirection: "row",
+                    alignSelf: "center",
+                    position: "relative",
+                  }}
+                >
+                  {isAdded ? (
+                    <>
+                      <View style={{ position: "relative" }}>
+                        <TouchableOpacity
                           onPress={() => {
-                            setStatusView(true)
+                            setStatusView(true);
                           }}
                         >
                           <MaterialCommunityIcons
                             name={"movie"}
                             size={25}
                             color={truthy ? "white" : "black"}
-                            style={{alignSelf: "center", position: "relative"}}
+                            style={{
+                              alignSelf: "center",
+                              position: "relative",
+                            }}
                           />
-                          <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>{(status != null) ? status.charAt(0).toUpperCase() + status.slice(1).replace(/_/g, ' ') : "None"}</Text>
+                          <Text
+                            style={{
+                              color: truthy ? "white" : "black",
+                              textAlign: "center",
+                            }}
+                          >
+                            {status != null
+                              ? status.charAt(0).toUpperCase() +
+                                status.slice(1).replace(/_/g, " ")
+                              : "None"}
+                          </Text>
                         </TouchableOpacity>
-                  </View>
-                  <View style={{paddingEnd: 80, position: "relative"}}>
-                    {/* <TouchableOpacity
+                      </View>
+                      <View style={{ paddingEnd: 80, position: "relative" }}>
+                        {/* <TouchableOpacity
                           onPress={() => {
                             console.log('hello')
                           }}
@@ -498,202 +573,541 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             color={truthy ? "white" : "black"}
                             style={{alignSelf: "center"}}
                           /> */}
-                          {/* <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>0/{route.params.episodes}</Text> */}
+                        {/* <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>0/{route.params.episodes}</Text> */}
                         {/* </TouchableOpacity> */}
-                  </View>
-                  <View style={{position: "relative"}}>
-                    <TouchableOpacity
+                      </View>
+                      <View style={{ position: "relative" }}>
+                        <TouchableOpacity
                           onPress={() => {
-                            setScoreView(true)
+                            setScoreView(true);
                           }}
                         >
                           <AntDesign
                             name={"like1"}
                             size={25}
                             color={truthy ? "white" : "black"}
-                            style={{ marginBottom: 1, alignSelf: "center"}}
+                            style={{ marginBottom: 1, alignSelf: "center" }}
                           />
-                          <Text style={{color: truthy ? "white" : "black", textAlign: "center"}}>{(score != null) ? score : "None"}</Text>
+                          <Text
+                            style={{
+                              color: truthy ? "white" : "black",
+                              textAlign: "center",
+                            }}
+                          >
+                            {score != null ? score : "None"}
+                          </Text>
                         </TouchableOpacity>
-                  </View>
-                </>
-
-                ) : (
-                <TouchableOpacity onPress={() => console.log("TODO")} style={styles(truthy).isAdded}>
-                    <Ionicons
-                    name={"add"}
-                    color="#fff"
-                    size={25} />
-                  <Text style={styles(truthy).isAddedText}>ADD TO LIST</Text>
-                </TouchableOpacity>
-                )}
-              <Modal
-                animationType="fade"
-                transparent={true}
-                visible={scoreView}
-                onRequestClose={() => setStatusView(false)}>
-                 <View style={styles(truthy).centeredView}>
-                    <View style={styles(truthy).modalView}>
-                      <Text style={{color: "#fff", fontSize: 15, alignSelf: "center", marginBottom: 5, fontWeight: "bold"}}>Rate this anime</Text>
-                      <View style={{ flexDirection: "row",flexWrap: "wrap", flexShrink: 1}}>
-                          <TouchableOpacity onPress={() =>{
-                              setScoreView(false)
-                              handleScore(0)
-                              animeList[animeKey]["list_status"]["score"] = 0
-
-                            }} activeOpacity={1} style={{ marginLeft: 22, backgroundColor: (score === 0) ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10,paddingHorizontal: 30, marginBottom: 7, marginEnd: 7}}>
-                            <Text style={{fontSize: 20, color: "#fff", alignSelf: "center"}}>0</Text>
-                            <Text style={{fontSize: 20, color: "#fff", textAlign: "center"}}>Unrated</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() =>{
-                              setScoreView(false)
-                              handleScore(1)
-                              animeList[animeKey]["list_status"]["score"] = 1
-
-                            }} activeOpacity={1} style={{backgroundColor: (score === 1) ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10,paddingHorizontal: 40, marginBottom: 7}}>
-                            <Text style={{fontSize: 20, color: "#fff", alignSelf: "center"}}>1</Text>
-                            <Text style={{fontSize: 20, color: "#fff"}}>Trash</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() =>{
-                              setScoreView(false)
-                              handleScore(2)
-                              animeList[animeKey]["list_status"]["score"] = 2
-
-                            }} activeOpacity={1} style={{ marginLeft: 22, backgroundColor: (score === 2) ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10,paddingHorizontal: 30, marginBottom: 7, marginEnd: 7}}>
-                            <Text style={{fontSize: 20, color: "#fff", alignSelf: "center"}}>2</Text>
-                            <Text style={{fontSize: 20, color: "#fff"}}>Horrible</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() =>{
-                              setScoreView(false)
-                              handleScore(3)
-                              animeList[animeKey]["list_status"]["score"] = 3
-
-                            }} activeOpacity={1} style={{backgroundColor: (score === 3) ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10,paddingHorizontal: 25.5, marginBottom: 7}}>
-                            <Text style={{fontSize: 20, color: "#fff", alignSelf: "center"}}>3</Text>
-                            <Text style={{fontSize: 20, color: "#fff"}}>Very bad</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() =>{
-                              setScoreView(false)
-                              handleScore(4)
-                              animeList[animeKey]["list_status"]["score"] = 4
-
-                            }} activeOpacity={1} style={{ marginLeft: 22, backgroundColor: (score === 4) ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10,paddingHorizontal: 48, marginBottom: 7, marginEnd: 7}}>
-                            <Text style={{fontSize: 20, color: "#fff", alignSelf: "center"}}>4</Text>
-                            <Text style={{fontSize: 20, color: "#fff"}}>Bad</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() =>{
-                              setScoreView(false)
-                              handleScore(5)
-                              animeList[animeKey]["list_status"]["score"] = 5
-
-                            }} activeOpacity={1} style={{backgroundColor: (score === 5) ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10,marginBottom: 7, paddingHorizontal: 28.5}}>
-                            <Text style={{fontSize: 20, color: "#fff", alignSelf: "center"}}>5</Text>
-                            <Text style={{fontSize: 20, color: "#fff"}}>Average</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() =>{
-                              setScoreView(false)
-                              handleScore(6)
-                              animeList[animeKey]["list_status"]["score"] = 6
-
-                            }} activeOpacity={1} style={{ marginLeft: 22, backgroundColor: (score === 6) ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10,paddingHorizontal: 47, marginBottom: 7, marginEnd: 7}}>
-                            <Text style={{fontSize: 20, color: "#fff", alignSelf: "center"}}>6</Text>
-                            <Text style={{fontSize: 20, color: "#fff"}}>Fine</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() =>{
-                              setScoreView(false)
-                              handleScore(7)
-                              animeList[animeKey]["list_status"]["score"] = 7
-
-                            }} activeOpacity={1} style={{backgroundColor: (score === 7) ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10,paddingHorizontal: 41, marginBottom: 7}}>
-                            <Text style={{fontSize: 20, color: "#fff", alignSelf: "center"}}>7</Text>
-                            <Text style={{fontSize: 20, color: "#fff"}}>Good</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() =>{
-                              setScoreView(false)
-                              handleScore(8)
-                              animeList[animeKey]["list_status"]["score"] = 8
-
-                            }} activeOpacity={1} style={{ marginLeft: 22, backgroundColor: (score === 8) ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10,paddingHorizontal: 20, marginBottom: 7, marginEnd: 7}}>
-                            <Text style={{fontSize: 20, color: "#fff", alignSelf: "center"}}>8</Text>
-                            <Text style={{fontSize: 20, color: "#fff"}}>Very Good</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() =>{
-                              setScoreView(false)
-                              handleScore(9)
-                              animeList[animeKey]["list_status"]["score"] = 9
-
-                            }} activeOpacity={1} style={{backgroundColor: (score === 9) ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10,paddingHorizontal: 40, marginBottom: 7}}>
-                            <Text style={{fontSize: 20, color: "#fff", alignSelf: "center"}}>9</Text>
-                            <Text style={{fontSize: 20, color: "#fff"}}>Great</Text>
-                        </TouchableOpacity>
-                        <TouchableOpacity onPress={() =>{
-                              setScoreView(false)
-                              handleScore(10)
-                              animeList[animeKey]["list_status"]["score"] = 10
-
-                            }} activeOpacity={1} style={{ marginLeft: 22,backgroundColor: (score === 10) ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10,paddingHorizontal: 11.5, marginBottom: 7}}>
-                            <Text style={{fontSize: 20, color: "#fff", alignSelf: "center"}}>10</Text>
-                            <Text style={{fontSize: 20, color: "#fff"}}>Masterpiece</Text>
-                        </TouchableOpacity>
-                        
                       </View>
-
+                    </>
+                  ) : (
+                    <TouchableOpacity
+                      onPress={() => handleAddToList()}
+                      style={styles(truthy).isAdded}
+                    >
+                      <Ionicons name={"add"} color="#fff" size={25} />
+                      <Text style={styles(truthy).isAddedText}>
+                        ADD TO LIST
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                  <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={scoreView}
+                    onRequestClose={() => setStatusView(false)}
+                  >
+                    <View style={styles(truthy).centeredView}>
+                      <View style={styles(truthy).modalView}>
+                        <Text
+                          style={{
+                            color: "#fff",
+                            fontSize: 15,
+                            alignSelf: "center",
+                            marginBottom: 5,
+                            fontWeight: "bold",
+                          }}
+                        >
+                          Rate this anime
+                        </Text>
+                        <View
+                          style={{
+                            flexDirection: "row",
+                            flexWrap: "wrap",
+                            flexShrink: 1,
+                          }}
+                        >
+                          <TouchableOpacity
+                            onPress={() => {
+                              setScoreView(false);
+                              handleScore(0);
+                              animeList[animeKey]["list_status"]["score"] = 0;
+                            }}
+                            activeOpacity={1}
+                            style={{
+                              marginLeft: 22,
+                              backgroundColor:
+                                score === 0 ? "green" : "#1a1a1a",
+                              borderRadius: 5,
+                              paddingVertical: 10,
+                              paddingHorizontal: 30,
+                              marginBottom: 7,
+                              marginEnd: 7,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#fff",
+                                alignSelf: "center",
+                              }}
+                            >
+                              0
+                            </Text>
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#fff",
+                                textAlign: "center",
+                              }}
+                            >
+                              Unrated
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setScoreView(false);
+                              handleScore(1);
+                              animeList[animeKey]["list_status"]["score"] = 1;
+                            }}
+                            activeOpacity={1}
+                            style={{
+                              backgroundColor:
+                                score === 1 ? "green" : "#1a1a1a",
+                              borderRadius: 5,
+                              paddingVertical: 10,
+                              paddingHorizontal: 40,
+                              marginBottom: 7,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#fff",
+                                alignSelf: "center",
+                              }}
+                            >
+                              1
+                            </Text>
+                            <Text style={{ fontSize: 20, color: "#fff" }}>
+                              Trash
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setScoreView(false);
+                              handleScore(2);
+                              animeList[animeKey]["list_status"]["score"] = 2;
+                            }}
+                            activeOpacity={1}
+                            style={{
+                              marginLeft: 22,
+                              backgroundColor:
+                                score === 2 ? "green" : "#1a1a1a",
+                              borderRadius: 5,
+                              paddingVertical: 10,
+                              paddingHorizontal: 30,
+                              marginBottom: 7,
+                              marginEnd: 7,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#fff",
+                                alignSelf: "center",
+                              }}
+                            >
+                              2
+                            </Text>
+                            <Text style={{ fontSize: 20, color: "#fff" }}>
+                              Horrible
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setScoreView(false);
+                              handleScore(3);
+                              animeList[animeKey]["list_status"]["score"] = 3;
+                            }}
+                            activeOpacity={1}
+                            style={{
+                              backgroundColor:
+                                score === 3 ? "green" : "#1a1a1a",
+                              borderRadius: 5,
+                              paddingVertical: 10,
+                              paddingHorizontal: 25.5,
+                              marginBottom: 7,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#fff",
+                                alignSelf: "center",
+                              }}
+                            >
+                              3
+                            </Text>
+                            <Text style={{ fontSize: 20, color: "#fff" }}>
+                              Very bad
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setScoreView(false);
+                              handleScore(4);
+                              animeList[animeKey]["list_status"]["score"] = 4;
+                            }}
+                            activeOpacity={1}
+                            style={{
+                              marginLeft: 22,
+                              backgroundColor:
+                                score === 4 ? "green" : "#1a1a1a",
+                              borderRadius: 5,
+                              paddingVertical: 10,
+                              paddingHorizontal: 48,
+                              marginBottom: 7,
+                              marginEnd: 7,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#fff",
+                                alignSelf: "center",
+                              }}
+                            >
+                              4
+                            </Text>
+                            <Text style={{ fontSize: 20, color: "#fff" }}>
+                              Bad
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setScoreView(false);
+                              handleScore(5);
+                              animeList[animeKey]["list_status"]["score"] = 5;
+                            }}
+                            activeOpacity={1}
+                            style={{
+                              backgroundColor:
+                                score === 5 ? "green" : "#1a1a1a",
+                              borderRadius: 5,
+                              paddingVertical: 10,
+                              marginBottom: 7,
+                              paddingHorizontal: 28.5,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#fff",
+                                alignSelf: "center",
+                              }}
+                            >
+                              5
+                            </Text>
+                            <Text style={{ fontSize: 20, color: "#fff" }}>
+                              Average
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setScoreView(false);
+                              handleScore(6);
+                              animeList[animeKey]["list_status"]["score"] = 6;
+                            }}
+                            activeOpacity={1}
+                            style={{
+                              marginLeft: 22,
+                              backgroundColor:
+                                score === 6 ? "green" : "#1a1a1a",
+                              borderRadius: 5,
+                              paddingVertical: 10,
+                              paddingHorizontal: 47,
+                              marginBottom: 7,
+                              marginEnd: 7,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#fff",
+                                alignSelf: "center",
+                              }}
+                            >
+                              6
+                            </Text>
+                            <Text style={{ fontSize: 20, color: "#fff" }}>
+                              Fine
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setScoreView(false);
+                              handleScore(7);
+                              animeList[animeKey]["list_status"]["score"] = 7;
+                            }}
+                            activeOpacity={1}
+                            style={{
+                              backgroundColor:
+                                score === 7 ? "green" : "#1a1a1a",
+                              borderRadius: 5,
+                              paddingVertical: 10,
+                              paddingHorizontal: 41,
+                              marginBottom: 7,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#fff",
+                                alignSelf: "center",
+                              }}
+                            >
+                              7
+                            </Text>
+                            <Text style={{ fontSize: 20, color: "#fff" }}>
+                              Good
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setScoreView(false);
+                              handleScore(8);
+                              animeList[animeKey]["list_status"]["score"] = 8;
+                            }}
+                            activeOpacity={1}
+                            style={{
+                              marginLeft: 22,
+                              backgroundColor:
+                                score === 8 ? "green" : "#1a1a1a",
+                              borderRadius: 5,
+                              paddingVertical: 10,
+                              paddingHorizontal: 20,
+                              marginBottom: 7,
+                              marginEnd: 7,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#fff",
+                                alignSelf: "center",
+                              }}
+                            >
+                              8
+                            </Text>
+                            <Text style={{ fontSize: 20, color: "#fff" }}>
+                              Very Good
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setScoreView(false);
+                              handleScore(9);
+                              animeList[animeKey]["list_status"]["score"] = 9;
+                            }}
+                            activeOpacity={1}
+                            style={{
+                              backgroundColor:
+                                score === 9 ? "green" : "#1a1a1a",
+                              borderRadius: 5,
+                              paddingVertical: 10,
+                              paddingHorizontal: 40,
+                              marginBottom: 7,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#fff",
+                                alignSelf: "center",
+                              }}
+                            >
+                              9
+                            </Text>
+                            <Text style={{ fontSize: 20, color: "#fff" }}>
+                              Great
+                            </Text>
+                          </TouchableOpacity>
+                          <TouchableOpacity
+                            onPress={() => {
+                              setScoreView(false);
+                              handleScore(10);
+                              animeList[animeKey]["list_status"]["score"] = 10;
+                            }}
+                            activeOpacity={1}
+                            style={{
+                              marginLeft: 22,
+                              backgroundColor:
+                                score === 10 ? "green" : "#1a1a1a",
+                              borderRadius: 5,
+                              paddingVertical: 10,
+                              paddingHorizontal: 11.5,
+                              marginBottom: 7,
+                            }}
+                          >
+                            <Text
+                              style={{
+                                fontSize: 20,
+                                color: "#fff",
+                                alignSelf: "center",
+                              }}
+                            >
+                              10
+                            </Text>
+                            <Text style={{ fontSize: 20, color: "#fff" }}>
+                              Masterpiece
+                            </Text>
+                          </TouchableOpacity>
+                        </View>
                       </View>
-                  </View>
-              </Modal>
-              <Modal 
-                animationType="fade"
-                transparent={true}
-                visible={statusView}
-                onRequestClose={() => console.log("setStatusView(false)")}>
-                  <View style={styles(truthy).centeredView}>
-                    <View style={styles(truthy).modalView}>
-                      <Text style={{color: "#fff", fontSize: 15, alignSelf: "center", marginBottom: 5, fontWeight: "bold"}}>Set your status</Text>
-                      <TouchableOpacity onPress={() =>{
-                        setStatusView(false)
-                        handleStatus("watching")
-                        animeList[animeKey]["list_status"]["status"] = "watching"
-
-                      }} activeOpacity={1} style={{ width: '100%', backgroundColor: (status === "watching") ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10,paddingHorizontal: 80, marginBottom: 7}}>
-                      <Text style={{fontSize: 20, color: "#fff"}}>Watching</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {
-                      setStatusView(false)
-                      handleStatus("plan_to_watch")
-                      animeList[animeKey]["list_status"]["status"] = "plan_to_watch"
-
-                    }} activeOpacity={1} style={{ width: '100%', backgroundColor: (status === "plan_to_watch") ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10, paddingHorizontal: 62, marginBottom: 7}}>
-                      <Text style={{fontSize: 20, color: "#fff"}}>Plan to watch</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {
-                      setStatusView(false)
-                      handleStatus("on_hold")
-                      animeList[animeKey]["list_status"]["status"] = "on_hold"
-
-                    }} activeOpacity={1} style={{ width: '100%', backgroundColor: (status === "on_hold") ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10, paddingHorizontal: 89, marginBottom: 7}}>
-                      <Text style={{fontSize: 20, color: "#fff"}}>On hold</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {
-                      setStatusView(false)
-                      handleStatus("completed")
-                      animeList[animeKey]["list_status"]["status"] = "completed"
-
-                    }} activeOpacity={1} style={{ width: '100%', backgroundColor: (status === "completed") ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10, paddingHorizontal: 74, marginBottom: 7}}>
-                      <Text style={{fontSize: 20, color: "#fff"}}>Completed</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => {
-                      setStatusView(false)
-                      handleStatus("dropped")
-                      animeList[animeKey]["list_status"]["status"] = "dropped"
-
-                    }} activeOpacity={1} style={{ width: '100%', backgroundColor: (status === "dropped") ? "green" : "#1a1a1a",borderRadius: 5,paddingVertical: 10, paddingHorizontal: 85}}>
-                      <Text style={{fontSize: 20, color: "#fff"}}>Dropped</Text>
-                    </TouchableOpacity>
-
                     </View>
-                  </View>
-              </Modal>
-              </View>
+                  </Modal>
+                  <Modal
+                    animationType="fade"
+                    transparent={true}
+                    visible={statusView}
+                    onRequestClose={() => console.log("setStatusView(false)")}
+                  >
+                    <View style={styles(truthy).centeredView}>
+                      <View style={styles(truthy).modalView}>
+                        <Text
+                          style={{
+                            color: "#fff",
+                            fontSize: 15,
+                            alignSelf: "center",
+                            marginBottom: 5,
+                            fontWeight: "bold",
+                          }}
+                        >
+                          Set your status
+                        </Text>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setStatusView(false);
+                            handleStatus("watching");
+                            animeList[animeKey]["list_status"]["status"] =
+                              "watching";
+                          }}
+                          activeOpacity={1}
+                          style={{
+                            width: "100%",
+                            backgroundColor:
+                              status === "watching" ? "green" : "#1a1a1a",
+                            borderRadius: 5,
+                            paddingVertical: 10,
+                            paddingHorizontal: 80,
+                            marginBottom: 7,
+                          }}
+                        >
+                          <Text style={{ fontSize: 20, color: "#fff" }}>
+                            Watching
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setStatusView(false);
+                            handleStatus("plan_to_watch");
+                            animeList[animeKey]["list_status"]["status"] =
+                              "plan_to_watch";
+                          }}
+                          activeOpacity={1}
+                          style={{
+                            width: "100%",
+                            backgroundColor:
+                              status === "plan_to_watch" ? "green" : "#1a1a1a",
+                            borderRadius: 5,
+                            paddingVertical: 10,
+                            paddingHorizontal: 62,
+                            marginBottom: 7,
+                          }}
+                        >
+                          <Text style={{ fontSize: 20, color: "#fff" }}>
+                            Plan to watch
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setStatusView(false);
+                            handleStatus("on_hold");
+                            animeList[animeKey]["list_status"]["status"] =
+                              "on_hold";
+                          }}
+                          activeOpacity={1}
+                          style={{
+                            width: "100%",
+                            backgroundColor:
+                              status === "on_hold" ? "green" : "#1a1a1a",
+                            borderRadius: 5,
+                            paddingVertical: 10,
+                            paddingHorizontal: 89,
+                            marginBottom: 7,
+                          }}
+                        >
+                          <Text style={{ fontSize: 20, color: "#fff" }}>
+                            On hold
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setStatusView(false);
+                            handleStatus("completed");
+                            animeList[animeKey]["list_status"]["status"] =
+                              "completed";
+                          }}
+                          activeOpacity={1}
+                          style={{
+                            width: "100%",
+                            backgroundColor:
+                              status === "completed" ? "green" : "#1a1a1a",
+                            borderRadius: 5,
+                            paddingVertical: 10,
+                            paddingHorizontal: 74,
+                            marginBottom: 7,
+                          }}
+                        >
+                          <Text style={{ fontSize: 20, color: "#fff" }}>
+                            Completed
+                          </Text>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                          onPress={() => {
+                            setStatusView(false);
+                            handleStatus("dropped");
+                            animeList[animeKey]["list_status"]["status"] =
+                              "dropped";
+                          }}
+                          activeOpacity={1}
+                          style={{
+                            width: "100%",
+                            backgroundColor:
+                              status === "dropped" ? "green" : "#1a1a1a",
+                            borderRadius: 5,
+                            paddingVertical: 10,
+                            paddingHorizontal: 85,
+                          }}
+                        >
+                          <Text style={{ fontSize: 20, color: "#fff" }}>
+                            Dropped
+                          </Text>
+                        </TouchableOpacity>
+                      </View>
+                    </View>
+                  </Modal>
+                </View>
                 <Text
                   onTextLayout={onTextLayout}
                   style={{ color: truthy ? "white" : "black" }}
@@ -701,14 +1115,16 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                   ellipsizeMode="tail"
                 >
                   {route.params.synopsis}
-                  {'\n\nOther name(s): '}
-                  {(route.params.otherNames === undefined) ? 'None' : (route.params.otherNames)}
+                  {"\n\nOther name(s): "}
+                  {route.params.otherNames === undefined
+                    ? "None"
+                    : route.params.otherNames}
                 </Text>
                 {showMoreButton && (
                   <TouchableOpacity
                     style={styles(truthy).white}
                     onPress={() => {
-                      setShowText((showText) => !showText)
+                      setShowText((showText) => !showText);
                     }}
                   >
                     <Ionicons
@@ -727,7 +1143,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
               showsHorizontalScrollIndicator={false}
             >
               <View style={styles(truthy).episodesList}>
-
                 {list.map((data, key) => {
                   return (
                     <Text
@@ -759,29 +1174,31 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 ) {
                                   Platform.OS === "android"
                                     ? ToastAndroid.showWithGravity(
-                                      "This video file cannot be played.",
-                                      2000,
-                                      ToastAndroid.BOTTOM
-                                    )
+                                        "This video file cannot be played.",
+                                        2000,
+                                        ToastAndroid.BOTTOM
+                                      )
                                     : Alert.alert(
-                                      "Warning",
-                                      "This video file cannot be played",
-                                      [
-                                        {
-                                          text: "Cancel",
-                                          onPress: () => setIsLoading(false),
-                                          style: "cancel",
-                                        },
-                                        {
-                                          text: "OK",
-                                          onPress: () => setIsLoading(false),
-                                        },
-                                      ]
-                                    );
+                                        "Warning",
+                                        "This video file cannot be played",
+                                        [
+                                          {
+                                            text: "Cancel",
+                                            onPress: () => setIsLoading(false),
+                                            style: "cancel",
+                                          },
+                                          {
+                                            text: "OK",
+                                            onPress: () => setIsLoading(false),
+                                          },
+                                        ]
+                                      );
                                 } else {
                                   navigation.navigate("WatchRoom", {
                                     title:
-                                      route.params.animeTitle + " Ep " + data.epNum,
+                                      route.params.animeTitle +
+                                      " Ep " +
+                                      data.epNum,
                                     src: res1.data.data,
                                   });
                                 }
@@ -796,11 +1213,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       {" "}
                       {"Episode " + data.epNum}
                     </Text>
-                  )
-                })
-
-                }
-
+                  );
+                })}
               </View>
             </ScrollView>
           </ScrollView>
@@ -849,8 +1263,7 @@ const styles = (truthy, isLoading) =>
       borderBottomRightRadius: 15,
       marginBottom: 6,
       flexWrap: "wrap",
-      marginEnd: 4
-
+      marginEnd: 4,
     },
     genres: {
       top: 10,
@@ -920,7 +1333,7 @@ const styles = (truthy, isLoading) =>
       marginTop: 5,
       width: 150,
       height: 30,
-      backgroundColor: "#1a1a1a"
+      backgroundColor: "#1a1a1a",
     },
     back: {
       position: "absolute",
@@ -935,8 +1348,8 @@ const styles = (truthy, isLoading) =>
       right: Dimensions.get("window").width / 2.43,
       width: 70,
       height: 70,
-      alignItems: 'center',
-      justifyContent: 'center',
+      alignItems: "center",
+      justifyContent: "center",
       backgroundColor: isLoading ? "#585858" : "transparent",
       borderRadius: 8,
     },
@@ -947,18 +1360,18 @@ const styles = (truthy, isLoading) =>
       fontSize: 20,
       position: "absolute",
       top: 10,
-      right: 15
+      right: 15,
     },
     backgroundImage: {
-      height: '100%',
-      width: '100%',
+      height: "100%",
+      width: "100%",
       flex: 1,
     },
     centeredView: {
       flex: 1,
       justifyContent: "center",
       alignItems: "center",
-      marginTop: 22
+      marginTop: 22,
     },
     modalView: {
       margin: 20,
@@ -971,7 +1384,7 @@ const styles = (truthy, isLoading) =>
       paddingBottom: 20,
       shadowOffset: {
         width: 0,
-        height: 2
+        height: 2,
       },
       shadowOpacity: 0.25,
       shadowRadius: 4,
@@ -995,11 +1408,11 @@ const styles = (truthy, isLoading) =>
     textStyle: {
       color: "white",
       fontWeight: "bold",
-      textAlign: "center"
+      textAlign: "center",
     },
     modalText: {
       marginBottom: 15,
-      textAlign: "center"
+      textAlign: "center",
     },
     searchFilterContainer: {
       paddingTop: 20,
@@ -1010,19 +1423,19 @@ const styles = (truthy, isLoading) =>
       flexWrap: "wrap",
     },
     isAdded: {
-      width: '100%',
+      width: "100%",
       backgroundColor: "#1a1a1a",
       borderRadius: 10,
       paddingVertical: 10,
       paddingHorizontal: 12,
       borderWidth: 2,
       borderColor: "#fff",
-      flexDirection: "row"
+      flexDirection: "row",
     },
     isAddedText: {
       fontSize: 18,
       color: "#fff",
       fontWeight: "bold",
-      marginLeft: 90
-    }
+      marginLeft: 90,
+    },
   });
