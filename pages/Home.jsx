@@ -16,6 +16,9 @@ import {
 import { Header } from "../components/index";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {key, url, BASE_URL_V2 as BASE_URL} from "@env"
+import { firebase } from '@firebase/app'
+import "@firebase/database"
+import "@firebase/auth";
 
 const axios = require("axios");
 const API = {
@@ -612,37 +615,46 @@ const Home = ({ navigation, navigate, truth }) => {
                                 },
                               })
                               .then(async function (res1) {
-                                AsyncStorage.getItem('accessToken').then(async function(token) {
-                                  axios.get(`${BASE_URL}users/@me/animelist?fields=list_status&limit=1000&sort=list_score`, {
-                                    headers: {
-                                      Authorization: `${API.key}${token}`,
-                                    }
-                                  }).then(async function (animeList) {
-                                    res1.data.data.map((info) => {
+                                if (await AsyncStorage.getItem('accessToken') == null){
+                                  setIsLoading(false);
+                                  console.log(firebase.auth().currentUser.uid)
+                                  // TODO: add firebase incase the user is not signed in
+
+                                } else {
+                                  AsyncStorage.getItem('accessToken').then(async function(token) {
+                                    axios.get(`${BASE_URL}users/@me/animelist?fields=list_status&limit=1000&sort=list_score`, {
+                                      headers: {
+                                        Authorization: `${API.key}${token}`,
+                                      }
+                                    }).then(async function (animeList) {
                                       setIsLoading(false);
-                                      navigate.navigate("EpisodeRoom", {
-                                        type: info.type,
-                                        synopsis: info.synopsis,
-                                        animeCover: info.animeCover,
-                                        animeTitle: info.animeEnglishTitle,
-                                        episodes: info.episodesAvaliable,
-                                        season: info.season,
-                                        language: info.language,
-                                        genres: info.genres,
-                                        status: info.status,
-                                        episodesList: info.episodesList,
-                                        animeUrl: data.animeUrl,
-                                        otherNames: info.otherNames,
-                                        accessToken: token,
-                                        animeList: animeList.data.data
-                                        // there is more options such as animeJapaneseTitle, studio.
+                                      res1.data.data.map((info) => {
+                                        navigate.navigate("EpisodeRoom", {
+                                          type: info.type,
+                                          synopsis: info.synopsis,
+                                          animeCover: info.animeCover,
+                                          animeTitle: info.animeEnglishTitle,
+                                          episodes: info.episodesAvaliable,
+                                          season: info.season,
+                                          language: info.language,
+                                          genres: info.genres,
+                                          status: info.status,
+                                          episodesList: info.episodesList,
+                                          animeUrl: data.animeUrl,
+                                          otherNames: info.otherNames,
+                                          accessToken: token,
+                                          animeList: animeList.data.data
+                                          // there is more options such as animeJapaneseTitle, studio.
+                                        });
                                       });
-                                    });
-
-
-
-                                  })
+                                }).catch((err) => {
+                                  setIsLoading(false);
+                                  console.log(err)
                                 })
+                              
+
+                                })
+                              }
                               });
                           })
                           .catch(function (err) {
