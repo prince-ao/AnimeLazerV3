@@ -201,10 +201,14 @@ const WatchRoom = ({ navigation, route, truthy }) => {
       ) : (
         <Video
           ref={videoRef}
-          source={{ uri: videoUrl, headers: { Referer: "https://goload.one" } }}
+          source={{
+            uri: videoUrl,
+            headers: { Referer: "https://goload.one" },
+          }}
           rate={1.0}
           volume={1.0}
           isMuted={false}
+          onPress={() => console.log("pressed")}
           resizeMode={ResizeMode.CONTAIN}
           shouldPlay={true}
           isLooping={false}
@@ -217,6 +221,7 @@ const WatchRoom = ({ navigation, route, truthy }) => {
           style={styles(truthy).video}
           onPlaybackStatusUpdate={(status) => {
             setStatus(() => status);
+            console.log(status);
           }}
         />
       )}

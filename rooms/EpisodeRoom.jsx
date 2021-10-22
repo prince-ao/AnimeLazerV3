@@ -184,7 +184,10 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
             <Menu onSelect={value => alert(`You Clicked : ${value}`)}>
               <MenuTrigger > */}
           <TouchableOpacity
-            style={{ position: "absolute", right: 15 }}
+            style={{
+              position: "absolute",
+              right: 15,
+            }}
             onPress={() => {
               // TODO: Add advanced search; make sorting smooth
 
