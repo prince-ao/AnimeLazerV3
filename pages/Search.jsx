@@ -14,6 +14,10 @@ import {
 import { SearchBar } from "react-native-elements";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {key, url, BASE_URL_V2 as BASE_URL} from "@env"
+import { firebase } from '@firebase/app'
+import "@firebase/database"
+import "@firebase/auth";
+
 
 const axios = require("axios");
 const API = {
@@ -149,7 +153,7 @@ const Search = ({ navigation, navigate, truth }) => {
                             },
                           })
                           .then(async function (res1) {
-                            res1.data.data.map((info) => {
+                            res1.data.data.map(async(info) => {
                               if (data === null) {
                                 setIsLoading(false);
                                 Platform.OS === "android"
@@ -172,15 +176,19 @@ const Search = ({ navigation, navigate, truth }) => {
                                       },
                                     ]);
                               } else {
-                                AsyncStorage.getItem('accessToken').then(async function(token) {
-                                  axios.get(`${BASE_URL}users/@me/animelist?fields=list_status&limit=1000&sort=list_score`, {
-                                    headers: {
-                                      Authorization: `${API.key}${token}`,
-                                    }
-                                  }).then(async function (animeList) {
+                                if (await AsyncStorage.getItem('accessToken') == null){
+                                  try {
+                                    let animeList = await fetch(`${API.url}/favorites/find`, {
+                                      method: "GET",
+                                      headers: {
+                                        uid: firebase.auth().currentUser.uid
+                                      }
+                                    })
+                                    animeList = await animeList.json()
+                                    setIsLoading(false)
                                     res1.data.data.map((info) => {
-                                      setIsLoading(false);
                                       navigate.navigate("EpisodeRoom", {
+                                        flag: "local",
                                         type: info.type,
                                         synopsis: info.synopsis,
                                         animeCover: info.animeCover,
@@ -193,16 +201,53 @@ const Search = ({ navigation, navigate, truth }) => {
                                         episodesList: info.episodesList,
                                         animeUrl: data.animeUrl,
                                         otherNames: info.otherNames,
-                                        accessToken: token,
-                                        animeList: animeList.data.data
+                                        accessToken: "unused",
+                                        animeList: animeList
                                         // there is more options such as animeJapaneseTitle, studio.
                                       });
                                     });
 
-
-
-                                  })
+                                  } catch (err) {
+                                    setIsLoading(false)
+                                    console.log(err)
+                                  }
+                                  
+                                } else {
+                                  AsyncStorage.getItem('accessToken').then(async function(token) {
+                                    axios.get(`${BASE_URL}users/@me/animelist?fields=list_status&limit=1000&sort=list_score`, {
+                                      headers: {
+                                        Authorization: `${API.key}${token}`,
+                                      }
+                                    }).then(async function (animeList) {
+                                      setIsLoading(false);
+                                      res1.data.data.map((info) => {
+                                        navigate.navigate("EpisodeRoom", {
+                                          flag: "MAL",
+                                          type: info.type,
+                                          synopsis: info.synopsis,
+                                          animeCover: info.animeCover,
+                                          animeTitle: info.animeEnglishTitle,
+                                          episodes: info.episodesAvaliable,
+                                          season: info.season,
+                                          language: info.language,
+                                          genres: info.genres,
+                                          status: info.status,
+                                          episodesList: info.episodesList,
+                                          animeUrl: data.animeUrl,
+                                          otherNames: info.otherNames,
+                                          accessToken: token,
+                                          animeList: animeList.data.data
+                                          // there is more options such as animeJapaneseTitle, studio.
+                                        });
+                                      });
+                                }).catch((err) => {
+                                  setIsLoading(false);
+                                  console.log(err)
                                 })
+                              
+
+                                })
+                              }
                               }
                             });
                           });

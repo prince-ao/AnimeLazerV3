@@ -25,7 +25,8 @@ import {
 } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { key, url, BASE_URL_V2 as BASE_URL } from "@env";
-import "@firebase/database";
+import { firebase } from '@firebase/app'
+import "@firebase/database"
 import "@firebase/auth";
 
 const axios = require("axios");
@@ -64,6 +65,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   const [status, setStatus] = useState(null);
   const [score, setScore] = useState(null);
 
+  const [flag, setFlag] = useState(route.params.flag)
+
   // for Advanced episode search
   const [searchQuery, setSearchQuery] = React.useState("");
   const [filteredSearch, setFilteredSearch] = useState([]);
@@ -87,53 +90,111 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   );
 
   const handleAddToList = async () => {
-    try {
-      setIsLoading(true)
-      const response1 = await fetch(
-        `https://api.myanimelist.net/v2/anime?q=${route.params.animeTitle}&limit=100`,
-        {
-          method: "GET",
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-      const s_response1 = await response1.text();
-      const ss_response1 = await JSON.parse(s_response1);
-      const id = ss_response1.data[0].node.id;
-      const response2 = await fetch(
-        `https://api.myanimelist.net/v2/anime/${id}/my_list_status?status=plan_to_watch`,
-        {
+    if (flag == "MAL") {
+      try {
+        setIsLoading(true)
+        const response1 = await fetch(
+          `https://api.myanimelist.net/v2/anime?q=${route.params.animeTitle}&limit=100`,
+          {
+            method: "GET",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
+          }
+        );
+        const s_response1 = await response1.text();
+        const ss_response1 = await JSON.parse(s_response1);
+        const id = ss_response1.data[0].node.id;
+        const response2 = await fetch(
+          `https://api.myanimelist.net/v2/anime/${id}/my_list_status?status=plan_to_watch`,
+          {
+            method: "PUT",
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded",
+              Authorization: `Bearer ${token}`,
+            },
+            body: `status=plan_to_watch`,
+          }
+        );
+        const s_response2 = await response2.text();
+        const ss_response2 = await JSON.parse(s_response2);
+        setIsLoading(false)
+        setIsAdded(true);
+        setAnimeId(id)
+        setAnimeList(route.params.animeList.push({
+          list_status: {
+            "is_rewatching": ss_response2["is_rewatching"],
+            "num_episodes_watched": ss_response2["num_episodes_watched"],
+            "score": ss_response2["score"],
+            "status": ss_response2["status"],
+            "updated_at": ss_response2["updated_at"]
+  
+          }
+        }));
+        setAnimeKey(animeList.length - 1)
+        setScore(ss_response2["score"])
+        setStatus(ss_response2["status"])
+      } catch (error) {
+        setIsLoading(false)
+        console.log(error);
+      }
+
+    } else {
+      try {
+        const timestamp = +new Date
+        const uid = firebase.auth().currentUser.uid
+        setIsLoading(true)
+        await fetch(`${API.url}/favorites/add?timestamp=${timestamp}&anime=${route.params.animeTitle}&status=${"plan_to_watch"}&score=${0}`, {
           method: "PUT",
           headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${token}`,
-          },
-          body: `status=plan_to_watch`,
-        }
-      );
-      const s_response2 = await response2.text();
-      const ss_response2 = await JSON.parse(s_response2);
-      setIsLoading(false)
-      setIsAdded(true);
-      setAnimeId(id)
-      setAnimeList(route.params.animeList.push({
-        list_status: {
-          "is_rewatching": ss_response2["is_rewatching"],
-          "num_episodes_watched": ss_response2["num_episodes_watched"],
-          "score": ss_response2["score"],
-          "status": ss_response2["status"],
-          "updated_at": ss_response2["updated_at"]
+            uid: uid
+          }
+  
+        })
+        setIsAdded(true)
+        setAnimeId(timestamp)
+        
+        setAnimeList(animeList.push({
+          score: "0",
+          status: "plan_to_watch",
+          timestamp: timestamp,
+          title: route.params.animeTitle,
+          uid: uid
+          
+        }))
+        setAnimeKey(animeList.length - 1)
+        setScore("0")
+        setStatus("plan_to_watch")
+        setIsLoading(false)
 
-        }
-      }));
-      setAnimeKey(animeList.length - 1)
-      setScore(ss_response2["score"])
-      setStatus(ss_response2["status"])
-    } catch (error) {
-      setIsLoading(false)
-      console.log(error);
+      } catch (err) {
+        setIsLoading(true)
+        console.log(err)
+      }
+      // let anime = []
+      // anime.push({
+      //   list_status: {
+      //     score: 0,
+      //     status: 'plan_to_watch'
+      //   },
+      //   node: {
+      //     id: route.params.animeTitle,
+      //     title: route.params.animeTitle
+
+      //   }
+      // })
+      // setIsLoading(true)
+      // if (await AsyncStorage.getItem('animeList') == null) {
+      //   await AsyncStorage.setItem('animeList', JSON.stringify(anime))
+      // } else {
+      //   let localList = await AsyncStorage.getItem('animeList')
+      //   console.log(localList)
+      //   await AsyncStorage.setItem('animeList', localList.concat(JSON.stringify(anime)))
+
+      // }
+      // setIsLoading(false)
     }
+    
   };
 
   useEffect(() => {
@@ -167,45 +228,78 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   //   }
   // }
   const handleScore = (score) => {
-    setIsLoading(true);
-    fetch(`${BASE_URL}anime/${animeId}/my_list_status?score=${score}`, {
-      method: "PUT",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-        Authorization: `Bearer ${token}`,
-      },
-      body: `score=${score}`,
-    })
-      .then(function (res) {
-        setIsLoading(false);
-        res.json().then((data) => {
-          if (Object.keys(data).length > 2) {
-            setScore(score);
-            if (Platform.OS === "android") {
-              ToastAndroid.showWithGravity(
-                "Score updated successfully",
-                2500,
-                ToastAndroid.BOTTOM
-              );
-            }
-          } else {
-            if (Platform.OS === "android") {
-              ToastAndroid.showWithGravity(
-                "Internal error",
-                2500,
-                ToastAndroid.BOTTOM
-              );
-            }
-          }
-        });
+    if (flag == "MAL") {
+      setIsLoading(true);
+      fetch(`${BASE_URL}anime/${animeId}/my_list_status?score=${score}`, {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          Authorization: `Bearer ${token}`,
+        },
+        body: `score=${score}`,
       })
-      .catch((err) => {
-        setIsLoading(false);
-        console.log(err);
-      });
+        .then(function (res) {
+          setIsLoading(false);
+          res.json().then((data) => {
+            if (Object.keys(data).length > 2) {
+              setScore(score);
+              if (Platform.OS === "android") {
+                ToastAndroid.showWithGravity(
+                  "Score updated successfully",
+                  2500,
+                  ToastAndroid.BOTTOM
+                );
+              }
+            } else {
+              if (Platform.OS === "android") {
+                ToastAndroid.showWithGravity(
+                  "Internal error",
+                  2500,
+                  ToastAndroid.BOTTOM
+                );
+              }
+            }
+          });
+        })
+        .catch((err) => {
+          setIsLoading(false);
+          console.log(err);
+        });
+
+    } else {
+      setIsLoading(true)
+      const uid = firebase.auth().currentUser.uid
+      fetch(`${API.url}/favorites/update/score?timestamp=${animeId}&score=${score}`, {
+        method: "PUT",
+        headers: {
+          uid: uid
+        }
+      }).then((res) => {
+        setIsLoading(false)
+        setScore(score)
+        if (Platform.OS === "android") {
+          ToastAndroid.showWithGravity(
+            "Score updated successfully",
+            2500,
+            ToastAndroid.BOTTOM
+          );
+        }
+      }).catch((err) => {
+        setIsLoading(false)
+        if (Platform.OS === "android") {
+          ToastAndroid.showWithGravity(
+            "Internal error",
+            2500,
+            ToastAndroid.BOTTOM
+          );
+        }
+        console.log(err)
+      })
+    }
   };
   const handleStatus = (status) => {
-    setIsLoading(true);
+    if (flag == "MAL") {
+      setIsLoading(true);
     fetch(`${BASE_URL}anime/${animeId}/my_list_status?status=${status}`, {
       method: "PUT",
       headers: {
@@ -249,26 +343,77 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
         }
         console.log(err);
       });
+
+    } else {
+      setIsLoading(true)
+      const uid = firebase.auth().currentUser.uid
+      fetch(`${API.url}/favorites/update/status?timestamp=${animeId}&status=${status}`, {
+        method: "PUT",
+        headers: {
+          uid: uid
+        }
+      }).then((res) => {
+        setIsLoading(false)
+        setStatus(status)
+        if (Platform.OS === "android") {
+          ToastAndroid.showWithGravity(
+            "Status updated successfully",
+            2500,
+            ToastAndroid.BOTTOM
+          );
+        }
+      }).catch((err) => {
+        setIsLoading(false)
+        if (Platform.OS === "android") {
+          ToastAndroid.showWithGravity(
+            "Internal error",
+            2500,
+            ToastAndroid.BOTTOM
+          );
+        }
+        console.log(err)
+      })
+    }
+    
   };
 
   const animeStatus = () => {
-    if (animeList !== undefined) {
-      if (animeList.length > 0) {
-        animeList.map((data, key) => {
-          if (data.node.title == route.params.animeTitle) {
-            setIsAdded(true);
-            setStatus(data.list_status.status);
-            setScore(data.list_status.score);
-            setAnimeKey(key);
-            setAnimeId(data.node.id);
-          }
-        });
+    if (flag == "MAL") {
+      if (animeList !== undefined) {
+        if (animeList.length > 0) {
+          animeList.map((data, key) => {
+            if (data.node.title == route.params.animeTitle) {
+              setIsAdded(true);
+              setStatus(data.list_status.status);
+              setScore(data.list_status.score);
+              setAnimeKey(key);
+              setAnimeId(data.node.id);
+            }
+          });
+        } else {
+          console.log("Sign in first");
+        }
+  
       } else {
-        console.log("Sign in first");
+        console.log("AnimeList doesnt exists")
       }
 
     } else {
-      console.log("AnimeList doesnt exists")
+      try {
+        for (let i = 0; i < animeList.length; i++) {
+          if (animeList[i].title == route.params.animeTitle) {
+            setIsAdded(true)
+            setStatus(animeList[i].status)
+            setScore(animeList[i].score)
+            setAnimeKey(i)
+            setAnimeId(animeList[i].timestamp)
+          }
+        }
+        
+
+      } catch (err) {
+        console.log(err)
+      }
     }
     if (!isAdded) {
       console.log("Not Added");
@@ -659,13 +804,17 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             onPress={() => {
                               setScoreView(false);
                               handleScore(0);
-                              animeList[animeKey]["list_status"]["score"] = 0;
+                              if (flag == "MAL") {
+                                animeList[animeKey]["list_status"]["score"] = 0;
+                              } else {
+                                animeList[animeKey].score = 0
+                              }
                             }}
                             activeOpacity={1}
                             style={{
                               marginLeft: 22,
                               backgroundColor:
-                                score === 0 ? "green" : "#1a1a1a",
+                                parseInt(score) === 0 ? "green" : "#1a1a1a",
                               borderRadius: 5,
                               paddingVertical: 10,
                               paddingHorizontal: 30,
@@ -696,12 +845,16 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             onPress={() => {
                               setScoreView(false);
                               handleScore(1);
-                              animeList[animeKey]["list_status"]["score"] = 1;
+                              if (flag == "MAL") {
+                                animeList[animeKey]["list_status"]["score"] = 1;
+                              } else {
+                                animeList[animeKey].score = 1
+                              }
                             }}
                             activeOpacity={1}
                             style={{
                               backgroundColor:
-                                score === 1 ? "green" : "#1a1a1a",
+                                parseInt(score) === 1 ? "green" : "#1a1a1a",
                               borderRadius: 5,
                               paddingVertical: 10,
                               paddingHorizontal: 40,
@@ -725,13 +878,17 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             onPress={() => {
                               setScoreView(false);
                               handleScore(2);
-                              animeList[animeKey]["list_status"]["score"] = 2;
+                              if (flag == "MAL") {
+                                animeList[animeKey]["list_status"]["score"] = 2;
+                              } else {
+                                animeList[animeKey].score = 2
+                              }
                             }}
                             activeOpacity={1}
                             style={{
                               marginLeft: 22,
                               backgroundColor:
-                                score === 2 ? "green" : "#1a1a1a",
+                                parseInt(score) === 2 ? "green" : "#1a1a1a",
                               borderRadius: 5,
                               paddingVertical: 10,
                               paddingHorizontal: 30,
@@ -756,12 +913,16 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             onPress={() => {
                               setScoreView(false);
                               handleScore(3);
-                              animeList[animeKey]["list_status"]["score"] = 3;
+                              if (flag == "MAL") {
+                                animeList[animeKey]["list_status"]["score"] = 3;
+                              } else {
+                                animeList[animeKey].score = 3
+                              }
                             }}
                             activeOpacity={1}
                             style={{
                               backgroundColor:
-                                score === 3 ? "green" : "#1a1a1a",
+                                parseInt(score) === 3 ? "green" : "#1a1a1a",
                               borderRadius: 5,
                               paddingVertical: 10,
                               paddingHorizontal: 25.5,
@@ -785,13 +946,17 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             onPress={() => {
                               setScoreView(false);
                               handleScore(4);
-                              animeList[animeKey]["list_status"]["score"] = 4;
+                              if (flag == "MAL") {
+                                animeList[animeKey]["list_status"]["score"] = 4;
+                              } else {
+                                animeList[animeKey].score = 4
+                              }
                             }}
                             activeOpacity={1}
                             style={{
                               marginLeft: 22,
                               backgroundColor:
-                                score === 4 ? "green" : "#1a1a1a",
+                                parseInt(score) === 4 ? "green" : "#1a1a1a",
                               borderRadius: 5,
                               paddingVertical: 10,
                               paddingHorizontal: 48,
@@ -816,12 +981,16 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             onPress={() => {
                               setScoreView(false);
                               handleScore(5);
-                              animeList[animeKey]["list_status"]["score"] = 5;
+                              if (flag == "MAL") {
+                                animeList[animeKey]["list_status"]["score"] = 5;
+                              } else {
+                                animeList[animeKey].score = 5
+                              }
                             }}
                             activeOpacity={1}
                             style={{
                               backgroundColor:
-                                score === 5 ? "green" : "#1a1a1a",
+                                parseInt(score) === 5 ? "green" : "#1a1a1a",
                               borderRadius: 5,
                               paddingVertical: 10,
                               marginBottom: 7,
@@ -845,13 +1014,17 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             onPress={() => {
                               setScoreView(false);
                               handleScore(6);
-                              animeList[animeKey]["list_status"]["score"] = 6;
+                              if (flag == "MAL") {
+                                animeList[animeKey]["list_status"]["score"] = 6;
+                              } else {
+                                animeList[animeKey].score = 6
+                              }
                             }}
                             activeOpacity={1}
                             style={{
                               marginLeft: 22,
                               backgroundColor:
-                                score === 6 ? "green" : "#1a1a1a",
+                                parseInt(score) === 6 ? "green" : "#1a1a1a",
                               borderRadius: 5,
                               paddingVertical: 10,
                               paddingHorizontal: 47,
@@ -876,12 +1049,16 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             onPress={() => {
                               setScoreView(false);
                               handleScore(7);
-                              animeList[animeKey]["list_status"]["score"] = 7;
+                              if (flag == "MAL") {
+                                animeList[animeKey]["list_status"]["score"] = 7;
+                              } else {
+                                animeList[animeKey].score = 7
+                              }
                             }}
                             activeOpacity={1}
                             style={{
                               backgroundColor:
-                                score === 7 ? "green" : "#1a1a1a",
+                                parseInt(score) === 7 ? "green" : "#1a1a1a",
                               borderRadius: 5,
                               paddingVertical: 10,
                               paddingHorizontal: 41,
@@ -905,13 +1082,17 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             onPress={() => {
                               setScoreView(false);
                               handleScore(8);
-                              animeList[animeKey]["list_status"]["score"] = 8;
+                              if (flag == "MAL") {
+                                animeList[animeKey]["list_status"]["score"] = 8;
+                              } else {
+                                animeList[animeKey].score = 8
+                              }
                             }}
                             activeOpacity={1}
                             style={{
                               marginLeft: 22,
                               backgroundColor:
-                                score === 8 ? "green" : "#1a1a1a",
+                                parseInt(score) === 8 ? "green" : "#1a1a1a",
                               borderRadius: 5,
                               paddingVertical: 10,
                               paddingHorizontal: 20,
@@ -936,12 +1117,16 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             onPress={() => {
                               setScoreView(false);
                               handleScore(9);
-                              animeList[animeKey]["list_status"]["score"] = 9;
+                              if (flag == "MAL") {
+                                animeList[animeKey]["list_status"]["score"] = 9;
+                              } else {
+                                animeList[animeKey].score = 9
+                              }
                             }}
                             activeOpacity={1}
                             style={{
                               backgroundColor:
-                                score === 9 ? "green" : "#1a1a1a",
+                                parseInt(score) === 9 ? "green" : "#1a1a1a",
                               borderRadius: 5,
                               paddingVertical: 10,
                               paddingHorizontal: 40,
@@ -965,13 +1150,17 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             onPress={() => {
                               setScoreView(false);
                               handleScore(10);
-                              animeList[animeKey]["list_status"]["score"] = 10;
+                              if (flag == "MAL") {
+                                animeList[animeKey]["list_status"]["score"] = 10;
+                              } else {
+                                animeList[animeKey].score = 10
+                              }
                             }}
                             activeOpacity={1}
                             style={{
                               marginLeft: 22,
                               backgroundColor:
-                                score === 10 ? "green" : "#1a1a1a",
+                                parseInt(score) === 10 ? "green" : "#1a1a1a",
                               borderRadius: 5,
                               paddingVertical: 10,
                               paddingHorizontal: 11.5,
@@ -1018,8 +1207,12 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                           onPress={() => {
                             setStatusView(false);
                             handleStatus("watching");
-                            animeList[animeKey]["list_status"]["status"] =
+                            if (flag == "MAL") {
+                              animeList[animeKey]["list_status"]["status"] =
                               "watching";
+                            } else {
+                              animeList[animeKey].status = "watching"
+                            }
                           }}
                           activeOpacity={1}
                           style={{
@@ -1040,8 +1233,12 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                           onPress={() => {
                             setStatusView(false);
                             handleStatus("plan_to_watch");
-                            animeList[animeKey]["list_status"]["status"] =
+                            if (flag == "MAL") {
+                              animeList[animeKey]["list_status"]["status"] =
                               "plan_to_watch";
+                            } else {
+                              animeList[animeKey].status = "plan_to_watch"
+                            }
                           }}
                           activeOpacity={1}
                           style={{
@@ -1062,8 +1259,12 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                           onPress={() => {
                             setStatusView(false);
                             handleStatus("on_hold");
-                            animeList[animeKey]["list_status"]["status"] =
+                            if (flag == "MAL") {
+                              animeList[animeKey]["list_status"]["status"] =
                               "on_hold";
+                            } else {
+                              animeList[animeKey].status = "on_hold"
+                            }
                           }}
                           activeOpacity={1}
                           style={{
@@ -1084,8 +1285,13 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                           onPress={() => {
                             setStatusView(false);
                             handleStatus("completed");
-                            animeList[animeKey]["list_status"]["status"] =
+                            if (flag == "MAL") {
+                              animeList[animeKey]["list_status"]["status"] =
                               "completed";
+                            } else {
+                              console.log(animeList[6].status)
+                              animeList[animeKey].status = "completed"
+                            }
                           }}
                           activeOpacity={1}
                           style={{
@@ -1106,8 +1312,12 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                           onPress={() => {
                             setStatusView(false);
                             handleStatus("dropped");
-                            animeList[animeKey]["list_status"]["status"] =
+                            if (flag == "MAL") {
+                              animeList[animeKey]["list_status"]["status"] =
                               "dropped";
+                            } else {
+                              animeList[animeKey].status = "dropped"
+                            }
                           }}
                           activeOpacity={1}
                           style={{
