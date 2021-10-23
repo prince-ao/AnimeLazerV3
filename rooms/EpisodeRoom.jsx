@@ -88,13 +88,13 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
 
   const handleAddToList = async () => {
     try {
-      const aToken = await AsyncStorage.getItem("accessToken");
+      setIsLoading(true)
       const response1 = await fetch(
         `https://api.myanimelist.net/v2/anime?q=${route.params.animeTitle}&limit=100`,
         {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${aToken}`,
+            Authorization: `Bearer ${token}`,
           },
         }
       );
@@ -107,19 +107,31 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
           method: "PUT",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
-            Authorization: `Bearer ${aToken}`,
+            Authorization: `Bearer ${token}`,
           },
           body: `status=plan_to_watch`,
         }
       );
       const s_response2 = await response2.text();
       const ss_response2 = await JSON.parse(s_response2);
-      console.log(ss_response2);
+      setIsLoading(false)
       setIsAdded(true);
-      setAnimeList((prev) => {
-        prev, ss_response2;
-      });
+      setAnimeId(id)
+      setAnimeList(route.params.animeList.push({
+        list_status: {
+          "is_rewatching": ss_response2["is_rewatching"],
+          "num_episodes_watched": ss_response2["num_episodes_watched"],
+          "score": ss_response2["score"],
+          "status": ss_response2["status"],
+          "updated_at": ss_response2["updated_at"]
+
+        }
+      }));
+      setAnimeKey(animeList.length - 1)
+      setScore(ss_response2["score"])
+      setStatus(ss_response2["status"])
     } catch (error) {
+      setIsLoading(false)
       console.log(error);
     }
   };
@@ -240,18 +252,23 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   };
 
   const animeStatus = () => {
-    if (animeList.length > 0) {
-      animeList.map((data, key) => {
-        if (data.node.title == route.params.animeTitle) {
-          setIsAdded(true);
-          setStatus(data.list_status.status);
-          setScore(data.list_status.score);
-          setAnimeKey(key);
-          setAnimeId(data.node.id);
-        }
-      });
+    if (animeList !== undefined) {
+      if (animeList.length > 0) {
+        animeList.map((data, key) => {
+          if (data.node.title == route.params.animeTitle) {
+            setIsAdded(true);
+            setStatus(data.list_status.status);
+            setScore(data.list_status.score);
+            setAnimeKey(key);
+            setAnimeId(data.node.id);
+          }
+        });
+      } else {
+        console.log("Sign in first");
+      }
+
     } else {
-      console.log("Sign in first");
+      console.log("AnimeList doesnt exists")
     }
     if (!isAdded) {
       console.log("Not Added");
@@ -601,7 +618,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                     </>
                   ) : (
                     <TouchableOpacity
-                      onPress={() => handleAddToList()}
+                      onPress={() => {
+                        handleAddToList()
+                      }}
                       style={styles(truthy).isAdded}
                     >
                       <Ionicons name={"add"} color="#fff" size={25} />
