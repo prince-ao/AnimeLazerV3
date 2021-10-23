@@ -121,7 +121,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
         setIsLoading(false)
         setIsAdded(true);
         setAnimeId(id)
-        setAnimeList(route.params.animeList.push({
+        animeList.push({
           list_status: {
             "is_rewatching": ss_response2["is_rewatching"],
             "num_episodes_watched": ss_response2["num_episodes_watched"],
@@ -130,10 +130,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
             "updated_at": ss_response2["updated_at"]
   
           }
-        }));
-        setAnimeKey(animeList.length - 1)
-        setScore(ss_response2["score"])
-        setStatus(ss_response2["status"])
+        });
+        animeStatus()
       } catch (error) {
         setIsLoading(false)
         console.log(error);
@@ -147,24 +145,23 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
         await fetch(`${API.url}/favorites/add?timestamp=${timestamp}&anime=${route.params.animeTitle}&status=${"plan_to_watch"}&score=${0}`, {
           method: "PUT",
           headers: {
-            uid: uid
+            uid: uid,
+            img: route.params.animeCover
           }
   
         })
         setIsAdded(true)
         setAnimeId(timestamp)
         
-        setAnimeList(animeList.push({
+        animeList.push({
           score: "0",
           status: "plan_to_watch",
           timestamp: timestamp,
           title: route.params.animeTitle,
-          uid: uid
-          
-        }))
-        setAnimeKey(animeList.length - 1)
-        setScore("0")
-        setStatus("plan_to_watch")
+          uid: uid,
+          img: route.params.animeCover
+        })
+        animeStatus()
         setIsLoading(false)
 
       } catch (err) {
@@ -422,6 +419,85 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     }
   };
 
+  function handleEpisodes(data) {
+    setModalVisible(false);
+    setIsLoading(true);
+    axios
+      .get(`${API.url}/AnimeLazer/Login`, {
+        headers: {
+          "Content-Type": "application/json",
+          id: API.id,
+        },
+      })
+      .then(async function (res) {
+        axios
+          .get(
+            `${API.url}/Animes/RecentEpisodesMp4Src`,
+            {
+              headers: {
+                "Content-Type": "application/json",
+                Authorization: `${API.key}${res.data.token}`,
+                src: data.epUrl,
+              },
+            }
+          )
+          .then(async function (res1) {
+            setIsLoading(false);
+            if (
+              res1.data.data.length === 0 ||
+              (typeof res1.data.data === undefined) |
+                null
+            ) {
+              Platform.OS === "android"
+                ? ToastAndroid.showWithGravity(
+                    "This video file cannot be played.",
+                    2000,
+                    ToastAndroid.BOTTOM
+                  )
+                : Alert.alert(
+                    "Warning",
+                    "This video file cannot be played",
+                    [
+                      {
+                        text: "Cancel",
+                        onPress: () =>
+                          setIsLoading(false),
+                        style: "cancel",
+                      },
+                      {
+                        text: "OK",
+                        onPress: () =>
+                          setIsLoading(false),
+                      },
+                    ]
+                  );
+            } else {
+              navigation.navigate("WatchRoom", {
+                title:
+                  route.params.animeTitle +
+                  " Ep " +
+                  data.epNum,
+                src: res1.data.data,
+              });
+            }
+          });
+      })
+      .catch(function (err) {
+        setIsLoading(false);
+        console.log(err);
+      });
+  }
+
+  // function handleSort() {
+  //   if (!isAsc) {
+  //     setList(list.reverse());
+  //     setIsAsc(true);
+  //   } else {
+  //     setList(list.reverse());
+  //     setIsAsc(false);
+  //   }
+  // }
+
   return (
     <>
       <SafeAreaView
@@ -531,72 +607,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                             style={styles(truthy).episodeCard}
                             key={key}
                             onPress={() => {
-                              setModalVisible(false);
-                              setIsLoading(true);
-                              axios
-                                .get(`${API.url}/AnimeLazer/Login`, {
-                                  headers: {
-                                    "Content-Type": "application/json",
-                                    id: API.id,
-                                  },
-                                })
-                                .then(async function (res) {
-                                  axios
-                                    .get(
-                                      `${API.url}/Animes/RecentEpisodesMp4Src`,
-                                      {
-                                        headers: {
-                                          "Content-Type": "application/json",
-                                          Authorization: `${API.key}${res.data.token}`,
-                                          src: data.epUrl,
-                                        },
-                                      }
-                                    )
-                                    .then(async function (res1) {
-                                      setIsLoading(false);
-                                      if (
-                                        res1.data.data.length === 0 ||
-                                        (typeof res1.data.data === undefined) |
-                                          null
-                                      ) {
-                                        Platform.OS === "android"
-                                          ? ToastAndroid.showWithGravity(
-                                              "This video file cannot be played.",
-                                              2000,
-                                              ToastAndroid.BOTTOM
-                                            )
-                                          : Alert.alert(
-                                              "Warning",
-                                              "This video file cannot be played",
-                                              [
-                                                {
-                                                  text: "Cancel",
-                                                  onPress: () =>
-                                                    setIsLoading(false),
-                                                  style: "cancel",
-                                                },
-                                                {
-                                                  text: "OK",
-                                                  onPress: () =>
-                                                    setIsLoading(false),
-                                                },
-                                              ]
-                                            );
-                                      } else {
-                                        navigation.navigate("WatchRoom", {
-                                          title:
-                                            route.params.animeTitle +
-                                            " Ep " +
-                                            data.epNum,
-                                          src: res1.data.data,
-                                        });
-                                      }
-                                    });
-                                })
-                                .catch(function (err) {
-                                  setIsLoading(false);
-                                  console.log(err);
-                                });
+                              handleEpisodes(data)
                             }}
                           >
                             {" "}
@@ -1289,7 +1300,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                               animeList[animeKey]["list_status"]["status"] =
                               "completed";
                             } else {
-                              console.log(animeList[6].status)
                               animeList[animeKey].status = "completed"
                             }
                           }}
@@ -1378,65 +1388,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       style={styles(truthy).episodeCard}
                       key={key}
                       onPress={() => {
-                        setIsLoading(true);
-                        axios
-                          .get(`${API.url}/AnimeLazer/Login`, {
-                            headers: {
-                              "Content-Type": "application/json",
-                              id: API.id,
-                            },
-                          })
-                          .then(async function (res) {
-                            axios
-                              .get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
-                                headers: {
-                                  "Content-Type": "application/json",
-                                  Authorization: `${API.key}${res.data.token}`,
-                                  src: data.epUrl,
-                                },
-                              })
-                              .then(async function (res1) {
-                                setIsLoading(false);
-                                if (
-                                  res1.data.data.length === 0 ||
-                                  (typeof res1.data.data === undefined) | null
-                                ) {
-                                  Platform.OS === "android"
-                                    ? ToastAndroid.showWithGravity(
-                                        "This video file cannot be played.",
-                                        2000,
-                                        ToastAndroid.BOTTOM
-                                      )
-                                    : Alert.alert(
-                                        "Warning",
-                                        "This video file cannot be played",
-                                        [
-                                          {
-                                            text: "Cancel",
-                                            onPress: () => setIsLoading(false),
-                                            style: "cancel",
-                                          },
-                                          {
-                                            text: "OK",
-                                            onPress: () => setIsLoading(false),
-                                          },
-                                        ]
-                                      );
-                                } else {
-                                  navigation.navigate("WatchRoom", {
-                                    title:
-                                      route.params.animeTitle +
-                                      " Ep " +
-                                      data.epNum,
-                                    src: res1.data.data,
-                                  });
-                                }
-                              });
-                          })
-                          .catch(function (err) {
-                            setIsLoading(false);
-                            console.log(err);
-                          });
+                        handleEpisodes(data)
                       }}
                     >
                       {" "}

@@ -11,8 +11,6 @@ import {
 import { createMaterialTopTabNavigator } from "@react-navigation/material-top-tabs";
 import { Header } from "../components/index";
 import { Complete, OnHold, Dropped, Plan, Watching } from "../screens";
-import { firebase } from "@firebase/app";
-import "@firebase/auth";
 import { WebView } from "react-native-webview";
 import { clientID, codeChallenge, BASE_URL_V1 } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -49,7 +47,47 @@ const Favorites = ({ truth }) => {
   const handleDelete = async () => {
     await AsyncStorage.removeItem("accessToken");
     await AsyncStorage.removeItem("refreshToken");
+    await AsyncStorage.removeItem("reloadDate");
+    await AsyncStorage.removeItem("expireToke");
   };
+  const handleExpire = async () => {
+    try {
+      const eToken = await AsyncStorage.getItem("expireToken");
+      const curDate = await AsyncStorage.getItem("reloadDate");
+      if (parseInt(curDate) + parseInt(eToken) * 1000 <= Date.now()) {
+        console.log("going inside");
+        const response = await fetch(`${BASE_URL}token`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: `grant_type=refresh_token&refresh_token=${eToken}&client_id=${clientID}&code_verifier=${codeChallenge}`,
+        });
+        const response_s = await response.json();
+        //console.log(response_s);
+        try {
+          await AsyncStorage.setItem("reloadDate", String(Date.now()));
+          await AsyncStorage.setItem("accessToken", response_s.access_token);
+          await AsyncStorage.setItem("refreshToken", response_s.refresh_token);
+          await AsyncStorage.setItem(
+            "expireToken",
+            String(response_s.expires_in)
+          );
+        } catch (e) {
+          console.log(e);
+        }
+        authRef.current.access = response_s.access_token;
+        authRef.current.refresh = response_s.refresh_token;
+        authRef.current.expires = response_s.expires_in;
+        loggedRef.current = true;
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+  useEffect(() => {
+    handleExpire();
+  }, []);
   useEffect(() => {
     const checkItem = async () => {
       const aToken = await AsyncStorage.getItem("accessToken");
@@ -95,8 +133,17 @@ const Favorites = ({ truth }) => {
       const response_s = await response.json();
       //console.log(response_s);
       try {
+        await AsyncStorage.setItem("reloadDate", String(Date.now()));
+        console.log("made it through the reload");
         await AsyncStorage.setItem("accessToken", response_s.access_token);
+        console.log("made it through the access");
         await AsyncStorage.setItem("refreshToken", response_s.refresh_token);
+        console.log("made it through the refresh");
+        await AsyncStorage.setItem(
+          "expireToken",
+          String(response_s.expires_in)
+        );
+        console.log("made it through the expire");
       } catch (e) {
         console.log(e);
       }
@@ -168,6 +215,14 @@ const Favorites = ({ truth }) => {
               </TouchableOpacity>
             </View>
           ) : null}
+          {/*<View>
+            <TouchableOpacity
+              style={{ width: 100, height: 80, backgroundColor: "#fff" }}
+              onPress={() => handleDelete()}
+            >
+              <Text>Delete</Text>
+            </TouchableOpacity>
+          </View>*/}
           <Tab.Navigator
             screenOptions={{
               tabBarItemStyle: { width: 200 },

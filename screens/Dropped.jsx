@@ -8,10 +8,15 @@ import {
   TouchableOpacity,
   Dimensions,
   Alert,
+  DevSettings,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 const axios = require("axios");
 import { key, url, BASE_URL_V2 } from "@env";
+import { firebase } from '@firebase/app'
+import "@firebase/database"
+import "@firebase/auth";
+
 
 const Dropped = (props) => {
   const [data, setData] = useState([]);
@@ -26,27 +31,47 @@ const Dropped = (props) => {
 
   useEffect(() => {
     const fetc = async () => {
-      try {
-        const response = await fetch(
-          `${BASE_URL}users/@me/animelist?status=dropped&limit=1000&sort=list_score`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${props.route.params.authRef.current.access}`,
-            },
+      if (props.route.params.authRef.current.access.length > 0 ) {
+        try {
+          const response = await fetch(
+            `${BASE_URL}users/@me/animelist?status=dropped&limit=1000&sort=list_score`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${props.route.params.authRef.current.access}`,
+              },
+            }
+          );
+          const s_response = await response.text();
+          const ss_response = await JSON.parse(s_response);
+          setData(ss_response);
+          if (ss_response.data.length > 0) {
+            setGotData(true);
           }
-        );
-        const s_response = await response.text();
-        const ss_response = await JSON.parse(s_response);
-        setData(ss_response);
-        if (ss_response.data.length > 0) {
-          setGotData(true);
+        } catch (e) {
+          console.log(e);
         }
-      } catch (e) {
-        console.log(e);
+      } else {
+        try {
+          const uid = firebase.auth().currentUser.uid
+          let animeList = await fetch(
+            `${API.url}/favorites/filter?status=dropped`,
+            {
+              method: "GET",
+              headers: {
+                uid: uid
+              }
+            }
+          )
+          animeList = await animeList.json()
+        } catch (err) {
+          console.log(err)
+        }
+        
       }
-    };
+    }
     fetc();
+      
     //console.log(props.route.params);
   }, [props.route.params.webview, props.route.params.again, refresh]);
   const handlePress = (title) => {
@@ -147,7 +172,7 @@ const Dropped = (props) => {
     return (
       <>
         <TouchableOpacity
-          onPress={() => setRefresh("inclusivelord")}
+          onPress={() => setRefresh(`${Math.random() * 1000000}`)}
           style={styles.floatRefresh}
         >
           <Ionicons name="refresh-outline" size={24} color="black" />
@@ -184,7 +209,7 @@ const Dropped = (props) => {
       <View>
         <TouchableOpacity
           style={styles.noDataContainer}
-          onPress={() => setRefresh("inclusivelord")}
+          onPress={() => setRefresh(`${Math.random() * 1000000}`)}
         >
           <Ionicons name="refresh-outline" size={60} color="black" />
         </TouchableOpacity>
@@ -237,9 +262,5 @@ const styles = StyleSheet.create({
     marginTop: 10,
     textAlign: "center",
   },
-  floatRefresh: {
-    position: "absolute",
-    right: 10,
-    top: 10,
-  },
+  floatRefresh: {},
 });
