@@ -14,7 +14,7 @@ import { Complete, OnHold, Dropped, Plan, Watching } from "../screens";
 import { firebase } from "@firebase/app";
 import "@firebase/auth";
 import { WebView } from "react-native-webview";
-import { clientID, codeChallenge, BASE_URL_V1 } from "@env";
+import { clientID, codeChallenge, BASE_URL_V1, url } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Tab = createMaterialTopTabNavigator();
@@ -106,9 +106,7 @@ const Favorites = ({ truth }) => {
   }, []);
   const handleNav = async (newNavState) => {
     //console.log(newNavState);
-    if (
-      newNavState.url.includes("https://animelazerapi.herokuapp.com/api/MAL")
-    ) {
+    if (newNavState.url.includes(`${url}api/MAL`)) {
       let code = false;
       let auth = "";
       for (let i = 0; i < newNavState.url.length; i++) {

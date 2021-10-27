@@ -68,7 +68,7 @@ const Watching = (props) => {
   }, [props.route.params.webview, props.route.params.again, refresh]);
   const handlePress = (title) => {
     axios
-      .get(`${API.url}/AnimeLazer/Login`, {
+      .get(`${API.url}AnimeLazer/Login`, {
         headers: {
           "Content-Type": "application/json",
           id: API.id,
@@ -76,7 +76,7 @@ const Watching = (props) => {
       })
       .then(async (res) => {
         await axios
-          .get(`${API.url}/Animes/Search`, {
+          .get(`${API.url}Animes/Search`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `${API.key}${res.data.token}`,
@@ -101,7 +101,7 @@ const Watching = (props) => {
                   ]);
             } else {
               axios
-                .get(`${API.url}/AnimeLazer/Login`, {
+                .get(`${API.url}AnimeLazer/Login`, {
                   headers: {
                     "Content-Type": "application/json",
                     id: API.id,
@@ -109,7 +109,7 @@ const Watching = (props) => {
                 })
                 .then(async (res) => {
                   axios
-                    .get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                    .get(`${API.url}Animes/scrapeAnimeDetails`, {
                       headers: {
                         "Content-Type": "application/json",
                         Authorization: `${API.key}${res.data.token}`,
