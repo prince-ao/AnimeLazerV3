@@ -9,6 +9,7 @@ import {
   Alert,
   Dimensions,
   DevSettings,
+  RefreshControl
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 const axios = require("axios");
@@ -28,6 +29,8 @@ const Complete = (props) => {
   const [gotData, setGotData] = useState(false);
   const [refresh, setRefresh] = useState("");
   const [isLocal, setIsLocal] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+
   const uid = firebase.auth().currentUser.uid
   const BASE_URL = BASE_URL_V2;
   const API = {
@@ -71,9 +74,8 @@ const Complete = (props) => {
               }
             }
           )
-          animeList = await animeList.json()
+          animeList = await animeList.text()
           setData(animeList)
-          console.log(data)
           if (animeList.length > 0) {
             setGotData(true)
           }
@@ -241,7 +243,7 @@ const Complete = (props) => {
   };
   function handleRender() {
     if (!isLocal) {
-      {data.data.map((item, key) => {
+      {return data.data.map((item, key) => {
         return (
           <View style={styles().map} key={key}>
             <TouchableOpacity
@@ -258,6 +260,21 @@ const Complete = (props) => {
       })}
 
     } else {
+      {return JSON.parse(data).map((item, key) => {
+        return (
+          <View style={styles().map} key={key}>
+            <TouchableOpacity
+              onPress={() => handlePress(item.animeName)}
+            >
+              <Image
+                style={styles().mapImage}
+                source={{ uri: String(item.uri) }}
+              />
+            </TouchableOpacity>
+            <Text style={styles().mapText}>{item.animeName}</Text>
+          </View>
+        );
+      })}
       // for (let i = 0; i < data.length; i++) {
       //   data.push({
       //     animeName: data[i].animeName,
@@ -288,17 +305,12 @@ const Complete = (props) => {
   if (gotData) {
     return (
       <>
-        <TouchableOpacity
-          style={styles().floatRefresh}
-          onPress={() => setRefresh(`${Math.random() * 1000000}`)}
-        >
-          <Ionicons name="refresh-outline" size={24} color="black" />
-        </TouchableOpacity>
         <ScrollView
           style={styles().mapContainer}
           overScrollMode="never"
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => setRefresh(`${Math.random() * 1000000}`)}/>}
         >
           <View style={styles().container}>
             {handleRender()}

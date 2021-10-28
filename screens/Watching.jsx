@@ -9,46 +9,43 @@ import {
   Alert,
   Dimensions,
   DevSettings,
+  RefreshControl
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 const axios = require("axios");
 import { key, url, BASE_URL_V2 } from "@env";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { firebase } from '@firebase/app'
 import "@firebase/database"
 import "@firebase/auth";
+import { withSafeAreaInsets } from "react-native-safe-area-context";
 
+function useForceUpdate() {
+  const [value, setValue] = useState(0); // integer state
+  return () => setValue((value) => value + 1); // update the state to force render
+}
 
-/*return (
-      {/*<ScrollView style={styles.mapContainer}>
-        {data.data.map((item) => {
-          return (
-            <View>
-              <Image
-                style={{ width: 150, height: 200 }}
-                source={{ uri: String(item.node.main_picture.large) }}
-              />
-              <Text>{item.node.title}</Text>
-            </View>
-          );
-        })}
-      </ScrollView>
-    );*/
-
-const Watching = (props) => {
+const Complete = (props) => {
   const [data, setData] = useState([]);
   const [gotData, setGotData] = useState(false);
   const [refresh, setRefresh] = useState("");
+  const [isLocal, setIsLocal] = useState(false)
+  const [refreshing, setRefreshing] = useState(false)
+  const uid = firebase.auth().currentUser.uid
   const BASE_URL = BASE_URL_V2;
   const API = {
     id: "_" + Math.random().toString(36).substr(2, 9),
     url: url,
     key: key + " ",
   };
+  const forceUpdate = useForceUpdate();
 
   useEffect(() => {
     const fetc = async () => {
+      setRefreshing(true)
       if (props.route.params.authRef.current.access.length > 0 ) {
         try {
+          setIsLocal(false)
           const response = await fetch(
             `${BASE_URL}users/@me/animelist?status=watching&limit=1000&sort=list_score`,
             {
@@ -61,15 +58,17 @@ const Watching = (props) => {
           const s_response = await response.text();
           const ss_response = await JSON.parse(s_response);
           setData(ss_response);
+          setRefreshing(false)
           if (ss_response.data.length > 0) {
             setGotData(true);
           }
         } catch (e) {
+          setRefreshing(false)
           console.log(e);
         }
       } else {
         try {
-          const uid = firebase.auth().currentUser.uid
+          setIsLocal(true)
           let animeList = await fetch(
             `${API.url}/favorites/filter?status=watching`,
             {
@@ -79,14 +78,23 @@ const Watching = (props) => {
               }
             }
           )
-          animeList = await animeList.json()
+          animeList = await animeList.text()
+          setData(animeList)
+          setRefreshing(false)
+          if (animeList.length > 0) {
+            setGotData(true)
+          }
         } catch (err) {
+          setRefreshing(false)
           console.log(err)
         }
         
       }
     }
     fetc();
+      
+      
+      
     //console.log(props.route.params);
   }, [props.route.params.webview, props.route.params.again, refresh]);
   const handlePress = (title) => {
@@ -140,7 +148,7 @@ const Watching = (props) => {
                       },
                     })
                     .then(async function (res1) {
-                      res1.data.data.map((info) => {
+                      res1.data.data.map(async(info) => {
                         if (data[0] === null) {
                           Platform.OS === "android"
                             ? ToastAndroid.showWithGravity(
@@ -160,21 +168,77 @@ const Watching = (props) => {
                                 },
                               ]);
                         } else {
-                          props.navigation.navigate("EpisodeRoom", {
-                            type: info.type,
-                            synopsis: info.synopsis,
-                            animeCover: info.animeCover,
-                            animeTitle: info.animeEnglishTitle,
-                            episodes: info.episodesAvaliable,
-                            season: info.season,
-                            language: info.language,
-                            genres: info.genres,
-                            status: info.status,
-                            episodesList: info.episodesList,
-                            animeUrl: data.animeUrl,
+                          if (await AsyncStorage.getItem('accessToken') == null){
+                            try {
+                              let animeList = await fetch(`${API.url}/favorites/find`, {
+                                method: "GET",
+                                headers: {
+                                  uid: firebase.auth().currentUser.uid
+                                }
+                              })
+                              animeList = await animeList.json()
+                              res1.data.data.map((info) => {
+                                props.navigation.navigate("EpisodeRoom", {
+                                  flag: "local",
+                                  type: info.type,
+                                  synopsis: info.synopsis,
+                                  animeCover: info.animeCover,
+                                  animeTitle: info.animeEnglishTitle,
+                                  episodes: info.episodesAvaliable,
+                                  season: info.season,
+                                  language: info.language,
+                                  genres: info.genres,
+                                  status: info.status,
+                                  episodesList: info.episodesList,
+                                  animeUrl: data.animeUrl,
+                                  otherNames: info.otherNames,
+                                  accessToken: "unused",
+                                  animeList: animeList
+                                  // there is more options such as animeJapaneseTitle, studio.
+                                });
+                              });
+          
+                            } catch (err) {
 
-                            // there is more options such as animeJapaneseTitle, studio.
-                          });
+                              console.log(err)
+                            }
+                            
+                          } else {
+                            AsyncStorage.getItem('accessToken').then(async function(token) {
+                              axios.get(`${BASE_URL}users/@me/animelist?fields=list_status&limit=1000&sort=list_score`, {
+                                headers: {
+                                  Authorization: `${API.key}${token}`,
+                                }
+                              }).then(async function (animeList) {
+
+                                res1.data.data.map((info) => {
+                                  props.navigation.navigate("EpisodeRoom", {
+                                    flag: "MAL",
+                                    type: info.type,
+                                    synopsis: info.synopsis,
+                                    animeCover: info.animeCover,
+                                    animeTitle: info.animeEnglishTitle,
+                                    episodes: info.episodesAvaliable,
+                                    season: info.season,
+                                    language: info.language,
+                                    genres: info.genres,
+                                    status: info.status,
+                                    episodesList: info.episodesList,
+                                    animeUrl: data.animeUrl,
+                                    otherNames: info.otherNames,
+                                    accessToken: token,
+                                    animeList: animeList.data.data
+                                    // there is more options such as animeJapaneseTitle, studio.
+                                  });
+                                });
+                          }).catch((err) => {
+
+                            console.log(err)
+                          })
+                        
+          
+                          })
+                        }
                         }
                       });
                     });
@@ -183,99 +247,140 @@ const Watching = (props) => {
           });
       });
   };
+  function handleRender() {
+    if (!isLocal) {
+      {return data.data.map((item, key) => {
+        return (
+          <View style={styles().map} key={key}>
+            <TouchableOpacity
+              onPress={() => handlePress(item.node.title)}
+            >
+              <Image
+                style={styles().mapImage}
+                source={{ uri: String(item.node.main_picture.large) }}
+              />
+            </TouchableOpacity>
+            <Text style={styles().mapText}>{item.node.title}</Text>
+          </View>
+        );
+      })}
+
+    } else {
+      {return JSON.parse(data).map((item, key) => {
+        return (
+          <View style={styles().map} key={key}>
+            <TouchableOpacity
+              onPress={() => handlePress(item.animeName)}
+            >
+              <Image
+                style={styles().mapImage}
+                source={{ uri: String(item.uri) }}
+              />
+            </TouchableOpacity>
+            <Text style={styles().mapText}>{item.animeName}</Text>
+          </View>
+        );
+      })}
+      // for (let i = 0; i < data.length; i++) {
+      //   data.push({
+      //     animeName: data[i].animeName,
+      //     uri: data[i].uri,
+      //   })
+      // }
+      // {data.map((data, key) => {
+      //   console.log(data.uri)
+      //   return (
+      //     <View style={styles().map} key={key}>
+      //     <TouchableOpacity
+      //       onPress={() => handlePress(data.animeName)}
+      //     >
+      //       <Image
+      //         style={styles().mapImage}
+      //         source={{ uri: data.uri }}
+      //       />
+      //     </TouchableOpacity>
+      //     <Text style={styles().mapText}>{data.animeName}</Text>
+      //   </View>
+
+      //   )
+      // })}
+        
+    }
+  }
+
   if (gotData) {
     return (
       <>
-        <TouchableOpacity
-          style={styles.floatRefresh}
-          onPress={() => setRefresh(`${Math.random() * 1000000}`)}
-        >
-          <Ionicons name="refresh-outline" size={24} color="black" />
-        </TouchableOpacity>
         <ScrollView
-          style={styles.mapContainer}
+          style={styles().mapContainer}
           overScrollMode="never"
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
+          refreshControl={<RefreshControl refreshing={refreshing} onRefresh={() => setRefresh(`${Math.random() * 1000000}`)}/>}
         >
-          <View style={styles.container}>
-            {data.data.map((item, key) => {
-              return (
-                <View style={styles.map} key={key}>
-                  <TouchableOpacity
-                    onPress={() => handlePress(item.node.title)}
-                    key={item.node.title}
-                  >
-                    <Image
-                      style={styles.mapImage}
-                      source={{ uri: String(item.node.main_picture.large) }}
-                    />
-                  </TouchableOpacity>
-                  <Text style={styles.mapText}>{item.node.title}</Text>
-                </View>
-              );
-            })}
+          <View style={styles().container}>
+            {handleRender()}
           </View>
         </ScrollView>
       </>
     );
   } else {
     return (
-      <View>
+      <View style={styles().noDataContainer}>
         <TouchableOpacity
-          style={styles.noDataContainer}
           onPress={() => setRefresh(`${Math.random() * 1000000}`)}
         >
           <Ionicons name="refresh-outline" size={60} color="black" />
         </TouchableOpacity>
-        <Text style={styles.noDataText}>If already logged in, refresh</Text>
+        <Text style={styles().noDataText}>If already logged in, refresh</Text>
       </View>
     );
   }
 };
 
-export default Watching;
+export default Complete;
 
-const styles = StyleSheet.create({
-  mapContainer: {
-    display: "flex",
-    flexDirection: "column",
-    flexWrap: "wrap",
-  },
-  container: {
-    display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-evenly",
-  },
-  map: {
-    width: 175,
-    marginTop: 30,
-    display: "flex",
-    alignItems: "center",
-  },
-  mapText: {
-    marginTop: 10,
-    textAlign: "center",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-  mapImage: {
-    width: 150,
-    height: 200,
-    borderRadius: 5,
-  },
-  noDataContainer: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 200,
-  },
-  noDataText: {
-    fontSize: 20,
-    marginTop: 10,
-    textAlign: "center",
-  },
-  floatRefresh: {},
-});
+const styles = () =>
+  StyleSheet.create({
+    mapContainer: {
+      display: "flex",
+      flexDirection: "column",
+      flexWrap: "wrap",
+    },
+    container: {
+      display: "flex",
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-evenly",
+    },
+    map: {
+      width: 175,
+      marginTop: 30,
+      display: "flex",
+      alignItems: "center",
+    },
+    mapText: {
+      marginTop: 10,
+      textAlign: "center",
+      fontWeight: "bold",
+      fontSize: 18,
+    },
+    mapImage: {
+      width: 150,
+      height: 200,
+      borderRadius: 5,
+    },
+    noDataContainer: {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 200,
+    },
+    noDataText: {
+      fontSize: 20,
+      marginTop: 10,
+      textAlign: "center",
+    },
+    floatRefresh: {},
+  });
