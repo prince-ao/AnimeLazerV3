@@ -174,7 +174,7 @@ const WatchRoom = ({ navigation, route, truthy }) => {
             }}
             onPlaybackStatusUpdate={(status) => {
               setStatus(() => status);
-              console.log(status.positionMillis);
+              //console.log(status.positionMillis);
             }}
           />
           <ActivityIndicator
@@ -221,7 +221,7 @@ const WatchRoom = ({ navigation, route, truthy }) => {
           style={styles(truthy).video}
           onPlaybackStatusUpdate={(status) => {
             setStatus(() => status);
-            console.log(status);
+            //console.log(status);
           }}
         />
       )}

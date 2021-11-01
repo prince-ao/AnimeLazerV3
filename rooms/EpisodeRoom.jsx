@@ -30,10 +30,12 @@ import {
   ActivityIndicator,
   Platform,
   Alert,
+  Modal,
 } from "react-native";
 import { Header } from "../components/index";
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { firebase } from "@firebase/app";
+import { Picker } from "react-native-woodpicker";
 import { key, url, BASE_URL_V2 } from "@env";
 import "@firebase/database";
 import "@firebase/auth";
@@ -57,8 +59,22 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   const [showMoreButton, setShowMoreButton] = useState(false);
   const [list, setList] = useState(route.params.episodesList);
   const [isAsc, setIsAsc] = useState(true);
+  const [isAdded, setIsAdded] = useState(false);
   const [show, setShow] = useState(false);
   const [status, setStatus] = useState("");
+  const [pickedData, setPickedData] = useState();
+  const [modalVisible, setModalVisible] = useState(false);
+  const [rating, setRating] = useState(0);
+  const [episode, setEpisode] = useState(0);
+  const [refresh, setRefresh] = useState("");
+
+  const data = [
+    { label: "Watching", value: 1 },
+    { label: "Completed", value: 2 },
+    { label: "On-Hold", value: 3 },
+    { label: "Dropped", value: 4 },
+    { label: "Plan to Watch", value: 5 },
+  ];
 
   const onTextLayout = useCallback(
     (e) => {
@@ -79,7 +95,136 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   const getStatus = async () => {
     const aToken = await AsyncStorage.getItem("accessToken");
     if (aToken == null) {
-      //Do something
+      return;
+    }
+    try {
+      const response = await fetch(
+        `${BASE_URL_V2}users/@me/animelist?fields=list_status&limit=1000`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${aToken}`,
+          },
+        }
+      );
+      const s_response = await response.text();
+      const ss_response = await JSON.parse(s_response);
+      /* ss_response format:
+        {
+          "data": [
+            {
+              "list_status": {
+                "is_rewatching": false,
+                "num_episodes_watched": 0,
+                "score": 0,
+                "status": "plan_to_watch",
+                "updated_at": "2021-10-19T12:41:09+00:00",
+              },
+              "node": {
+                "id": 48569,
+                "main_picture": Object {
+                  "large": "https://api-cdn.myanimelist.net/images/anime/1321/117508l.jpg",
+                  "medium": "https://api-cdn.myanimelist.net/images/anime/1321/117508.jpg",
+                },
+                "title": "86 Part 2",
+              },
+            },
+            ...
+            ...
+            ...
+          ]
+        }
+      */
+      const ar = [];
+      for (let i = 0; i < ss_response.data.length; i++) {
+        if (route.params.animeTitle.includes(ss_response.data[i].node.title)) {
+          ar.push(ss_response.data[i]);
+        }
+      }
+      if (ar.length > 1) {
+        for (let i = 0; i < ar.length; i++) {
+          if (route.params.animeTitle == ar[i].node.title) {
+            if (ar[0].list_status.status === "watching") {
+              setStatus("Watching");
+            } else if (ar[0].list_status.status === "completed") {
+              setStatus("Completed");
+            } else if (ar[0].list_status.status === "on_hold") {
+              setStatus("On-Hold");
+            } else if (ar[0].list_status.status === "dropped") {
+              setStatus("Dropped");
+            } else {
+              setStatus("Plan to Watch");
+            }
+            setIsAdded(true);
+            return;
+          }
+        }
+      } else if (ar.length === 1) {
+        if (ar[0].list_status.status === "watching") {
+          setStatus("Watching");
+        } else if (ar[0].list_status.status === "completed") {
+          setStatus("Completed");
+        } else if (ar[0].list_status.status === "on_hold") {
+          setStatus("On-Hold");
+        } else if (ar[0].list_status.status === "dropped") {
+          setStatus("Dropped");
+        } else {
+          setStatus("Plan to Watch");
+        }
+        setIsAdded(true);
+      } else {
+        const ar2 = [];
+        for (let i = 0; i < ss_response.data.length; i++) {
+          if (
+            ss_response.data[i].node.title.includes(route.params.animeTitle)
+          ) {
+            ar2.push(ss_response.data[i]);
+          }
+        }
+        if (ar2.length === 1) {
+          if (ar2[0].list_status.status === "watching") {
+            setStatus("Watching");
+          } else if (ar2[0].list_status.status === "completed") {
+            setStatus("Completed");
+          } else if (ar2[0].list_status.status === "on_hold") {
+            setStatus("On-Hold");
+          } else if (ar2[0].list_status.status === "dropped") {
+            setStatus("Dropped");
+          } else {
+            setStatus("Plan to Watch");
+          }
+          setIsAdded(true);
+        } else if (ar2.length > 1) {
+          for (let i = 0; i < ar2.length; i++) {
+            if (route.params.animeTitle == ar2[i].node.title) {
+              if (ar2[0].list_status.status === "watching") {
+                setStatus("Watching");
+              } else if (ar2[0].list_status.status === "completed") {
+                setStatus("Completed");
+              } else if (ar2[0].list_status.status === "on_hold") {
+                setStatus("On-Hold");
+              } else if (ar2[0].list_status.status === "dropped") {
+                setStatus("Dropped");
+              } else {
+                setStatus("Plan to Watch");
+              }
+              setIsAdded(true);
+              return;
+            }
+          }
+        } else {
+          setIsAdded(false);
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getRating = async () => {
+    const aToken = await AsyncStorage.getItem("accessToken");
+    if (aToken == null) {
+      return;
     }
     try {
       const response = await fetch(
@@ -102,12 +247,88 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
       if (ar.length > 1) {
         for (let i = 0; i < ar.length; i++) {
           if (route.params.animeTitle == ar[i].node.title) {
-            setStatus(ar[i].list_status.status);
+            setRating(ar[i].list_status.score);
             return;
           }
         }
+      } else if (ar.length === 1) {
+        setRating(ar[0].list_status.score);
       } else {
-        setStatus(ar[0].list_status.status);
+        const ar2 = [];
+        for (let i = 0; i < ss_response.data.length; i++) {
+          if (
+            ss_response.data[i].node.title.includes(route.params.animeTitle)
+          ) {
+            ar2.push(ss_response.data[i]);
+          }
+        }
+        if (ar2.length === 1) {
+          setRating(ar2[0].list_status.score);
+        } else if (ar2.length > 1) {
+          for (let i = 0; i < ar2.length; i++) {
+            if (route.params.animeTitle == ar2[i].node.title) {
+              setRating(ar2[0].list_status.score);
+              return;
+            }
+          }
+        }
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const getEpisode = async () => {
+    const aToken = await AsyncStorage.getItem("accessToken");
+    if (aToken == null) {
+      return;
+    }
+    try {
+      const response = await fetch(
+        `${BASE_URL_V2}users/@me/animelist?fields=list_status&limit=1000`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${aToken}`,
+          },
+        }
+      );
+      const s_response = await response.text();
+      const ss_response = await JSON.parse(s_response);
+      const ar = [];
+      for (let i = 0; i < ss_response.data.length; i++) {
+        if (route.params.animeTitle.includes(ss_response.data[i].node.title)) {
+          ar.push(ss_response.data[i]);
+        }
+      }
+      if (ar.length > 1) {
+        for (let i = 0; i < ar.length; i++) {
+          if (route.params.animeTitle == ar[i].node.title) {
+            setEpisode(ar[i].list_status.num_episodes_watched);
+            return;
+          }
+        }
+      } else if (ar.length === 1) {
+        setEpisode(ar[0].list_status.num_episodes_watched);
+      } else {
+        const ar2 = [];
+        for (let i = 0; i < ss_response.data.length; i++) {
+          if (
+            ss_response.data[i].node.title.includes(route.params.animeTitle)
+          ) {
+            ar2.push(ss_response.data[i]);
+          }
+        }
+        if (ar2.length === 1) {
+          setEpisode(ar2[0].list_status.num_episodes_watched);
+        } else if (ar2.length > 1) {
+          for (let i = 0; i < ar2.length; i++) {
+            if (route.params.animeTitle == ar2[i].node.title) {
+              setEpisode(ar2[0].list_status.num_episodes_watched);
+              return;
+            }
+          }
+        }
       }
     } catch (error) {
       console.log(error);
@@ -116,9 +337,11 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
 
   useEffect(() => {
     getStatus();
+    getRating();
+    getEpisode();
   }, []);
 
-  const handlePress = async (prop) => {
+  const handleScore = async (score) => {
     try {
       const aToken = await AsyncStorage.getItem("accessToken");
       const response1 = await fetch(
@@ -134,19 +357,136 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
       const ss_response1 = await JSON.parse(s_response1);
       const id = ss_response1.data[0].node.id;
       const response2 = await fetch(
-        `https://api.myanimelist.net/v2/anime/${id}/my_list_status?status=${prop}`,
+        `https://api.myanimelist.net/v2/anime/${id}/my_list_status?score=${score}`,
         {
           method: "PUT",
           headers: {
             "Content-Type": "application/x-www-form-urlencoded",
             Authorization: `Bearer ${aToken}`,
           },
-          body: `status=${prop}`,
+          body: `score=${score}`,
         }
       );
       const s_response2 = await response2.text();
       const ss_response2 = await JSON.parse(s_response2);
-      setStatus(ss_response2.status);
+      setRating(ss_response2.score);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleNewAnime = async () => {
+    try {
+      const aToken = await AsyncStorage.getItem("accessToken");
+      const response1 = await fetch(
+        `https://api.myanimelist.net/v2/anime?q=${route.params.animeTitle}&limit=100`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${aToken}`,
+          },
+        }
+      );
+      const s_response1 = await response1.text();
+      const ss_response1 = await JSON.parse(s_response1);
+      const id = ss_response1.data[0].node.id;
+      const response2 = await fetch(
+        `https://api.myanimelist.net/v2/anime/${id}/my_list_status?score=${0}&status=${"plan_to_watch"}&num_watched_episodes=${0}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${aToken}`,
+          },
+          body: `score=${0}&status=${"plan_to_watch"}&num_watched_episodes=${0}`,
+        }
+      );
+      const s_response2 = await response2.text();
+      const ss_response2 = await JSON.parse(s_response2);
+      setRating(ss_response2.score);
+      setEpisode(ss_response2.num_episodes_watched);
+      setStatus("Plan To Watch");
+      setIsAdded(true);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleEpisodePress = async (ep) => {
+    try {
+      const aToken = await AsyncStorage.getItem("accessToken");
+      const response1 = await fetch(
+        `https://api.myanimelist.net/v2/anime?q=${route.params.animeTitle}&limit=100`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${aToken}`,
+          },
+        }
+      );
+      const s_response1 = await response1.text();
+      const ss_response1 = await JSON.parse(s_response1);
+      const id = ss_response1.data[0].node.id;
+      const response2 = await fetch(
+        `https://api.myanimelist.net/v2/anime/${id}/my_list_status?num_watched_episodes=${ep}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${aToken}`,
+          },
+          body: `num_watched_episodes=${ep}`,
+        }
+      );
+      const s_response2 = await response2.text();
+      const ss_response2 = await JSON.parse(s_response2);
+      setEpisode(ss_response2.num_episodes_watched);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handlePress = async (prop) => {
+    let stat;
+    if (prop.label === "Watching") {
+      stat = "watching";
+    } else if (prop.label === "Completed") {
+      stat = "completed";
+    } else if (prop.label === "On-Hold") {
+      stat = "on_hold";
+    } else if (prop.label === "Dropped") {
+      stat = "dropped";
+    } else {
+      stat = "plan_to_watch";
+    }
+    setStatus(prop.label);
+    try {
+      const aToken = await AsyncStorage.getItem("accessToken");
+      const response1 = await fetch(
+        `https://api.myanimelist.net/v2/anime?q=${route.params.animeTitle}&limit=100`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${aToken}`,
+          },
+        }
+      );
+      const s_response1 = await response1.text();
+      const ss_response1 = await JSON.parse(s_response1);
+      const id = ss_response1.data[0].node.id;
+      const response2 = await fetch(
+        `https://api.myanimelist.net/v2/anime/${id}/my_list_status?status=${stat}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${aToken}`,
+          },
+          body: `status=${stat}`,
+        }
+      );
+      const s_response2 = await response2.text();
+      const ss_response2 = await JSON.parse(s_response2);
     } catch (error) {
       console.log(error);
     }
@@ -308,168 +648,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
           </MenuProvider> */}
         </View>
         <View style={{ zIndex: 1 }}>
-          <TouchableOpacity
-            style={{ position: "absolute", right: 10, top: 5, zIndex: 100 }}
-            onPress={() => setShow(!show)}
-          >
-            <Ionicons name="add-outline" size={40} color="white" />
-          </TouchableOpacity>
-          {show ? (
-            <View
-              style={{
-                backgroundColor: "#fff",
-                zIndex: 20,
-                position: "absolute",
-                top: 50,
-                right: 10,
-                borderRadius: 5,
-                width: 170,
-                height: 190,
-              }}
-            >
-              <ScrollView>
-                <View style={styles().listContainer}>
-                  <TouchableOpacity
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      marginLeft: 12,
-                    }}
-                    onPress={async () => await handlePress("watching")}
-                  >
-                    <Ionicons
-                      name="checkmark-sharp"
-                      size={24}
-                      color="green"
-                      style={{
-                        display: status === "watching" ? "flex" : "none",
-                      }}
-                    />
-                    <Text
-                      style={{
-                        ...styles().listText,
-                        color: status === "watching" ? "green" : "black",
-                        marginLeft: status === "watching" ? 8 : 0,
-                      }}
-                    >
-                      Watching
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles().listContainer}>
-                  <TouchableOpacity
-                    onPress={async () => handlePress("completed")}
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      marginLeft: 12,
-                    }}
-                  >
-                    <Ionicons
-                      name="checkmark-sharp"
-                      size={24}
-                      color="green"
-                      style={{
-                        display: status === "completed" ? "flex" : "none",
-                      }}
-                    />
-                    <Text
-                      style={{
-                        ...styles().listText,
-                        color: status === "completed" ? "green" : "black",
-                        marginLeft: status === "completed" ? 8 : 0,
-                      }}
-                    >
-                      Completed
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles().listContainer}>
-                  <TouchableOpacity
-                    onPress={async () => handlePress("on_hold")}
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      marginLeft: 12,
-                    }}
-                  >
-                    <Ionicons
-                      name="checkmark-sharp"
-                      size={24}
-                      color="#979500"
-                      style={{
-                        display: status === "on_hold" ? "flex" : "none",
-                      }}
-                    />
-                    <Text
-                      style={{
-                        ...styles().listText,
-                        color: status === "on_hold" ? "#979500" : "black",
-                        marginLeft: status === "on_hold" ? 8 : 0,
-                      }}
-                    >
-                      On Hold
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles().listContainer}>
-                  <TouchableOpacity
-                    onPress={async () => handlePress("dropped")}
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      marginLeft: 12,
-                    }}
-                  >
-                    <Ionicons
-                      name="checkmark-sharp"
-                      size={24}
-                      color="red"
-                      style={{
-                        display: status === "dropped" ? "flex" : "none",
-                      }}
-                    />
-                    <Text
-                      style={{
-                        ...styles().listText,
-                        color: status === "dropped" ? "red" : "black",
-                        marginLeft: status === "dropped" ? 8 : 0,
-                      }}
-                    >
-                      Dropped
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-                <View style={styles().listContainer}>
-                  <TouchableOpacity
-                    onPress={async () => handlePress("plan_to_watch")}
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      marginLeft: 12,
-                    }}
-                  >
-                    <Ionicons
-                      name="checkmark-sharp"
-                      size={24}
-                      color="blue"
-                      style={{
-                        display: status === "plan_to_watch" ? "flex" : "none",
-                      }}
-                    />
-                    <Text
-                      style={{
-                        ...styles().listText,
-                        color: status === "plan_to_watch" ? "blue" : "black",
-                      }}
-                    >
-                      Plan To Watch
-                    </Text>
-                  </TouchableOpacity>
-                </View>
-              </ScrollView>
-            </View>
-          ) : null}
           <ScrollView
             overScrollMode="never"
             contentContainerStyle={{ marginTop: 0 }}
@@ -550,6 +728,520 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                 </View>
               </View>
               <View style={{ ...styles(truthy).descContainer, zIndex: 1 }}>
+                {isAdded ? (
+                  <View
+                    syle={{
+                      display: "flex",
+                      flexDirection: "row",
+                    }}
+                  >
+                    <View
+                      style={{
+                        display: "flex",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        width: Dimensions.get("window").width / 3,
+                        marginTop: 10,
+                        marginBottom: -90,
+                      }}
+                    >
+                      <Picker
+                        item={status}
+                        items={data}
+                        onItemChange={handlePress}
+                        title="Select"
+                        placeholder={status != "" ? status : "Select"}
+                        style={{
+                          borderWidth: 2,
+                          borderRadius: 7,
+                          width: 110,
+                          height: 40,
+                          backgroundColor: "#fff",
+                          textAlign: "center",
+                        }}
+                        //backdropAnimation={{ opacity: 0 }}
+                        //mode="dropdown"
+                        //isNullable
+                        //disable
+                      />
+                    </View>
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        width: Dimensions.get("window").width / 3,
+                        position: "relative",
+                        top: -40,
+                        left: Dimensions.get("window").width / 3.4,
+                        height: 40,
+                        marginTop: 90,
+                        marginBottom: -60,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Modal
+                        animationType="slide"
+                        visible={modalVisible}
+                        transparent={true}
+                        onRequestClose={() => setModalVisible(false)}
+                      >
+                        <View style={styles().centeredView}>
+                          <View style={styles().modalView}>
+                            <Text
+                              style={{
+                                color: "#fff",
+                                fontSize: 20,
+                                alignSelf: "center",
+                                marginBottom: 15,
+                                fontWeight: "bold",
+                              }}
+                            >
+                              Rate this anime
+                            </Text>
+                            <ScrollView
+                              style={{
+                                flexDirection: "row",
+                                flexWrap: "wrap",
+                                flexShrink: 1,
+                                width: Dimensions.get("window").width / 1,
+                              }}
+                            >
+                              <View
+                                style={{
+                                  flexDirection: "row",
+                                  flexWrap: "wrap",
+                                  flexShrink: 1,
+                                  width: Dimensions.get("window").width / 1,
+                                  justifyContent: "center",
+                                }}
+                              >
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setModalVisible(false);
+                                    handleScore(0);
+                                  }}
+                                  activeOpacity={1}
+                                  style={{
+                                    marginLeft: 22,
+                                    //backgroundColor:
+                                    //parseInt(score) === 0 ? "green" : "#1a1a1a",
+                                    borderRadius: 5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 30,
+                                    marginBottom: 7,
+                                    marginEnd: 7,
+                                    backgroundColor: "#5c5c5c",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      fontSize: 20,
+                                      color: "#fff",
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    0
+                                  </Text>
+                                  <Text
+                                    style={{
+                                      fontSize: 20,
+                                      color: "#fff",
+                                      textAlign: "center",
+                                    }}
+                                  >
+                                    Unrated 😶
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setModalVisible(false);
+                                    handleScore(1);
+                                  }}
+                                  activeOpacity={1}
+                                  style={{
+                                    //backgroundColor:
+                                    //  parseInt(score) === 1 ? "green" : "#1a1a1a",
+                                    borderRadius: 5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 40,
+                                    marginBottom: 7,
+                                    alignItems: "center",
+                                    backgroundColor: "#5c5c5c",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      fontSize: 20,
+                                      color: "#fff",
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    1
+                                  </Text>
+                                  <Text style={{ fontSize: 20, color: "#fff" }}>
+                                    Appalling 🤮
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setModalVisible(false);
+                                    handleScore(2);
+                                  }}
+                                  activeOpacity={1}
+                                  style={{
+                                    marginLeft: 22,
+                                    //backgroundColor:
+                                    //  parseInt(score) === 2 ? "green" : "#1a1a1a",
+                                    borderRadius: 5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 30,
+                                    marginBottom: 7,
+                                    marginEnd: 7,
+                                    backgroundColor: "#5c5c5c",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      fontSize: 20,
+                                      color: "#fff",
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    2
+                                  </Text>
+                                  <Text style={{ fontSize: 20, color: "#fff" }}>
+                                    Horrible 🤢
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setModalVisible(false);
+                                    handleScore(3);
+                                  }}
+                                  activeOpacity={1}
+                                  style={{
+                                    //backgroundColor:
+                                    //  parseInt(score) === 3 ? "green" : "#1a1a1a",
+                                    borderRadius: 5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 25.5,
+                                    marginBottom: 7,
+                                    backgroundColor: "#5c5c5c",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      fontSize: 20,
+                                      color: "#fff",
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    3
+                                  </Text>
+                                  <Text style={{ fontSize: 20, color: "#fff" }}>
+                                    Very bad 🙁
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setModalVisible(false);
+                                    handleScore(4);
+                                  }}
+                                  activeOpacity={1}
+                                  style={{
+                                    marginLeft: 22,
+                                    //backgroundColor:
+                                    //parseInt(score) === 4 ? "green" : "#1a1a1a",
+                                    borderRadius: 5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 48,
+                                    marginBottom: 7,
+                                    marginEnd: 7,
+                                    backgroundColor: "#5c5c5c",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      fontSize: 20,
+                                      color: "#fff",
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    4
+                                  </Text>
+                                  <Text style={{ fontSize: 20, color: "#fff" }}>
+                                    Bad 👎
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setModalVisible(false);
+                                    handleScore(5);
+                                  }}
+                                  activeOpacity={1}
+                                  style={{
+                                    //backgroundColor:
+                                    //  parseInt(score) === 5 ? "green" : "#1a1a1a",
+                                    borderRadius: 5,
+                                    paddingVertical: 10,
+                                    marginBottom: 7,
+                                    paddingHorizontal: 28.5,
+                                    backgroundColor: "#5c5c5c",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      fontSize: 20,
+                                      color: "#fff",
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    5
+                                  </Text>
+                                  <Text style={{ fontSize: 20, color: "#fff" }}>
+                                    Average 😐
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setModalVisible(false);
+                                    handleScore(6);
+                                  }}
+                                  activeOpacity={1}
+                                  style={{
+                                    marginLeft: 22,
+                                    //backgroundColor:
+                                    //parseInt(score) === 6 ? "green" : "#1a1a1a",
+                                    borderRadius: 5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 47,
+                                    marginBottom: 7,
+                                    marginEnd: 7,
+                                    backgroundColor: "#5c5c5c",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      fontSize: 20,
+                                      color: "#fff",
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    6
+                                  </Text>
+                                  <Text style={{ fontSize: 20, color: "#fff" }}>
+                                    Fine 😌
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setModalVisible(false);
+                                    handleScore(7);
+                                  }}
+                                  activeOpacity={1}
+                                  style={{
+                                    //backgroundColor:
+                                    //parseInt(score) === 7 ? "green" : "#1a1a1a",
+                                    borderRadius: 5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 41,
+                                    marginBottom: 7,
+                                    backgroundColor: "#5c5c5c",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      fontSize: 20,
+                                      color: "#fff",
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    7
+                                  </Text>
+                                  <Text style={{ fontSize: 20, color: "#fff" }}>
+                                    Good 👍
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setModalVisible(false);
+                                    handleScore(8);
+                                  }}
+                                  activeOpacity={1}
+                                  style={{
+                                    marginLeft: 22,
+                                    //backgroundColor:
+                                    //parseInt(score) === 8 ? "green" : "#1a1a1a",
+                                    borderRadius: 5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 20,
+                                    marginBottom: 7,
+                                    marginEnd: 7,
+                                    backgroundColor: "#5c5c5c",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      fontSize: 20,
+                                      color: "#fff",
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    8
+                                  </Text>
+                                  <Text style={{ fontSize: 20, color: "#fff" }}>
+                                    Very Good 😃
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setModalVisible(false);
+                                    handleScore(9);
+                                  }}
+                                  activeOpacity={1}
+                                  style={{
+                                    //backgroundColor:
+                                    //parseInt(score) === 9 ? "green" : "#1a1a1a",
+                                    borderRadius: 5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 40,
+                                    marginBottom: 7,
+                                    backgroundColor: "#5c5c5c",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      fontSize: 20,
+                                      color: "#fff",
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    9
+                                  </Text>
+                                  <Text style={{ fontSize: 20, color: "#fff" }}>
+                                    Great 🤩
+                                  </Text>
+                                </TouchableOpacity>
+                                <TouchableOpacity
+                                  onPress={() => {
+                                    setModalVisible(false);
+                                    handleScore(10);
+                                  }}
+                                  activeOpacity={1}
+                                  style={{
+                                    marginLeft: 22,
+                                    //backgroundColor:
+                                    //parseInt(score) === 10 ? "green" : "#1a1a1a",
+                                    borderRadius: 5,
+                                    paddingVertical: 10,
+                                    paddingHorizontal: 11.5,
+                                    marginBottom: 7,
+                                    backgroundColor: "#5c5c5c",
+                                  }}
+                                >
+                                  <Text
+                                    style={{
+                                      fontSize: 20,
+                                      color: "#fff",
+                                      alignSelf: "center",
+                                    }}
+                                  >
+                                    10
+                                  </Text>
+                                  <Text style={{ fontSize: 20, color: "#fff" }}>
+                                    Masterpiece 🤯
+                                  </Text>
+                                </TouchableOpacity>
+                              </View>
+                            </ScrollView>
+                          </View>
+                        </View>
+                      </Modal>
+                      <Text style={{ fontSize: 30 }}>
+                        {rating === 0
+                          ? "😶"
+                          : rating === 1
+                          ? "🤮"
+                          : rating === 2
+                          ? "🤢"
+                          : rating === 3
+                          ? "🙁"
+                          : rating === 4
+                          ? "👎"
+                          : rating === 5
+                          ? "😐"
+                          : rating === 6
+                          ? "😌"
+                          : rating === 7
+                          ? "👍"
+                          : rating === 8
+                          ? "😃"
+                          : rating === 9
+                          ? "🤩"
+                          : rating === 10
+                          ? "🤯"
+                          : "🤷"}
+                      </Text>
+                      <TouchableOpacity
+                        onPress={() => setModalVisible(!modalVisible)}
+                      >
+                        <Ionicons name="ios-star" size={40} color="#f8ef71" />
+                      </TouchableOpacity>
+                    </View>
+                    <View
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        width: Dimensions.get("window").width / 3,
+                        position: "relative",
+                        top: -80,
+                        marginTop: 65,
+                        marginBottom: -60,
+                        left: 1.8 * (Dimensions.get("window").width / 3),
+                        height: 40,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                    >
+                      <Text
+                        style={{
+                          textAlign: "center",
+                          fontWeight: "bold",
+                          fontSize: 20,
+                          color: "white",
+                        }}
+                      >
+                        Episode: {episode}
+                      </Text>
+                    </View>
+                  </View>
+                ) : (
+                  <TouchableOpacity
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      backgroundColor: "#252525",
+                      borderRadius: 10,
+                      borderWidth: 3,
+                      borderColor: "#959595",
+                      height: 60,
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                    onPress={async () => {
+                      handleNewAnime();
+                      setRefresh(`${Math.random() * 1000000}`);
+                    }}
+                  >
+                    <AntDesign name="pluscircleo" size={35} color="#959595" />
+                    <Text
+                      style={{ color: "#959595", marginLeft: 15, fontSize: 25 }}
+                    >
+                      Add To List
+                    </Text>
+                  </TouchableOpacity>
+                )}
                 <Text
                   onTextLayout={onTextLayout}
                   style={{ color: truthy ? "white" : "black" }}
@@ -589,8 +1281,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       key={key}
                       onPress={() => {
                         setIsLoading(true);
+                        handleEpisodePress(data.epNum);
                         axios
-                          .get(`${API.url}/AnimeLazer/Login`, {
+                          .get(`${API.url}AnimeLazer/Login`, {
                             headers: {
                               "Content-Type": "application/json",
                               id: API.id,
@@ -598,7 +1291,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                           })
                           .then(async function (res) {
                             axios
-                              .get(`${API.url}/Animes/RecentEpisodesMp4Src`, {
+                              .get(`${API.url}Animes/RecentEpisodesMp4Src`, {
                                 headers: {
                                   "Content-Type": "application/json",
                                   Authorization: `${API.key}${res.data.token}`,
@@ -607,6 +1300,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                               })
                               .then(async function (res1) {
                                 setIsLoading(false);
+                                //console.log(res1)
                                 if (
                                   res1.data.data.length === 0 ||
                                   (typeof res1.data.data === undefined) | null
@@ -744,7 +1438,6 @@ const styles = (truthy, isLoading) =>
       display: "flex",
       flexDirection: "row",
       justifyContent: "flex-start",
-      marginTop: Dimensions.get("window").height / 20,
     },
     textInfoContainer: {
       marginLeft: Dimensions.get("window").width / 16,
@@ -808,5 +1501,30 @@ const styles = (truthy, isLoading) =>
     },
     listContainer: {
       marginTop: 12,
+    },
+    centeredView: {
+      flex: 1,
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 22,
+    },
+    modalView: {
+      margin: 20,
+      borderRadius: 20,
+      backgroundColor: "rgba(20, 20, 20, 0.9)",
+      alignItems: "center",
+      shadowColor: "#000",
+      paddingRight: 20,
+      paddingLeft: 20,
+      paddingBottom: 20,
+      shadowOffset: {
+        width: 0,
+        height: 2,
+      },
+      shadowOpacity: 0.25,
+      shadowRadius: 4,
+      elevation: 5,
+      marginTop: 100,
+      marginBottom: 100,
     },
   });

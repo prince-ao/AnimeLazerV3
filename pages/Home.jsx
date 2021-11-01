@@ -365,7 +365,7 @@ const Home = ({ navigation, navigate, truth }) => {
                           })
                           .then(async function (res) {
                             axios
-                              .get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                              .get(`${API.url}Animes/scrapeAnimeDetails`, {
                                 headers: {
                                   "Content-Type": "application/json",
                                   Authorization: `${API.key}${res.data.token}`,
