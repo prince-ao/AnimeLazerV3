@@ -12,6 +12,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
   Platform,
+  Modal,
 } from "react-native";
 import { Header } from "../components/index";
 import { key, url } from "@env";
@@ -319,7 +320,9 @@ const Home = ({ navigation, navigate, truth }) => {
                                 },
                               })
                               .then(async function (res1) {
-                                setIsLoading(false);
+                                setTimeout(() => {
+                                  setIsLoading(false);
+                                }, 2000);
                                 navigate.navigate("WatchRoom", {
                                   title: data.animeName + " Ep " + data.epNum,
                                   src: res1.data.data,
@@ -374,7 +377,9 @@ const Home = ({ navigation, navigate, truth }) => {
                               })
                               .then(async function (res1) {
                                 res1.data.data.map((info) => {
-                                  setIsLoading(false);
+                                  setTimeout(() => {
+                                    setIsLoading(false);
+                                  }, 2000);
                                   navigate.navigate("EpisodeRoom", {
                                     type: info.type,
                                     synopsis: info.synopsis,
@@ -439,7 +444,9 @@ const Home = ({ navigation, navigate, truth }) => {
                               })
                               .then(async function (res1) {
                                 res1.data.data.map((info) => {
-                                  setIsLoading(false);
+                                  setTimeout(() => {
+                                    setIsLoading(false);
+                                  }, 2000);
                                   navigate.navigate("EpisodeRoom", {
                                     type: info.type,
                                     synopsis: info.synopsis,
@@ -504,7 +511,9 @@ const Home = ({ navigation, navigate, truth }) => {
                               })
                               .then(async function (res1) {
                                 res1.data.data.map((info) => {
-                                  setIsLoading(false);
+                                  setTimeout(() => {
+                                    setIsLoading(false);
+                                  }, 2000);
                                   navigate.navigate("EpisodeRoom", {
                                     type: info.type,
                                     synopsis: info.synopsis,
@@ -569,7 +578,9 @@ const Home = ({ navigation, navigate, truth }) => {
                               })
                               .then(async function (res1) {
                                 res1.data.data.map((info) => {
-                                  setIsLoading(false);
+                                  setTimeout(() => {
+                                    setIsLoading(false);
+                                  }, 2000);
                                   navigate.navigate("EpisodeRoom", {
                                     type: info.type,
                                     synopsis: info.synopsis,
@@ -634,7 +645,9 @@ const Home = ({ navigation, navigate, truth }) => {
                               })
                               .then(async function (res1) {
                                 res1.data.data.map((info) => {
-                                  setIsLoading(false);
+                                  setTimeout(() => {
+                                    setIsLoading(false);
+                                  }, 2000);
                                   navigate.navigate("EpisodeRoom", {
                                     type: info.type,
                                     synopsis: info.synopsis,
@@ -700,7 +713,9 @@ const Home = ({ navigation, navigate, truth }) => {
                             })
                             .then(async function (res1) {
                               res1.data.data.map((info) => {
-                                setIsLoading(false);
+                                setTimeout(() => {
+                                  setIsLoading(false);
+                                }, 2000);
                                 navigate.navigate("EpisodeRoom", {
                                   type: info.type,
                                   synopsis: info.synopsis,
@@ -757,12 +772,30 @@ const Home = ({ navigation, navigate, truth }) => {
             })}
           </View>
         </ScrollView>
-        <ActivityIndicator
+        {isLoading ? (
+          <Modal style={{}}>
+            <Image
+              source={require("../assets/cute-anime-dancing.gif")}
+              style={{
+                width: Dimensions.get("window").width,
+                height: Dimensions.get("window").height,
+                paddingTop: 100,
+              }}
+            />
+            <ActivityIndicator
+              animating={isLoading}
+              color="#d5e6ff"
+              style={styles(truth, isLoading).loading}
+              size={Platform.OS === "android" ? 51 : "large"}
+            />
+          </Modal>
+        ) : null}
+        {/*
           animating={isLoading}
           color="#d5e6ff"
           style={styles(truth, isLoading).loading}
           size={Platform.OS === "android" ? 51 : "large"}
-        />
+        />*/}
         <FAB
           placement="right"
           color="#0367fc"
