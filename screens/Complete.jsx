@@ -32,7 +32,6 @@ const Complete = (props) => {
     url: url,
     key: key + " ",
   };
-  const forceUpdate = useForceUpdate();
   useEffect(() => {
     const fetc = async () => {
       try {

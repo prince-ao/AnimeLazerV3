@@ -13,6 +13,7 @@ import {
   ActivityIndicator,
   Platform,
   Modal,
+  // RefreshControl,
 } from "react-native";
 import { Header } from "../components/index";
 import { key, url } from "@env";
@@ -45,6 +46,20 @@ const Home = ({ navigation, navigate, truth }) => {
   const [monsters, setMonsters] = useState([]);
   const [topRated, setTopRated] = useState([]);
   const [onGoing, setOnGoing] = useState([]);
+  // const [refreshing, setRefreshing] = useState(false);
+  // const [refresh, setRefresh] = useState("");
+
+  // const wait = (timeout) => {
+  //   return new Promise((resolve) => setTimeout(resolve, timeout));
+  // };
+
+  // const onRefresh = useCallback(() => {
+  //   setRefreshing(true);
+  //   wait(2000).then(() => {
+  //     setRefresh(`${Math.random() * 1000000}`);
+  //     setRefreshing(false);
+  //   });
+  // }, []);
 
   useEffect(() => {
     getRecentEp();
@@ -292,7 +307,12 @@ const Home = ({ navigation, navigate, truth }) => {
       >
         <StatusBar barStyle="light-content" />
         <Header />
-        <ScrollView overScrollMode="never">
+        <ScrollView
+          overScrollMode="never"
+          /*refreshControl={
+            <RefreshControl refreshing={refreshing} onRefresh={onRefresh} />
+          }*/
+        >
           <View style={styles(truth).padding} />
           <View style={styles(truth).shows}>
             <Text style={styles(truth).showText}>Recent</Text>
