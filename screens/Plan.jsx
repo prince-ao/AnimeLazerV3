@@ -9,8 +9,7 @@ import {
   Alert,
   Dimensions,
   DevSettings,
-  Modal,
-  ActivityIndicator,
+  RefreshControl,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 const axios = require("axios");
@@ -20,7 +19,7 @@ const Plan = (props) => {
   const [data, setData] = useState([]);
   const [gotData, setGotData] = useState(false);
   const [refresh, setRefresh] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
   const BASE_URL = BASE_URL_V2;
   const API = {
     id: "_" + Math.random().toString(36).substr(2, 9),
@@ -54,7 +53,6 @@ const Plan = (props) => {
     //console.log(props.route.params);
   }, [props.route.params.webview, props.route.params.again, refresh]);
   const handlePress = (title) => {
-    setLoading(true);
     axios
       .get(`${API.url}AnimeLazer/Login`, {
         headers: {
@@ -125,9 +123,6 @@ const Plan = (props) => {
                                 },
                               ]);
                         } else {
-                          setTimeout(() => {
-                            setLoading(false);
-                          }, 2000);
                           props.navigation.navigate("EpisodeRoom", {
                             type: info.type,
                             synopsis: info.synopsis,
@@ -151,6 +146,9 @@ const Plan = (props) => {
           });
       });
   };
+  const wait = (timeout) => {
+    return new Promise((resolve) => setTimeout(resolve, timeout));
+  };
   if (gotData) {
     return (
       <>
@@ -165,6 +163,19 @@ const Plan = (props) => {
           overScrollMode="never"
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
+          refreshControl={
+            <RefreshControl
+              refreshing={refreshing}
+              onRefresh={() => {
+                setRefreshing(true);
+                wait(2000).then(() => {
+                  setRefresh(`${Math.random() * 1000000}`);
+                  setRefreshing(false);
+                });
+              }}
+              tintColor="black"
+            />
+          }
         >
           <View style={styles.container}>
             {data.data.map((item, key) => {
@@ -184,24 +195,6 @@ const Plan = (props) => {
             })}
           </View>
         </ScrollView>
-        {loading ? (
-          <Modal style={{}}>
-            <Image
-              source={require("../assets/cute-anime-dancing.gif")}
-              style={{
-                width: Dimensions.get("window").width,
-                height: Dimensions.get("window").height,
-                paddingTop: 100,
-              }}
-            />
-            <ActivityIndicator
-              animating={loading}
-              color="#d5e6ff"
-              style={styles.loading}
-              size={Platform.OS === "android" ? 51 : "large"}
-            />
-          </Modal>
-        ) : null}
       </>
     );
   } else {

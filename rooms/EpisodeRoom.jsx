@@ -67,7 +67,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   const [rating, setRating] = useState(0);
   const [episode, setEpisode] = useState(0);
   const [refresh, setRefresh] = useState("");
-  const [loading, setLoading] = useState(false);
 
   const data = [
     { label: "Watching", value: 1 },
@@ -379,7 +378,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   const handleNewAnime = async () => {
     try {
       const aToken = await AsyncStorage.getItem("accessToken");
-      setLoading(true);
       const response1 = await fetch(
         `https://api.myanimelist.net/v2/anime?q=${route.params.animeTitle}&limit=100`,
         {
@@ -391,20 +389,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
       );
       const s_response1 = await response1.text();
       const ss_response1 = await JSON.parse(s_response1);
-      //if (!ss_response1.data[0]) {
-      /*Platform.OS === "android"
-          ? ToastAndroid.showWithGravity(
-              "Can't add this anime at the moment.",
-              2000,
-              ToastAndroid.BOTTOM
-            )
-          : Alert.alert("Alert", "You can't add this anime at the momnet.", [
-              {
-                text: "OK",
-              },
-            ]);*/
-      //return;
-      //}
       const id = ss_response1.data[0].node.id;
       const response2 = await fetch(
         `https://api.myanimelist.net/v2/anime/${id}/my_list_status?score=${0}&status=${"plan_to_watch"}&num_watched_episodes=${0}`,
@@ -423,9 +407,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
       setEpisode(ss_response2.num_episodes_watched);
       setStatus("Plan To Watch");
       setIsAdded(true);
-      setTimeout(() => {
-        setLoading(false);
-      }, 2000);
     } catch (error) {
       console.log(error);
     }
@@ -1259,26 +1240,6 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                     >
                       Add To List
                     </Text>
-                    <Modal
-                      animationType="slide"
-                      visible={loading}
-                      transparent={false}
-                    >
-                      <Image
-                        source={require("../assets/cute-anime-dancing.gif")}
-                        style={{
-                          width: Dimensions.get("window").width,
-                          height: Dimensions.get("window").height,
-                          paddingTop: 100,
-                        }}
-                      />
-                      <ActivityIndicator
-                        animating={loading}
-                        color="#d5e6ff"
-                        style={styles(truthy, loading).loading}
-                        size={Platform.OS === "android" ? 51 : "large"}
-                      />
-                    </Modal>
                   </TouchableOpacity>
                 )}
                 <Text
@@ -1404,7 +1365,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
 
 export default EpisodeRoom;
 
-const styles = (truthy, loading) =>
+const styles = (truthy, isLoading) =>
   StyleSheet.create({
     container: {
       backgroundColor: truthy ? "#1b1b1b" : "#e6e6e6e6",
@@ -1521,7 +1482,7 @@ const styles = (truthy, loading) =>
       height: 70,
       alignItems: "center",
       justifyContent: "center",
-      backgroundColor: loading ? "#585858" : "transparent",
+      backgroundColor: isLoading ? "#585858" : "transparent",
       borderRadius: 8,
     },
     menuContent: {
