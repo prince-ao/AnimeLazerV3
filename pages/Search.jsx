@@ -10,9 +10,10 @@ import {
   Image,
   TouchableOpacity,
   ActivityIndicator,
+  Modal,
 } from "react-native";
 import { SearchBar } from "react-native-elements";
-import {key, url} from "@env"
+import { key, url } from "@env";
 
 const axios = require("axios");
 const API = {
@@ -35,7 +36,7 @@ const Search = ({ navigation, navigate, truth }) => {
   function getQueryRes(searchQuery) {
     setIsLoading(true);
     axios
-      .get(`${API.url}/AnimeLazer/Login`, {
+      .get(`${API.url}AnimeLazer/Login`, {
         headers: {
           "Content-Type": "application/json",
           id: API.id,
@@ -43,7 +44,7 @@ const Search = ({ navigation, navigate, truth }) => {
       })
       .then(async function (res) {
         axios
-          .get(`${API.url}/Animes/Search`, {
+          .get(`${API.url}Animes/Search`, {
             headers: {
               "Content-Type": "application/json",
               Authorization: `${API.key}${res.data.token}`,
@@ -52,7 +53,9 @@ const Search = ({ navigation, navigate, truth }) => {
           })
           .then(async function (res1) {
             console.log(res1);
-            setIsLoading(false);
+            setTimeout(() => {
+              setIsLoading(false);
+            }, 2000);
             if (
               (typeof res1.data.data !== "undefined" &&
                 res1.data.data.length === 0) ||
@@ -82,7 +85,9 @@ const Search = ({ navigation, navigate, truth }) => {
           });
       })
       .catch(function (err) {
-        setIsLoading(false);
+        setTimeout(() => {
+          setIsLoading(false);
+        }, 2000);
         console.log(err);
       });
   }
@@ -132,7 +137,7 @@ const Search = ({ navigation, navigate, truth }) => {
                   onPress={() => {
                     setIsLoading(true);
                     axios
-                      .get(`${API.url}/AnimeLazer/Login`, {
+                      .get(`${API.url}AnimeLazer/Login`, {
                         headers: {
                           "Content-Type": "application/json",
                           id: API.id,
@@ -140,7 +145,7 @@ const Search = ({ navigation, navigate, truth }) => {
                       })
                       .then(async function (res) {
                         axios
-                          .get(`${API.url}/Animes/scrapeAnimeDetails`, {
+                          .get(`${API.url}Animes/scrapeAnimeDetails`, {
                             headers: {
                               "Content-Type": "application/json",
                               Authorization: `${API.key}${res.data.token}`,
@@ -183,7 +188,7 @@ const Search = ({ navigation, navigate, truth }) => {
                                   status: info.status,
                                   episodesList: info.episodesList,
                                   animeUrl: data.animeUrl,
-                                  otherNames: info.otherNames
+                                  otherNames: info.otherNames,
 
                                   // there is more options such as animeJapaneseTitle, studio.
                                 });
@@ -227,12 +232,30 @@ const Search = ({ navigation, navigate, truth }) => {
             );
           })}
         </ScrollView>
-        <ActivityIndicator
+        {isLoading ? (
+          <Modal style={{}}>
+            <Image
+              source={require("../assets/cute-anime-dancing.gif")}
+              style={{
+                width: Dimensions.get("window").width,
+                height: Dimensions.get("window").height,
+                paddingTop: 100,
+              }}
+            />
+            <ActivityIndicator
+              animating={isLoading}
+              color="#d5e6ff"
+              style={styles(truth, isLoading).loading}
+              size={Platform.OS === "android" ? 51 : "large"}
+            />
+          </Modal>
+        ) : null}
+        {/*<ActivityIndicator
           animating={isLoading}
           color="#d5e6ff"
           style={styles(truth, isLoading).loading}
           size={Platform.OS === "android" ? 51 : "large"}
-        />
+        />*/}
       </SafeAreaView>
     </>
   );

@@ -67,6 +67,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   const [rating, setRating] = useState(0);
   const [episode, setEpisode] = useState(0);
   const [refresh, setRefresh] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const data = [
     { label: "Watching", value: 1 },
@@ -377,6 +378,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
 
   const handleNewAnime = async () => {
     try {
+      setLoading(true);
       const aToken = await AsyncStorage.getItem("accessToken");
       const response1 = await fetch(
         `https://api.myanimelist.net/v2/anime?q=${route.params.animeTitle}&limit=100`,
@@ -407,7 +409,13 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
       setEpisode(ss_response2.num_episodes_watched);
       setStatus("Plan To Watch");
       setIsAdded(true);
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
     } catch (error) {
+      setTimeout(() => {
+        setLoading(false);
+      }, 2000);
       console.log(error);
     }
   };
@@ -1240,6 +1248,26 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                     >
                       Add To List
                     </Text>
+                    <Modal
+                      animationType="slide"
+                      visible={loading}
+                      transparent={false}
+                    >
+                      <Image
+                        source={require("../assets/cute-anime-dancing.gif")}
+                        style={{
+                          width: Dimensions.get("window").width,
+                          height: Dimensions.get("window").height,
+                          paddingTop: 100,
+                        }}
+                      />
+                      <ActivityIndicator
+                        animating={loading}
+                        color="#d5e6ff"
+                        style={styles(truthy, loading).loading}
+                        size={Platform.OS === "android" ? 51 : "large"}
+                      />
+                    </Modal>
                   </TouchableOpacity>
                 )}
                 <Text

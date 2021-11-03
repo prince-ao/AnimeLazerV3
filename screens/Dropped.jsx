@@ -10,6 +10,8 @@ import {
   Alert,
   DevSettings,
   RefreshControl,
+  Modal,
+  ActivityIndicator,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 const axios = require("axios");
@@ -20,6 +22,7 @@ const Dropped = (props) => {
   const [gotData, setGotData] = useState(false);
   const [refresh, setRefresh] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const BASE_URL = BASE_URL_V2;
   const API = {
@@ -54,6 +57,7 @@ const Dropped = (props) => {
     //console.log(props.route.params);
   }, [props.route.params.webview, props.route.params.again, refresh]);
   const handlePress = (title) => {
+    setLoading(true);
     axios
       .get(`${API.url}AnimeLazer/Login`, {
         headers: {
@@ -124,6 +128,9 @@ const Dropped = (props) => {
                                 },
                               ]);
                         } else {
+                          setTimeout(() => {
+                            setLoading(false);
+                          }, 2000);
                           props.navigation.navigate("EpisodeRoom", {
                             type: info.type,
                             synopsis: info.synopsis,
@@ -197,6 +204,24 @@ const Dropped = (props) => {
             })}
           </View>
         </ScrollView>
+        {loading ? (
+          <Modal style={{}}>
+            <Image
+              source={require("../assets/cute-anime-dancing.gif")}
+              style={{
+                width: Dimensions.get("window").width,
+                height: Dimensions.get("window").height,
+                paddingTop: 100,
+              }}
+            />
+            <ActivityIndicator
+              animating={loading}
+              color="#d5e6ff"
+              style={styles.loading}
+              size={Platform.OS === "android" ? 51 : "large"}
+            />
+          </Modal>
+        ) : null}
       </>
     );
   } else {
