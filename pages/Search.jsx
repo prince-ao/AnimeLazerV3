@@ -85,9 +85,7 @@ const Search = ({ navigation, navigate, truth }) => {
           });
       })
       .catch(function (err) {
-        setTimeout(() => {
-          setIsLoading(false);
-        }, 2000);
+        setIsLoading(false);
         console.log(err);
       });
   }
@@ -233,22 +231,12 @@ const Search = ({ navigation, navigate, truth }) => {
           })}
         </ScrollView>
         {isLoading ? (
-          <Modal style={{}}>
-            <Image
-              source={require("../assets/cute-anime-dancing.gif")}
-              style={{
-                width: Dimensions.get("window").width,
-                height: Dimensions.get("window").height,
-                paddingTop: 100,
-              }}
-            />
-            <ActivityIndicator
-              animating={isLoading}
-              color="#d5e6ff"
-              style={styles(truth, isLoading).loading}
-              size={Platform.OS === "android" ? 51 : "large"}
-            />
-          </Modal>
+          <ActivityIndicator
+            animating={isLoading}
+            color="#d5e6ff"
+            style={styles(truth, isLoading).loading}
+            size={Platform.OS === "android" ? 51 : "large"}
+          />
         ) : null}
         {/*<ActivityIndicator
           animating={isLoading}

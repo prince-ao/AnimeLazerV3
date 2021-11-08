@@ -158,6 +158,34 @@ const Home = ({ navigation, navigate, truth }) => {
       });
   }
 
+  function getFictionAnimes() {
+    setIsLoading(true);
+    axios
+      .get(`${API.url}AnimeLazer/Login`, {
+        headers: {
+          "Content-Type": "application/json",
+          id: API.id,
+        },
+      })
+      .then(async function (res) {
+        axios
+          .get(`${API.url}Animes/fictionAnimes`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${API.key}${res.data.token}`,
+            },
+          })
+          .then(async function (res1) {
+            setIsLoading(false);
+            setFiction(res1.data.data);
+          });
+      })
+      .catch(function (err) {
+        setIsLoading(false);
+        console.log(err);
+      });
+  }
+
   function getTopRatedAnimes() {
     setIsLoading(true);
     axios
@@ -178,6 +206,34 @@ const Home = ({ navigation, navigate, truth }) => {
           .then(async function (res1) {
             setIsLoading(false);
             setTopRated(res1.data.data);
+          });
+      })
+      .catch(function (err) {
+        setIsLoading(false);
+        console.log(err);
+      });
+  }
+
+  function getSchoolAnimes() {
+    setIsLoading(true);
+    axios
+      .get(`${API.url}AnimeLazer/Login`, {
+        headers: {
+          "Content-Type": "application/json",
+          id: API.id,
+        },
+      })
+      .then(async function (res) {
+        axios
+          .get(`${API.url}Animes/schoolAnimes`, {
+            headers: {
+              "Content-Type": "application/json",
+              Authorization: `${API.key}${res.data.token}`,
+            },
+          })
+          .then(async function (res1) {
+            setIsLoading(false);
+            setSchool(res1.data.data);
           });
       })
       .catch(function (err) {
