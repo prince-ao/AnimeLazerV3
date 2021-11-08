@@ -7,8 +7,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { StyleSheet, Text, View } from "react-native";
 import { Home, Search, Favorites, Settings } from "./pages/index";
 import { createStackNavigator } from "@react-navigation/stack";
-import EpisodeRoom from "./rooms/EpisodeRoom";
-import WatchRoom from "./rooms/WatchRoom";
+import { WatchRoom, EpisodeRoom, InfoRoom } from "./rooms";
 import { Orientation } from "expo-screen-orientation";
 import {
   isInialized,
@@ -98,6 +97,9 @@ export default function App() {
         </Stack.Screen>
         <Stack.Screen name="WatchRoom">
           {(props) => <WatchRoom {...props} truthy={truthy} />}
+        </Stack.Screen>
+        <Stack.Screen name="InfoRoom">
+          {(props) => <InfoRoom {...props} truthy={truthy} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>

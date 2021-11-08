@@ -33,7 +33,7 @@ import {
   Modal,
 } from "react-native";
 import { Header } from "../components/index";
-import { Ionicons, AntDesign } from "@expo/vector-icons";
+import { Ionicons, AntDesign, FontAwesome5 } from "@expo/vector-icons";
 import { firebase } from "@firebase/app";
 import { Picker } from "react-native-woodpicker";
 import { key, url, BASE_URL_V2 } from "@env";
@@ -500,6 +500,10 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     }
   };
 
+  /*const handleInfoRoom = () => {
+    navigation.navigate("InfoRoom");
+  };*/
+
   return (
     <>
       <SafeAreaView
@@ -669,13 +673,31 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                   style={styles(truthy).poster}
                 />
                 <View style={styles(truthy).textInfoContainer}>
-                  <Text
-                    numberOfLines={2}
-                    ellipsizeMode="tail"
-                    style={styles(truthy).title}
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                    }}
                   >
-                    {route.params.animeTitle}
-                  </Text>
+                    <Text
+                      numberOfLines={2}
+                      ellipsizeMode="tail"
+                      style={styles(truthy).title}
+                    >
+                      {route.params.animeTitle}
+                    </Text>
+                    <TouchableOpacity
+                      style={{ marginLeft: 10, marginTop: 15 }}
+                      //onPress={() => handleInfoRoom()}
+                    >
+                      <FontAwesome5
+                        name="question-circle"
+                        size={24}
+                        color="white"
+                      />
+                    </TouchableOpacity>
+                  </View>
                   <View style={styles(truthy).genDesc}>
                     <Text style={styles(truthy).white}>
                       Type:{" "}
