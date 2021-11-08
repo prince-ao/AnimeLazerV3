@@ -14,8 +14,6 @@ import {
 } from "react-native";
 import { SearchBar } from "react-native-elements";
 import { key, url } from "@env";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { firebase } from "@firebase/app";
 
 const axios = require("axios");
 const API = {
@@ -54,6 +52,10 @@ const Search = ({ navigation, navigate, truth }) => {
             },
           })
           .then(async function (res1) {
+<<<<<<< HEAD
+=======
+            console.log(res1);
+>>>>>>> parent of a7bf6ce (feat (local storage sync to episode room))
             setTimeout(() => {
               setIsLoading(false);
             }, 2000);
@@ -93,6 +95,7 @@ const Search = ({ navigation, navigate, truth }) => {
       });
   }
 
+<<<<<<< HEAD
   function handleSearch(data) {
     setIsLoading(true);
     axios
@@ -265,6 +268,116 @@ const Search = ({ navigation, navigate, truth }) => {
                   style={styles(truth).searchContainer}
                   onPress={() => {
                     handleSearch(data);
+=======
+  if (!searchResult) {
+    return null;
+  }
+  return (
+    <>
+      <SafeAreaView
+        style={{
+          flex: 0,
+          backgroundColor: "#1a1a1a",
+        }}
+      />
+      <SafeAreaView
+        style={{
+          width: "100%",
+          height: "100%",
+          backgroundColor: truth ? "#1a1a1a" : "#f0f0f0",
+          flex: 1,
+        }}
+      >
+        <SearchBar
+          containerStyle={{
+            backgroundColor: "#1a1a1a",
+            borderBottomWidth: 1,
+          }}
+          style={styles(truth).searchBar}
+          placeholder="Search..."
+          onChangeText={onChangeSearch}
+          value={searchQuery}
+        />
+        <ScrollView
+          overScrollMode="never"
+          contentContainerStyle={{
+            flexGrow: 1,
+            paddingBottom: 15,
+            alignItems: "baseline",
+          }}
+        >
+          {searchResult.map((data, i) => {
+            return (
+              <View style={styles(truth).searchContainer} key={i}>
+                <TouchableOpacity
+                  style={styles(truth).searchContainer}
+                  onPress={() => {
+                    setIsLoading(true);
+                    axios
+                      .get(`${API.url}AnimeLazer/Login`, {
+                        headers: {
+                          "Content-Type": "application/json",
+                          id: API.id,
+                        },
+                      })
+                      .then(async function (res) {
+                        axios
+                          .get(`${API.url}Animes/scrapeAnimeDetails`, {
+                            headers: {
+                              "Content-Type": "application/json",
+                              Authorization: `${API.key}${res.data.token}`,
+                              url: data.animeUrl,
+                            },
+                          })
+                          .then(async function (res1) {
+                            res1.data.data.map((info) => {
+                              setIsLoading(false);
+                              if (data === null) {
+                                Platform.OS === "android"
+                                  ? ToastAndroid.showWithGravity(
+                                      res1.data.data,
+                                      1500,
+                                      ToastAndroid.BOTTOM
+                                    )
+                                  : Alert.alert("Warning", res1.data.data, [
+                                      {
+                                        text: "Cancel",
+                                        onPress: () =>
+                                          console.log("Cancel Pressed"),
+                                        style: "cancel",
+                                      },
+                                      {
+                                        text: "OK",
+                                        onPress: () =>
+                                          console.log("OK Pressed"),
+                                      },
+                                    ]);
+                              } else {
+                                navigation.navigate("EpisodeRoom", {
+                                  type: info.type,
+                                  synopsis: info.synopsis,
+                                  animeCover: info.animeCover,
+                                  animeTitle: info.animeEnglishTitle,
+                                  episodes: info.episodesAvaliable,
+                                  season: info.season,
+                                  language: info.language,
+                                  genres: info.genres,
+                                  status: info.status,
+                                  episodesList: info.episodesList,
+                                  animeUrl: data.animeUrl,
+                                  otherNames: info.otherNames,
+
+                                  // there is more options such as animeJapaneseTitle, studio.
+                                });
+                              }
+                            });
+                          });
+                      })
+                      .catch(function (err) {
+                        setIsLoading(false);
+                        console.log(err);
+                      });
+>>>>>>> parent of a7bf6ce (feat (local storage sync to episode room))
                   }}
                 >
                   <Image
