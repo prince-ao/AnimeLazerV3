@@ -52,10 +52,7 @@ const Search = ({ navigation, navigate, truth }) => {
             },
           })
           .then(async function (res1) {
-<<<<<<< HEAD
-=======
             console.log(res1);
->>>>>>> parent of a7bf6ce (feat (local storage sync to episode room))
             setTimeout(() => {
               setIsLoading(false);
             }, 2000);
@@ -95,180 +92,6 @@ const Search = ({ navigation, navigate, truth }) => {
       });
   }
 
-<<<<<<< HEAD
-  function handleSearch(data) {
-    setIsLoading(true);
-    axios
-      .get(`${API.url}AnimeLazer/Login`, {
-        headers: {
-          "Content-Type": "application/json",
-          id: API.id,
-        },
-      })
-      .then(async function (res) {
-        axios
-          .get(`${API.url}Animes/scrapeAnimeDetails`, {
-            headers: {
-              "Content-Type": "application/json",
-              Authorization: `${API.key}${res.data.token}`,
-              url: data.animeUrl,
-            },
-          })
-          .then(async function (res1) {
-            res1.data.data.map(async (info) => {
-              if (data === null) {
-                setIsLoading(false);
-                Platform.OS === "android"
-                  ? ToastAndroid.showWithGravity(
-                      res1.data.data,
-                      1500,
-                      ToastAndroid.BOTTOM
-                    )
-                  : Alert.alert("Warning", res1.data.data, [
-                      {
-                        text: "Cancel",
-                        onPress: () => console.log("Cancel Pressed"),
-                        style: "cancel",
-                      },
-                      {
-                        text: "OK",
-                        onPress: () => console.log("OK Pressed"),
-                      },
-                    ]);
-              } else {
-                if ((await AsyncStorage.getItem("accessToken")) == null) {
-                  try {
-                    let animeList = await fetch(`${API.url}favorites/find`, {
-                      method: "GET",
-                      headers: {
-                        uid: firebase.auth().currentUser.uid,
-                      },
-                    });
-                    animeList = await animeList.json();
-                    setIsLoading(false);
-                    res1.data.data.map((info) => {
-                      navigate.navigate("EpisodeRoom", {
-                        type: info.type,
-                        synopsis: info.synopsis,
-                        animeCover: info.animeCover,
-                        animeTitle: info.animeEnglishTitle,
-                        episodes: info.episodesAvaliable,
-                        season: info.season,
-                        language: info.language,
-                        genres: info.genres,
-                        status: info.status,
-                        episodesList: info.episodesList,
-                        animeUrl: data.animeUrl,
-                        otherNames: info.otherNames,
-                        accessToken: null,
-                        animeList: animeList,
-                        // there is more options such as animeJapaneseTitle, studio.
-                      });
-                    });
-                  } catch (err) {
-                    setIsLoading(false);
-                    console.log(err);
-                  }
-                } else {
-                  AsyncStorage.getItem("accessToken").then(async function (
-                    token
-                  ) {
-                    axios
-                      .get(
-                        `${BASE_URL}users/@me/animelist?fields=list_status&limit=1000&sort=list_score`,
-                        {
-                          headers: {
-                            Authorization: `${API.key}${token}`,
-                          },
-                        }
-                      )
-                      .then(async function (animeList) {
-                        setIsLoading(false);
-                        res1.data.data.map((info) => {
-                          navigate.navigate("EpisodeRoom", {
-                            type: info.type,
-                            synopsis: info.synopsis,
-                            animeCover: info.animeCover,
-                            animeTitle: info.animeEnglishTitle,
-                            episodes: info.episodesAvaliable,
-                            season: info.season,
-                            language: info.language,
-                            genres: info.genres,
-                            status: info.status,
-                            episodesList: info.episodesList,
-                            animeUrl: data.animeUrl,
-                            otherNames: info.otherNames,
-                            accessToken: token,
-                            animeList: animeList.data.data,
-                            // there is more options such as animeJapaneseTitle, studio.
-                          });
-                        });
-                      })
-                      .catch((err) => {
-                        setIsLoading(false);
-                        console.log(err);
-                      });
-                  });
-                }
-              }
-            });
-          });
-      })
-      .catch(function (err) {
-        setIsLoading(false);
-        console.log(err);
-      });
-  }
-
-  if (!searchResult) {
-    return null;
-  }
-
-  if (!searchResult) {
-    return null;
-  }
-  return (
-    <>
-      <SafeAreaView
-        style={{
-          flex: 0,
-          backgroundColor: "#1a1a1a",
-        }}
-      />
-      <SafeAreaView
-        style={{
-          width: "100%",
-          height: "100%",
-          backgroundColor: truth ? "#1a1a1a" : "#f0f0f0",
-          flex: 1,
-        }}
-      >
-        <SearchBar
-          containerStyle={{
-            backgroundColor: "#1a1a1a",
-            borderBottomWidth: 1,
-          }}
-          style={styles(truth).searchBar}
-          placeholder="Search..."
-          onChangeText={onChangeSearch}
-          value={searchQuery}
-        />
-        <ScrollView
-          overScrollMode="never"
-          contentContainerStyle={{
-            flexGrow: 1,
-            paddingBottom: 15,
-            alignItems: "baseline",
-          }}
-        >
-          {searchResult.map((data, i) => {
-            return (
-              <View style={styles(truth).searchContainer} key={i}>
-                <TouchableOpacity
-                  style={styles(truth).searchContainer}
-                  onPress={() => {
-                    handleSearch(data);
-=======
   if (!searchResult) {
     return null;
   }
@@ -377,7 +200,6 @@ const Search = ({ navigation, navigate, truth }) => {
                         setIsLoading(false);
                         console.log(err);
                       });
->>>>>>> parent of a7bf6ce (feat (local storage sync to episode room))
                   }}
                 >
                   <Image
