@@ -72,6 +72,13 @@ const Watching = (props) => {
     fetc();
     //console.log(props.route.params);
   }, [props.route.params.webview, props.route.params.again, refresh]);
+
+  // useEffect(() => {
+  //   props.navigation.addListener("tabPress", () => {
+  //     setRefresh(`${Math.random() * 1000000}`);
+  //   });
+  // }, []);
+
   const handlePress = (title) => {
     setLoading(true);
     axios
