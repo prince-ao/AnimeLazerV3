@@ -16,6 +16,8 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 const axios = require("axios");
 import { key, url, BASE_URL_V2 } from "@env";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SQLite from "expo-sqlite";
 
 /*return (
       {/*<ScrollView style={styles.mapContainer}>
@@ -33,12 +35,15 @@ import { key, url, BASE_URL_V2 } from "@env";
       </ScrollView>
     );*/
 
+const db = SQLite.openDatabase("favorites.db");
+
 const Watching = (props) => {
   const [data, setData] = useState([]);
   const [gotData, setGotData] = useState(false);
   const [refresh, setRefresh] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [logged, setLogged] = useState(false);
 
   const BASE_URL = BASE_URL_V2;
   const API = {
@@ -47,7 +52,33 @@ const Watching = (props) => {
     key: key + " ",
   };
 
+  const getLogged = async () => {
+    const truth = await AsyncStorage.getItem("logged");
+    setLogged(truth);
+  };
+
+  const localGetData = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM favorites WHERE status = ?",
+        ["Watching"],
+        (tx, res) => console.log(res),
+        (err, errm) => console.log(errm)
+      );
+    });
+  };
+
   useEffect(() => {
+    getLogged();
+    console.log("Something\nsadsad\nasdasd");
+    console.log(logged);
+    if (logged == null) {
+      localGetData();
+    }
+  }, [logged]);
+
+  /*useEffect(() => {
+    console.log("we in here instead");
     const fetc = async () => {
       try {
         const response = await fetch(
@@ -71,7 +102,7 @@ const Watching = (props) => {
     };
     fetc();
     //console.log(props.route.params);
-  }, [props.route.params.webview, props.route.params.again, refresh]);
+  }, [props.route.params.webview, props.route.params.again, refresh]);*/
 
   // useEffect(() => {
   //   props.navigation.addListener("tabPress", () => {
@@ -80,7 +111,7 @@ const Watching = (props) => {
   // }, []);
 
   const handlePress = (title) => {
-    setLoading(true);
+    /*setLoading(true);
     axios
       .get(`${API.url}AnimeLazer/Login`, {
         headers: {
@@ -175,7 +206,7 @@ const Watching = (props) => {
                 });
             }
           });
-      });
+      });*/
   };
   const wait = (timeout) => {
     return new Promise((resolve) => setTimeout(resolve, timeout));
@@ -208,24 +239,28 @@ const Watching = (props) => {
             />
           }
         >
-          <View style={styles.container}>
-            {data.data.map((item, key) => {
-              return (
-                <View style={styles.map} key={key}>
-                  <TouchableOpacity
-                    onPress={() => handlePress(item.node.title)}
-                    key={item.node.title}
-                  >
-                    <Image
-                      style={styles.mapImage}
-                      source={{ uri: String(item.node.main_picture.large) }}
-                    />
-                  </TouchableOpacity>
-                  <Text style={styles.mapText}>{item.node.title}</Text>
-                </View>
-              );
-            })}
-          </View>
+          {logged == null ? (
+            <View></View>
+          ) : (
+            <View style={styles.container}>
+              {data.data.map((item, key) => {
+                return (
+                  <View style={styles.map} key={key}>
+                    <TouchableOpacity
+                      onPress={() => handlePress(item.node.title)}
+                      key={item.node.title}
+                    >
+                      <Image
+                        style={styles.mapImage}
+                        source={{ uri: String(item.node.main_picture.large) }}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styles.mapText}>{item.node.title}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          )}
         </ScrollView>
         {loading ? (
           <Modal style={{}}>
@@ -256,7 +291,6 @@ const Watching = (props) => {
         >
           <Ionicons name="refresh-outline" size={60} color="black" />
         </TouchableOpacity>
-        <Text style={styles.noDataText}>If already logged in, refresh</Text>
       </View>
     );
   }

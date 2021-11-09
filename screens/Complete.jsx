@@ -234,7 +234,6 @@ const Complete = (props) => {
         >
           <Ionicons name="refresh-outline" size={60} color="black" />
         </TouchableOpacity>
-        <Text style={styles().noDataText}>If already logged in, refresh</Text>
       </View>
     );
   }

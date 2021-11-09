@@ -54,6 +54,10 @@ const Favorites = ({ truth }) => {
   };
   const handleExpire = async () => {
     try {
+      const logged = await AsyncStorage.getItem("logged");
+      if (logged == null) {
+        return;
+      }
       const eToken = await AsyncStorage.getItem("expireToken");
       const curDate = await AsyncStorage.getItem("reloadDate");
       if (parseInt(curDate) + parseInt(eToken) * 1000 <= Date.now()) {
@@ -89,6 +93,7 @@ const Favorites = ({ truth }) => {
   };
   useEffect(() => {
     handleExpire();
+    return;
   }, []);
   useEffect(() => {
     const checkItem = async () => {
@@ -103,6 +108,7 @@ const Favorites = ({ truth }) => {
       }
     };
     checkItem();
+    return;
   }, []);
   const handleNav = async (newNavState) => {
     //console.log(newNavState);
@@ -134,11 +140,8 @@ const Favorites = ({ truth }) => {
       //console.log(response_s);
       try {
         await AsyncStorage.setItem("reloadDate", String(Date.now()));
-        console.log("made it through the reload");
         await AsyncStorage.setItem("accessToken", response_s.access_token);
-        console.log("made it through the access");
         await AsyncStorage.setItem("refreshToken", response_s.refresh_token);
-        console.log("made it through the refresh");
         await AsyncStorage.setItem(
           "expireToken",
           String(response_s.expires_in)
@@ -152,6 +155,7 @@ const Favorites = ({ truth }) => {
       authRef.current.refresh = response_s.refresh_token;
       authRef.current.expires = response_s.expires_in;
       loggedRef.current = true;
+      await AsyncStorage.setItem("logged", String(true));
       setWebview(true);
     }
   };
@@ -215,14 +219,14 @@ const Favorites = ({ truth }) => {
               </TouchableOpacity>
             </View>
           ) : null}
-          {/*<View>
+          <View>
             <TouchableOpacity
               style={{ width: 100, height: 80, backgroundColor: "#fff" }}
               onPress={() => handleDelete()}
             >
               <Text>Delete</Text>
             </TouchableOpacity>
-          </View>*/}
+          </View>
           <Tab.Navigator
             screenOptions={{
               tabBarItemStyle: { width: 200 },

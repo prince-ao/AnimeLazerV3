@@ -33,13 +33,14 @@ import {
   Modal,
 } from "react-native";
 import { Header } from "../components/index";
-import { Ionicons, AntDesign, FontAwesome5 } from "@expo/vector-icons";
+import { Ionicons, AntDesign } from "@expo/vector-icons";
 import { firebase } from "@firebase/app";
 import { Picker } from "react-native-woodpicker";
 import { key, url, BASE_URL_V2 } from "@env";
 import "@firebase/database";
 import "@firebase/auth";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SQLite from "expo-sqlite";
 
 const axios = require("axios");
 
@@ -68,6 +69,17 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   const [episode, setEpisode] = useState(0);
   const [refresh, setRefresh] = useState("");
   const [loading, setLoading] = useState(false);
+  const [logged, setLogged] = useState(false);
+
+  const db = SQLite.openDatabase("favorites.db");
+
+  const makeDatabase = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "CREATE TABLE IF NOT EXISTS favorites(user_id INTEGER PRIMARY KEY AUTOINCREMENT, title VARCHAR(150), poster_url VARCHAR(255), rating INT, episode INT, status VARCHAR(50))"
+      );
+    });
+  };
 
   const data = [
     { label: "Watching", value: 1 },
@@ -222,6 +234,28 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     }
   };
 
+  const getLocalEverything = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM favorites WHERE title = ?",
+        [route.params.animeTitle],
+        (tx, res) => {
+          console.log(res);
+          if (res.rows._array.length > 0) {
+            setStatus(res.rows._array[0].status);
+            setRating(res.rows._array[0].rating);
+            setEpisode(res.rows._array[0].episode);
+            setIsAdded(true);
+          } else {
+            setIsAdded(false);
+          }
+        },
+        (err, errm) => console.log(errm)
+      );
+    });
+    setRefresh(`${Math.random() * 100000000}`);
+  };
+
   const getRating = async () => {
     const aToken = await AsyncStorage.getItem("accessToken");
     if (aToken == null) {
@@ -336,11 +370,34 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     }
   };
 
+  const loggedStatus = async () => {
+    try {
+      const truth = await AsyncStorage.getItem("logged");
+      setLogged(truth);
+      setRefresh(`${Math.random() * 10000000}`);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  /*useEffect(() => {
+    console.log("we in the first render use effect");
+    console.log("we done with that shii");
+  }, []);*/
+
   useEffect(() => {
-    getStatus();
-    getRating();
-    getEpisode();
-  }, []);
+    makeDatabase();
+    if (logged == null) {
+      getLocalEverything();
+      loggedStatus();
+      setIsAdded(true);
+    } else {
+      getStatus();
+      getRating();
+      getEpisode();
+    }
+    return;
+  }, [logged]);
 
   const handleScore = async (score) => {
     try {
@@ -374,6 +431,18 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const localHandleScore = async (score) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "UPDATE favorites SET rating = ? WHERE title = ?",
+        [score, route.params.animeTitle],
+        (tx, res) => console.log(res),
+        (err, errm) => console.log(errm)
+      );
+    });
+    setRating(score);
   };
 
   const handleNewAnime = async () => {
@@ -420,6 +489,30 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     }
   };
 
+  const localHandleNewAnime = async () => {
+    //"CREATE TABLE IF NOT EXISTS favorites(user_id INTEGER PRIMARY KEY AUTOINCREMENT, title VARCHAR(150), poster_url VARCHAR(255), rating INT, episode INT, status VARCHAR(50))"
+    db.transaction((tx) => {
+      tx.executeSql(
+        "INSERT INTO favorites (title, poster_url, rating, episode, status) VALUES (?, ?, ?, ?, ?)",
+        [
+          route.params.animeTitle,
+          route.params.animeCover,
+          0,
+          0,
+          "Plan To Watch",
+        ],
+        (tx, res) => {
+          console.log(res);
+        },
+        (err, errm) => console.log(errm)
+      );
+    });
+    setRating(0);
+    setEpisode(0);
+    setStatus("Plan To Watch");
+    setIsAdded(true);
+  };
+
   const handleEpisodePress = async (ep) => {
     try {
       const aToken = await AsyncStorage.getItem("accessToken");
@@ -452,6 +545,18 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const localHandleEpisodePress = (ep) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "UPDATE favorites SET episode = ? WHERE title = ?",
+        [ep, route.params.animeTitle],
+        (tx, res) => console.log(res),
+        (err, errm) => console.log(errm)
+      );
+    });
+    setEpisode(ep);
   };
 
   const handlePress = async (prop) => {
@@ -498,6 +603,17 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
     } catch (error) {
       console.log(error);
     }
+  };
+
+  const localHandlePress = (prop) => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "UPDATE favorites SET status = ? WHERE title = ?",
+        [prop.label, route.params.animeTitle],
+        (tx, res) => console.log("status updated: \n", res),
+        (err, errm) => console.log(errm)
+      );
+    });
   };
 
   /*const handleInfoRoom = () => {
@@ -673,21 +789,21 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                   style={styles(truthy).poster}
                 />
                 <View style={styles(truthy).textInfoContainer}>
-                  <View
+                  {/*<View
                     style={{
                       display: "flex",
                       flexDirection: "row",
                       justifyContent: "space-between",
                     }}
+                  >*/}
+                  <Text
+                    numberOfLines={2}
+                    ellipsizeMode="tail"
+                    style={styles(truthy).title}
                   >
-                    <Text
-                      numberOfLines={2}
-                      ellipsizeMode="tail"
-                      style={styles(truthy).title}
-                    >
-                      {route.params.animeTitle}
-                    </Text>
-                    <TouchableOpacity
+                    {route.params.animeTitle}
+                  </Text>
+                  {/*<TouchableOpacity
                       style={{ marginLeft: 10, marginTop: 15 }}
                       //onPress={() => handleInfoRoom()}
                     >
@@ -696,8 +812,8 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                         size={24}
                         color="white"
                       />
-                    </TouchableOpacity>
-                  </View>
+                    </TouchableOpacity>*/}
+                  {/*</View>*/}
                   <View style={styles(truthy).genDesc}>
                     <Text style={styles(truthy).white}>
                       Type:{" "}
@@ -778,7 +894,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       <Picker
                         item={status}
                         items={data}
-                        onItemChange={handlePress}
+                        onItemChange={
+                          logged == null ? localHandlePress : handlePress
+                        }
                         title="Select"
                         placeholder={status != "" ? status : "Select"}
                         style={{
@@ -849,7 +967,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 <TouchableOpacity
                                   onPress={() => {
                                     setModalVisible(false);
-                                    handleScore(0);
+                                    logged == null
+                                      ? localHandleScore(0)
+                                      : handleScore(0);
                                   }}
                                   activeOpacity={1}
                                   style={{
@@ -886,7 +1006,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 <TouchableOpacity
                                   onPress={() => {
                                     setModalVisible(false);
-                                    handleScore(1);
+                                    logged == null
+                                      ? localHandleScore(1)
+                                      : handleScore(1);
                                   }}
                                   activeOpacity={1}
                                   style={{
@@ -916,7 +1038,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 <TouchableOpacity
                                   onPress={() => {
                                     setModalVisible(false);
-                                    handleScore(2);
+                                    logged == null
+                                      ? localHandleScore(2)
+                                      : handleScore(2);
                                   }}
                                   activeOpacity={1}
                                   style={{
@@ -947,7 +1071,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 <TouchableOpacity
                                   onPress={() => {
                                     setModalVisible(false);
-                                    handleScore(3);
+                                    logged == null
+                                      ? localHandleScore(3)
+                                      : handleScore(3);
                                   }}
                                   activeOpacity={1}
                                   style={{
@@ -976,7 +1102,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 <TouchableOpacity
                                   onPress={() => {
                                     setModalVisible(false);
-                                    handleScore(4);
+                                    logged == null
+                                      ? localHandleScore(4)
+                                      : handleScore(4);
                                   }}
                                   activeOpacity={1}
                                   style={{
@@ -1007,7 +1135,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 <TouchableOpacity
                                   onPress={() => {
                                     setModalVisible(false);
-                                    handleScore(5);
+                                    logged == null
+                                      ? localHandleScore(5)
+                                      : handleScore(5);
                                   }}
                                   activeOpacity={1}
                                   style={{
@@ -1036,7 +1166,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 <TouchableOpacity
                                   onPress={() => {
                                     setModalVisible(false);
-                                    handleScore(6);
+                                    logged == null
+                                      ? localHandleScore(6)
+                                      : handleScore(6);
                                   }}
                                   activeOpacity={1}
                                   style={{
@@ -1067,7 +1199,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 <TouchableOpacity
                                   onPress={() => {
                                     setModalVisible(false);
-                                    handleScore(7);
+                                    logged == null
+                                      ? localHandleScore(7)
+                                      : handleScore(7);
                                   }}
                                   activeOpacity={1}
                                   style={{
@@ -1096,7 +1230,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 <TouchableOpacity
                                   onPress={() => {
                                     setModalVisible(false);
-                                    handleScore(8);
+                                    logged == null
+                                      ? localHandleScore(8)
+                                      : handleScore(8);
                                   }}
                                   activeOpacity={1}
                                   style={{
@@ -1127,7 +1263,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 <TouchableOpacity
                                   onPress={() => {
                                     setModalVisible(false);
-                                    handleScore(9);
+                                    logged == null
+                                      ? localHandleScore(9)
+                                      : handleScore(9);
                                   }}
                                   activeOpacity={1}
                                   style={{
@@ -1156,7 +1294,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                                 <TouchableOpacity
                                   onPress={() => {
                                     setModalVisible(false);
-                                    handleScore(10);
+                                    logged == null
+                                      ? localHandleScore(10)
+                                      : handleScore(10);
                                   }}
                                   activeOpacity={1}
                                   style={{
@@ -1260,7 +1400,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       alignItems: "center",
                     }}
                     onPress={async () => {
-                      handleNewAnime();
+                      logged == null ? localHandleNewAnime() : handleNewAnime();
                       setRefresh(`${Math.random() * 1000000}`);
                     }}
                   >
@@ -1331,7 +1471,9 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       key={key}
                       onPress={() => {
                         setIsLoading(true);
-                        handleEpisodePress(data.epNum);
+                        logged == null
+                          ? localHandleEpisodePress(data.epNum)
+                          : handleEpisodePress(data.epNum);
                         axios
                           .get(`${API.url}AnimeLazer/Login`, {
                             headers: {
