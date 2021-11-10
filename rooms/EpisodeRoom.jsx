@@ -235,6 +235,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
   };
 
   const getLocalEverything = () => {
+    setLoading(true);
     db.transaction((tx) => {
       tx.executeSql(
         "SELECT * FROM favorites WHERE title = ?",
@@ -254,6 +255,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
       );
     });
     setRefresh(`${Math.random() * 100000000}`);
+    setLoading(false);
   };
 
   const getRating = async () => {

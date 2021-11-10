@@ -16,9 +16,12 @@ import "@firebase/auth";
 import { WebView } from "react-native-webview";
 import { clientID, codeChallenge, BASE_URL_V1, url } from "@env";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SQLite from "expo-sqlite";
 
 const Tab = createMaterialTopTabNavigator();
 const BASE_URL = `${BASE_URL_V1}`;
+
+const db = SQLite.openDatabase("favorites.db");
 
 const Favorites = ({ truth }) => {
   //console.log(truth);
@@ -51,6 +54,7 @@ const Favorites = ({ truth }) => {
     await AsyncStorage.removeItem("refreshToken");
     await AsyncStorage.removeItem("reloadDate");
     await AsyncStorage.removeItem("expireToke");
+    await AsyncStorage.removeItem("logged");
   };
   const handleExpire = async () => {
     try {
@@ -110,8 +114,56 @@ const Favorites = ({ truth }) => {
     checkItem();
     return;
   }, []);
+
+  const handleNewAnime = async (title, status, episode, score) => {
+    try {
+      let stat;
+      if (status === "Watching") {
+        stat = "watching";
+      } else if (status === "Completed") {
+        stat = "completed";
+      } else if (status === "On-Hold") {
+        stat = "on_hold";
+      } else if (status === "Dropped") {
+        stat = "dropped";
+      } else {
+        stat = "plan_to_watch";
+      }
+      const aToken = await AsyncStorage.getItem("accessToken");
+      const response1 = await fetch(
+        `https://api.myanimelist.net/v2/anime?q=${title}&limit=100`,
+        {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${aToken}`,
+          },
+        }
+      );
+      const s_response1 = await response1.text();
+      const ss_response1 = await JSON.parse(s_response1);
+      const id = ss_response1.data[0].node.id;
+      const response2 = await fetch(
+        `https://api.myanimelist.net/v2/anime/${id}/my_list_status?score=${score}&status=${stat}&num_watched_episodes=${episode}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+            Authorization: `Bearer ${aToken}`,
+          },
+          body: `score=${score}&status=${stat}&num_watched_episodes=${episode}`,
+        }
+      );
+      const s_response2 = await response2.text();
+      const ss_response2 = await JSON.parse(s_response2);
+      console.log(ss_response2);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   const handleNav = async (newNavState) => {
     //console.log(newNavState);
+    console.log(newNavState.url);
     if (newNavState.url.includes(`${url}api/MAL`)) {
       let code = false;
       let auth = "";
@@ -127,6 +179,7 @@ const Favorites = ({ truth }) => {
           auth += newNavState.url[i];
         }
       }
+      console.log("2");
       //console.log(auth);
 
       const response = await fetch(`${BASE_URL}token`, {
@@ -136,6 +189,7 @@ const Favorites = ({ truth }) => {
         },
         body: `grant_type=authorization_code&code=${auth}&client_id=${clientID}&code_verifier=${codeChallenge}`,
       });
+      console.log("3");
       const response_s = await response.json();
       //console.log(response_s);
       try {
@@ -150,6 +204,24 @@ const Favorites = ({ truth }) => {
       } catch (e) {
         console.log(e);
       }
+      db.transaction((tx) => {
+        tx.executeSql(
+          "SELECT * FROM favorites",
+          [],
+          (tx, res) => {
+            console.log(res);
+            for (let i = 0; i < res.rows._array.length; i++) {
+              handleNewAnime(
+                res.rows._array[i].title,
+                res.rows._array[i].status,
+                res.rows._array[i].episode,
+                res.rows._array[i].rating
+              );
+            }
+          },
+          (err, errm) => console.log(errm)
+        );
+      });
       authRef.current.auth = auth;
       authRef.current.access = response_s.access_token;
       authRef.current.refresh = response_s.refresh_token;

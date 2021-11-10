@@ -267,7 +267,7 @@ const Complete = (props) => {
             <ActivityIndicator
               animating={loading}
               color="#d5e6ff"
-              style={styles.loading}
+              style={styles().loading}
               size={Platform.OS === "android" ? 51 : "large"}
             />
           </Modal>
