@@ -39,6 +39,7 @@ const db = SQLite.openDatabase("favorites.db");
 
 const Watching = (props) => {
   const [data, setData] = useState([]);
+  const [offlineData, setOfflineData] = useState([]);
   const [gotData, setGotData] = useState(false);
   const [refresh, setRefresh] = useState("");
   const [refreshing, setRefreshing] = useState(false);
@@ -62,47 +63,44 @@ const Watching = (props) => {
       tx.executeSql(
         "SELECT * FROM favorites WHERE status = ?",
         ["Watching"],
-        (tx, res) => console.log(res),
+        (tx, res) => setOfflineData(res.rows._array),
         (err, errm) => console.log(errm)
       );
     });
+    setGotData(true);
   };
 
   useEffect(() => {
     getLogged();
-    console.log("Something\nsadsad\nasdasd");
-    console.log(logged);
     if (logged == null) {
       localGetData();
-    }
-  }, [logged]);
-
-  /*useEffect(() => {
-    console.log("we in here instead");
-    const fetc = async () => {
-      try {
-        const response = await fetch(
-          `${BASE_URL}users/@me/animelist?status=watching&limit=1000&sort=list_score`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${props.route.params.authRef.current.access}`,
-            },
+    } else {
+      console.log("we in here instead");
+      const fetc = async () => {
+        try {
+          const response = await fetch(
+            `${BASE_URL}users/@me/animelist?status=watching&limit=1000&sort=list_score`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${props.route.params.authRef.current.access}`,
+              },
+            }
+          );
+          const s_response = await response.text();
+          const ss_response = await JSON.parse(s_response);
+          setData(ss_response);
+          if (ss_response.data.length > 0) {
+            setGotData(true);
           }
-        );
-        const s_response = await response.text();
-        const ss_response = await JSON.parse(s_response);
-        setData(ss_response);
-        if (ss_response.data.length > 0) {
-          setGotData(true);
+        } catch (e) {
+          console.log(e);
         }
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    fetc();
-    //console.log(props.route.params);
-  }, [props.route.params.webview, props.route.params.again, refresh]);*/
+      };
+      fetc();
+      //console.log(props.route.params);
+    }
+  }, [props.route.params.webview, props.route.params.again, refresh, logged]);
 
   // useEffect(() => {
   //   props.navigation.addListener("tabPress", () => {
@@ -111,7 +109,7 @@ const Watching = (props) => {
   // }, []);
 
   const handlePress = (title) => {
-    /*setLoading(true);
+    setLoading(true);
     axios
       .get(`${API.url}AnimeLazer/Login`, {
         headers: {
@@ -206,7 +204,7 @@ const Watching = (props) => {
                 });
             }
           });
-      });*/
+      });
   };
   const wait = (timeout) => {
     return new Promise((resolve) => setTimeout(resolve, timeout));
@@ -240,7 +238,21 @@ const Watching = (props) => {
           }
         >
           {logged == null ? (
-            <View></View>
+            <View>
+              {offlineData.map((item, key) => {
+                return (
+                  <View style={styles.map} key={key}>
+                    <TouchableOpacity onPress={() => handlePress(item.title)}>
+                      <Image
+                        style={styles.mapImage}
+                        source={{ uri: String(item.poster_url) }}
+                      />
+                    </TouchableOpacity>
+                    <Text>{item.title}</Text>
+                  </View>
+                );
+              })}
+            </View>
           ) : (
             <View style={styles.container}>
               {data.data.map((item, key) => {

@@ -228,6 +228,7 @@ const Favorites = ({ truth }) => {
             </TouchableOpacity>
           </View>
           <Tab.Navigator
+            initialRouteName="CURRENTLY WATCHING"
             screenOptions={{
               tabBarItemStyle: { width: 200 },
               tabBarScrollEnabled: true,

@@ -387,10 +387,10 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
 
   useEffect(() => {
     makeDatabase();
+    loggedStatus();
+    console.log(logged);
     if (logged == null) {
       getLocalEverything();
-      loggedStatus();
-      setIsAdded(true);
     } else {
       getStatus();
       getRating();
@@ -614,6 +614,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
         (err, errm) => console.log(errm)
       );
     });
+    setStatus(prop.label);
   };
 
   /*const handleInfoRoom = () => {
@@ -1387,50 +1388,58 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                     </View>
                   </View>
                 ) : (
-                  <TouchableOpacity
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      backgroundColor: "#252525",
-                      borderRadius: 10,
-                      borderWidth: 3,
-                      borderColor: "#959595",
-                      height: 60,
-                      justifyContent: "center",
-                      alignItems: "center",
-                    }}
-                    onPress={async () => {
-                      logged == null ? localHandleNewAnime() : handleNewAnime();
-                      setRefresh(`${Math.random() * 1000000}`);
-                    }}
-                  >
-                    <AntDesign name="pluscircleo" size={35} color="#959595" />
-                    <Text
-                      style={{ color: "#959595", marginLeft: 15, fontSize: 25 }}
+                  <View style={{ marginBottom: 25 }}>
+                    <TouchableOpacity
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        backgroundColor: "#252525",
+                        borderRadius: 10,
+                        borderWidth: 3,
+                        borderColor: "#959595",
+                        height: 60,
+                        justifyContent: "center",
+                        alignItems: "center",
+                      }}
+                      onPress={async () => {
+                        logged == null
+                          ? localHandleNewAnime()
+                          : handleNewAnime();
+                        setRefresh(`${Math.random() * 1000000}`);
+                      }}
                     >
-                      Add To List
-                    </Text>
-                    <Modal
-                      animationType="slide"
-                      visible={loading}
-                      transparent={false}
-                    >
-                      <Image
-                        source={require("../assets/cute-anime-dancing.gif")}
+                      <AntDesign name="pluscircleo" size={35} color="#959595" />
+                      <Text
                         style={{
-                          width: Dimensions.get("window").width,
-                          height: Dimensions.get("window").height,
-                          paddingTop: 100,
+                          color: "#959595",
+                          marginLeft: 15,
+                          fontSize: 25,
                         }}
-                      />
-                      <ActivityIndicator
-                        animating={loading}
-                        color="#d5e6ff"
-                        style={styles(truthy, loading).loading}
-                        size={Platform.OS === "android" ? 51 : "large"}
-                      />
-                    </Modal>
-                  </TouchableOpacity>
+                      >
+                        Add To List
+                      </Text>
+                      <Modal
+                        animationType="slide"
+                        visible={loading}
+                        transparent={false}
+                      >
+                        <Image
+                          source={require("../assets/cute-anime-dancing.gif")}
+                          style={{
+                            width: Dimensions.get("window").width,
+                            height: Dimensions.get("window").height,
+                            paddingTop: 100,
+                          }}
+                        />
+                        <ActivityIndicator
+                          animating={loading}
+                          color="#d5e6ff"
+                          style={styles(truthy, loading).loading}
+                          size={Platform.OS === "android" ? 51 : "large"}
+                        />
+                      </Modal>
+                    </TouchableOpacity>
+                  </View>
                 )}
                 <Text
                   onTextLayout={onTextLayout}

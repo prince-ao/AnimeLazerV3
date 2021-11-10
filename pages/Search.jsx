@@ -258,6 +258,7 @@ const styles = (truth, isLoading) =>
       display: "flex",
       flexWrap: "wrap",
       marginRight: Dimensions.get("window").width / 100e1,
+      marginBottom: 25,
       alignItems: "center",
       width: Dimensions.get("window").width / 0.1,
       height: Dimensions.get("window").height / 4.9,

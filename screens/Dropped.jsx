@@ -16,6 +16,10 @@ import {
 import { Ionicons } from "@expo/vector-icons";
 const axios = require("axios");
 import { key, url, BASE_URL_V2 } from "@env";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import * as SQLite from "expo-sqlite";
+
+const db = SQLite.openDatabase("favorites.db");
 
 const Dropped = (props) => {
   const [data, setData] = useState([]);
@@ -23,6 +27,8 @@ const Dropped = (props) => {
   const [refresh, setRefresh] = useState("");
   const [refreshing, setRefreshing] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [offlineData, setOfflineData] = useState([]);
+  const [logged, setLogged] = useState(false);
 
   const BASE_URL = BASE_URL_V2;
   const API = {
@@ -31,31 +37,53 @@ const Dropped = (props) => {
     key: key + " ",
   };
 
+  const getLogged = async () => {
+    const truth = await AsyncStorage.getItem("logged");
+    setLogged(truth);
+  };
+
+  const localGetData = () => {
+    db.transaction((tx) => {
+      tx.executeSql(
+        "SELECT * FROM favorites WHERE status = ?",
+        ["Dropped"],
+        (tx, res) => setOfflineData(res.rows._array),
+        (err, errm) => console.log(errm)
+      );
+    });
+    setGotData(true);
+  };
+
   useEffect(() => {
-    const fetc = async () => {
-      try {
-        const response = await fetch(
-          `${BASE_URL}users/@me/animelist?status=dropped&limit=1000&sort=list_score`,
-          {
-            method: "GET",
-            headers: {
-              Authorization: `Bearer ${props.route.params.authRef.current.access}`,
-            },
+    getLogged();
+    if (logged == null) {
+      localGetData();
+    } else {
+      const fetc = async () => {
+        try {
+          const response = await fetch(
+            `${BASE_URL}users/@me/animelist?status=dropped&limit=1000&sort=list_score`,
+            {
+              method: "GET",
+              headers: {
+                Authorization: `Bearer ${props.route.params.authRef.current.access}`,
+              },
+            }
+          );
+          const s_response = await response.text();
+          const ss_response = await JSON.parse(s_response);
+          setData(ss_response);
+          if (ss_response.data.length > 0) {
+            setGotData(true);
           }
-        );
-        const s_response = await response.text();
-        const ss_response = await JSON.parse(s_response);
-        setData(ss_response);
-        if (ss_response.data.length > 0) {
-          setGotData(true);
+        } catch (e) {
+          console.log(e);
         }
-      } catch (e) {
-        console.log(e);
-      }
-    };
-    fetc();
-    //console.log(props.route.params);
-  }, [props.route.params.webview, props.route.params.again, refresh]);
+      };
+      fetc();
+      //console.log(props.route.params);
+    }
+  }, [props.route.params.webview, props.route.params.again, refresh, logged]);
   const handlePress = (title) => {
     setLoading(true);
     axios
@@ -185,24 +213,42 @@ const Dropped = (props) => {
             />
           }
         >
-          <View style={styles.container}>
-            {data.data.map((item, key) => {
-              return (
-                <View style={styles.map} key={key}>
-                  <TouchableOpacity
-                    onPress={() => handlePress(item.node.title)}
-                    key={item.node.title}
-                  >
-                    <Image
-                      style={styles.mapImage}
-                      source={{ uri: String(item.node.main_picture.large) }}
-                    />
-                  </TouchableOpacity>
-                  <Text style={styles.mapText}>{item.node.title}</Text>
-                </View>
-              );
-            })}
-          </View>
+          {logged == null ? (
+            <View>
+              {offlineData.map((item, key) => {
+                return (
+                  <View style={styles.map} key={key}>
+                    <TouchableOpacity onPress={() => handlePress(item.title)}>
+                      <Image
+                        style={styles.mapImage}
+                        source={{ uri: String(item.poster_url) }}
+                      />
+                    </TouchableOpacity>
+                    <Text>{item.title}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          ) : (
+            <View style={styles.container}>
+              {data.data.map((item, key) => {
+                return (
+                  <View style={styles.map} key={key}>
+                    <TouchableOpacity
+                      onPress={() => handlePress(item.node.title)}
+                      key={item.node.title}
+                    >
+                      <Image
+                        style={styles.mapImage}
+                        source={{ uri: String(item.node.main_picture.large) }}
+                      />
+                    </TouchableOpacity>
+                    <Text style={styles.mapText}>{item.node.title}</Text>
+                  </View>
+                );
+              })}
+            </View>
+          )}
         </ScrollView>
         {loading ? (
           <Modal style={{}}>

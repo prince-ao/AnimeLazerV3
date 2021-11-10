@@ -177,13 +177,15 @@ const WatchRoom = ({ navigation, route, truthy }) => {
               //console.log(status.positionMillis);
             }}
           />
+          {/*
+          I commented it out because it was buffering eternally and it is not nessesary.
           <ActivityIndicator
             animating={status.isBuffering ? true : false}
             style={styles().loading}
             size={60}
             color="red"
-          />
-          <TouchableOpacity
+          />*/}
+          {/*<TouchableOpacity
             onPress={() => {
               status.isPlaying
                 ? videoRef.current.pauseAsync()
@@ -196,7 +198,7 @@ const WatchRoom = ({ navigation, route, truthy }) => {
               size={55}
               color="#fff"
             />
-          </TouchableOpacity>
+          </TouchableOpacity>*/}
         </>
       ) : (
         <Video
