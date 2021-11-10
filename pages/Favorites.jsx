@@ -291,14 +291,15 @@ const Favorites = ({ truth }) => {
               </TouchableOpacity>
             </View>
           ) : null}
-          <View>
+          {/*<View>
             <TouchableOpacity
               style={{ width: 100, height: 80, backgroundColor: "#fff" }}
               onPress={() => handleDelete()}
             >
               <Text>Delete</Text>
             </TouchableOpacity>
-          </View>
+          </View>*/}
+
           <Tab.Navigator
             initialRouteName="CURRENTLY WATCHING"
             screenOptions={{
