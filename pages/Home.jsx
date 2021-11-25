@@ -132,7 +132,6 @@ const Home = ({ navigation, navigate, truth }) => {
 			});
 	}
 
-
 	function getMonstersAnimes() {
 		setIsLoading(true);
 		axios
@@ -473,7 +472,8 @@ const Home = ({ navigation, navigate, truth }) => {
 																}, 2000);
 																navigate.navigate("WatchRoom", {
 																	title: data.animeName + " Ep " + data.epNum,
-																	src: res1.data.data,
+																	src: res1.data.data.m3u8,
+																	referer: res1.data.data.referer,
 																});
 															});
 													})
