@@ -23,7 +23,7 @@ const BASE_URL = `${BASE_URL_V1}`;
 
 const db = SQLite.openDatabase("favorites.db");
 
-const Favorites = ({ truth }) => {
+const Favorites = ({ truth, navigation }) => {
   //console.log(truth);
   const [webview, setWebview] = useState(true);
   const [again, setAgain] = useState("");
@@ -96,6 +96,9 @@ const Favorites = ({ truth }) => {
     }
   };
   useEffect(() => {
+    const reinit = navigation.addListener("tabPress", () => {
+      setWebview(true);
+    });
     handleExpire();
     return;
   }, []);

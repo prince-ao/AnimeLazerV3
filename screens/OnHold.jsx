@@ -191,13 +191,17 @@ const OnHold = (props) => {
     return (
       <>
         <TouchableOpacity
-          style={styles().floatRefresh}
+          style={styles(props.route.params.truth).floatRefresh}
           onPress={() => setRefresh(`${Math.random() * 1000000}`)}
         >
-          <Ionicons name="refresh-outline" size={24} color="black" />
+          <Ionicons
+            name="refresh-outline"
+            size={24}
+            color={props.route.params.truth ? "white" : "black"}
+          />
         </TouchableOpacity>
         <ScrollView
-          style={styles(brightness).mapContainer}
+          style={styles(props.route.params.truth).mapContainer}
           overScrollMode="never"
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
@@ -216,7 +220,7 @@ const OnHold = (props) => {
           }
         >
           {logged == null ? (
-            <View>
+            <View style={styles().container}>
               {offlineData.map((item, key) => {
                 return (
                   <View style={styles().map} key={key}>
@@ -226,7 +230,9 @@ const OnHold = (props) => {
                         source={{ uri: String(item.poster_url) }}
                       />
                     </TouchableOpacity>
-                    <Text>{item.title}</Text>
+                    <Text style={styles(props.route.params.truth).mapText}>
+                      {item.title}
+                    </Text>
                   </View>
                 );
               })}
@@ -245,7 +251,9 @@ const OnHold = (props) => {
                         source={{ uri: String(item.node.main_picture.large) }}
                       />
                     </TouchableOpacity>
-                    <Text style={styles().mapText}>{item.node.title}</Text>
+                    <Text style={styles(props.route.params.truth).mapText}>
+                      {item.node.title}
+                    </Text>
                   </View>
                 );
               })}
@@ -294,6 +302,7 @@ const styles = (truth) =>
       display: "flex",
       flexDirection: "column",
       flexWrap: "wrap",
+      backgroundColor: truth ? "#222222" : "#e4e4e4",
     },
     container: {
       display: "flex",
@@ -304,6 +313,7 @@ const styles = (truth) =>
     map: {
       width: 175,
       marginTop: 30,
+      marginBottom: 15,
       display: "flex",
       alignItems: "center",
     },
@@ -311,6 +321,7 @@ const styles = (truth) =>
       marginTop: 10,
       textAlign: "center",
       fontWeight: "bold",
+      color: truth ? "white" : "black",
       fontSize: 18,
     },
     mapImage: {
@@ -330,5 +341,18 @@ const styles = (truth) =>
       marginTop: 10,
       textAlign: "center",
     },
-    floatRefresh: {},
+    floatRefresh: {
+      backgroundColor: truth ? "#222222" : "#e4e4e4",
+    },
+    loading: {
+      position: "absolute",
+      top: Dimensions.get("window").height / 2.3,
+      right: Dimensions.get("window").width / 2.43,
+      width: 70,
+      height: 70,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#585858",
+      borderRadius: 8,
+    },
   });

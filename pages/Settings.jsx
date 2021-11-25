@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Header } from "../components/index";
 import {
   StyleSheet,
@@ -11,7 +11,7 @@ import {
   TouchableOpacity,
   Linking,
   Share,
-  Dimensions
+  Dimensions,
 } from "react-native";
 import {
   Ionicons,
@@ -20,15 +20,55 @@ import {
   FontAwesome5,
 } from "@expo/vector-icons";
 
+const { width, height } = Dimensions.get("window");
 
-const {width, height} = Dimensions.get('window')
-
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Settings = ({ truth, truthSet }) => {
   const [isEnabled, setIsEnabled] = useState(true);
   const [appearance, setApearance] = useState("Dark");
-  const handleChange = () => {
-    truthSet(!truth);
+  const onRend = async () => {
+    let lightOp;
+    try {
+      lightOp = await AsyncStorage.getItem("lightOp");
+      if (lightOp === "true") {
+        setIsEnabled(false);
+        setApearance("Light");
+        truthSet(false);
+      } else if (lightOp === "false") {
+        setIsEnabled(true);
+        setApearance("Dark");
+        truthSet(true);
+      } else {
+        setIsEnabled(true);
+        setApearance("Dark");
+        truthSet(true);
+      }
+    } finally {
+      // if (Boolean(lightOp)) {
+      //   console.log("in here");
+      //   setIsEnabled(Boolean(lightOp));
+      //   setApearance(!Boolean(lightOp) ? "Light" : "Dark");
+      //   truthSet(Boolean(lightOp));
+      // } else {
+      //   console.log("error");
+      //   setIsEnabled(true);
+      //   setApearance("Dark");
+      // }
+    }
+  };
+  useEffect(() => {
+    onRend();
+  }, []);
+  const handleChange = async () => {
+    try {
+      await AsyncStorage.setItem("lightOp", String(truth));
+      setIsEnabled(!truth);
+      setApearance(truth ? "Light" : "Dark");
+      truthSet(!truth);
+    } catch (e) {
+      console.log(e);
+    }
   };
   const onShare = async () => {
     try {
@@ -70,8 +110,6 @@ const Settings = ({ truth, truthSet }) => {
               ios_backgroundColor="#b8b8b8"
               value={isEnabled}
               onValueChange={() => {
-                setIsEnabled(!isEnabled);
-                setApearance(isEnabled ? "Light" : "Dark");
                 handleChange();
               }}
               style={styles.settingSwitch}
@@ -208,9 +246,11 @@ const Settings = ({ truth, truthSet }) => {
               borderRadius: 5,
             }}
           >
-            <TouchableOpacity 
-            style={{ ...styles.settingCont2, marginTop: 20 }}
-            onPress={() => Linking.openURL("https://www.instagram.com/animelazer_")}
+            <TouchableOpacity
+              style={{ ...styles.settingCont2, marginTop: 20 }}
+              onPress={() =>
+                Linking.openURL("https://www.instagram.com/animelazer_")
+              }
             >
               <AntDesign
                 name="instagram"

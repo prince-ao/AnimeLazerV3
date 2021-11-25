@@ -24,6 +24,8 @@ const API = {
 	key: key + " ",
 };
 
+console.log(url);
+
 const Statusbar = ({ backgroundColor, barStyle = "dark-content" }) => {
 	return (
 		<View style={{ backgroundColor }}>
@@ -129,6 +131,7 @@ const Home = ({ navigation, navigate, truth }) => {
 				console.log(err);
 			});
 	}
+
 
 	function getMonstersAnimes() {
 		setIsLoading(true);

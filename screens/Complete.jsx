@@ -34,6 +34,18 @@ const Complete = (props) => {
   const [loading, setLoading] = useState(false);
   const [offlineData, setOfflineData] = useState([]);
   const [logged, setLogged] = useState(false);
+  const [light, setLight] = useState(false);
+
+  const initOp = async () => {
+    const lightOp = await AsyncStorage.getItem("lightOp");
+    if (lightOp === "true") {
+      setLight(false);
+    } else if (lightOp === "false") {
+      setLight(true);
+    } else {
+      setLight(false);
+    }
+  };
 
   const BASE_URL = BASE_URL_V2;
   const API = {
@@ -41,7 +53,6 @@ const Complete = (props) => {
     url: url,
     key: key + " ",
   };
-
   const getLogged = async () => {
     const truth = await AsyncStorage.getItem("logged");
     setLogged(truth);
@@ -194,13 +205,17 @@ const Complete = (props) => {
     return (
       <>
         <TouchableOpacity
-          style={styles().floatRefresh}
+          style={styles(light).floatRefresh}
           onPress={() => setRefresh(`${Math.random() * 1000000}`)}
         >
-          <Ionicons name="refresh-outline" size={24} color="black" />
+          <Ionicons
+            name="refresh-outline"
+            size={24}
+            color={props.route.params.truth ? "white" : "black"}
+          />
         </TouchableOpacity>
         <ScrollView
-          style={styles().mapContainer}
+          style={styles(props.route.params.truth).mapContainer}
           overScrollMode="never"
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
@@ -209,7 +224,7 @@ const Complete = (props) => {
               refreshing={refreshing}
               onRefresh={() => {
                 setRefreshing(true);
-                wait(2000).then(() => {
+                wait(1000).then(() => {
                   setRefresh(`${Math.random() * 1000000}`);
                   setRefreshing(false);
                 });
@@ -219,7 +234,7 @@ const Complete = (props) => {
           }
         >
           {logged == null ? (
-            <View>
+            <View style={styles().container}>
               {offlineData.map((item, key) => {
                 return (
                   <View style={styles().map} key={key}>
@@ -229,7 +244,9 @@ const Complete = (props) => {
                         source={{ uri: String(item.poster_url) }}
                       />
                     </TouchableOpacity>
-                    <Text>{item.title}</Text>
+                    <Text style={styles(props.route.params.truth).mapText}>
+                      {item.title}
+                    </Text>
                   </View>
                 );
               })}
@@ -247,7 +264,9 @@ const Complete = (props) => {
                         source={{ uri: String(item.node.main_picture.large) }}
                       />
                     </TouchableOpacity>
-                    <Text style={styles().mapText}>{item.node.title}</Text>
+                    <Text style={styles(props.route.params.truth).mapText}>
+                      {item.node.title}
+                    </Text>
                   </View>
                 );
               })}
@@ -289,12 +308,13 @@ const Complete = (props) => {
 
 export default Complete;
 
-const styles = () =>
+const styles = (truth) =>
   StyleSheet.create({
     mapContainer: {
       display: "flex",
       flexDirection: "column",
       flexWrap: "wrap",
+      backgroundColor: truth ? "#222222" : "#e4e4e4",
     },
     container: {
       display: "flex",
@@ -305,6 +325,7 @@ const styles = () =>
     map: {
       width: 175,
       marginTop: 30,
+      marginBottom: 15,
       display: "flex",
       alignItems: "center",
     },
@@ -313,6 +334,7 @@ const styles = () =>
       textAlign: "center",
       fontWeight: "bold",
       fontSize: 18,
+      color: truth ? "white" : "black",
     },
     mapImage: {
       width: 150,
@@ -331,7 +353,9 @@ const styles = () =>
       marginTop: 10,
       textAlign: "center",
     },
-    floatRefresh: {},
+    floatRefresh: {
+      backgroundColor: truth ? "#222222" : "#e4e4e4",
+    },
     loading: {
       position: "absolute",
       top: Dimensions.get("window").height / 2.3,

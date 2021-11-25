@@ -189,13 +189,17 @@ const Plan = (props) => {
     return (
       <>
         <TouchableOpacity
-          style={styles.floatRefresh}
+          style={styles(props.route.params.truth).floatRefresh}
           onPress={() => setRefresh(`${Math.random() * 1000000}`)}
         >
-          <Ionicons name="refresh-outline" size={24} color="black" />
+          <Ionicons
+            name="refresh-outline"
+            size={24}
+            color={props.route.params.truth ? "white" : "black"}
+          />
         </TouchableOpacity>
         <ScrollView
-          style={styles.mapContainer}
+          style={styles(props.route.params.truth).mapContainer}
           overScrollMode="never"
           showsHorizontalScrollIndicator={false}
           showsVerticalScrollIndicator={false}
@@ -214,35 +218,39 @@ const Plan = (props) => {
           }
         >
           {logged == null ? (
-            <View>
+            <View style={styles().container}>
               {offlineData.map((item, key) => {
                 return (
-                  <View style={styles.map} key={key}>
+                  <View style={styles().map} key={key}>
                     <TouchableOpacity onPress={() => handlePress(item.title)}>
                       <Image
-                        style={styles.mapImage}
+                        style={styles().mapImage}
                         source={{ uri: String(item.poster_url) }}
                       />
                     </TouchableOpacity>
-                    <Text>{item.title}</Text>
+                    <Text style={styles(props.route.params.truth).mapText}>
+                      {item.title}
+                    </Text>
                   </View>
                 );
               })}
             </View>
           ) : (
-            <View style={styles.container}>
+            <View style={styles().container}>
               {data.data.map((item, key) => {
                 return (
-                  <View style={styles.map} key={key}>
+                  <View style={styles().map} key={key}>
                     <TouchableOpacity
                       onPress={() => handlePress(item.node.title)}
                     >
                       <Image
-                        style={styles.mapImage}
+                        style={styles().mapImage}
                         source={{ uri: String(item.node.main_picture.large) }}
                       />
                     </TouchableOpacity>
-                    <Text style={styles.mapText}>{item.node.title}</Text>
+                    <Text style={styles(props.route.params.truth).mapText}>
+                      {item.node.title}
+                    </Text>
                   </View>
                 );
               })}
@@ -262,7 +270,7 @@ const Plan = (props) => {
             <ActivityIndicator
               animating={loading}
               color="#d5e6ff"
-              style={styles.loading}
+              style={styles().loading}
               size={Platform.OS === "android" ? 51 : "large"}
             />
           </Modal>
@@ -273,7 +281,7 @@ const Plan = (props) => {
     return (
       <View>
         <TouchableOpacity
-          style={styles.noDataContainer}
+          style={styles().noDataContainer}
           onPress={() => setRefresh(`${Math.random() * 1000000}`)}
         >
           <Ionicons name="refresh-outline" size={60} color="black" />
@@ -285,46 +293,63 @@ const Plan = (props) => {
 
 export default Plan;
 
-const styles = StyleSheet.create({
-  mapContainer: {
-    display: "flex",
-    flexDirection: "column",
-    flexWrap: "wrap",
-  },
-  container: {
-    display: "flex",
-    flexDirection: "row",
-    flexWrap: "wrap",
-    justifyContent: "space-evenly",
-  },
-  map: {
-    width: 175,
-    marginTop: 30,
-    display: "flex",
-    alignItems: "center",
-  },
-  mapText: {
-    marginTop: 10,
-    textAlign: "center",
-    fontWeight: "bold",
-    fontSize: 18,
-  },
-  mapImage: {
-    width: 150,
-    height: 200,
-    borderRadius: 5,
-  },
-  noDataContainer: {
-    display: "flex",
-    flexDirection: "column",
-    justifyContent: "center",
-    alignItems: "center",
-    marginTop: 200,
-  },
-  noDataText: {
-    fontSize: 20,
-    marginTop: 10,
-    textAlign: "center",
-  },
-  floatRefresh: {},
-});
+const styles = (truth) =>
+  StyleSheet.create({
+    mapContainer: {
+      display: "flex",
+      flexDirection: "column",
+      flexWrap: "wrap",
+      backgroundColor: truth ? "#222222" : "#e4e4e4",
+    },
+    container: {
+      display: "flex",
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "space-evenly",
+    },
+    map: {
+      width: 175,
+      marginTop: 30,
+      marginBottom: 15,
+      display: "flex",
+      alignItems: "center",
+    },
+    mapText: {
+      marginTop: 10,
+      textAlign: "center",
+      fontWeight: "bold",
+      color: truth ? "white" : "black",
+      fontSize: 18,
+    },
+    mapImage: {
+      width: 150,
+      height: 200,
+      borderRadius: 5,
+    },
+    noDataContainer: {
+      display: "flex",
+      flexDirection: "column",
+      justifyContent: "center",
+      alignItems: "center",
+      marginTop: 200,
+    },
+    noDataText: {
+      fontSize: 20,
+      marginTop: 10,
+      textAlign: "center",
+    },
+    floatRefresh: {
+      backgroundColor: truth ? "#222222" : "#e4e4e4",
+    },
+    loading: {
+      position: "absolute",
+      top: Dimensions.get("window").height / 2.3,
+      right: Dimensions.get("window").width / 2.43,
+      width: 70,
+      height: 70,
+      alignItems: "center",
+      justifyContent: "center",
+      backgroundColor: "#585858",
+      borderRadius: 8,
+    },
+  });
