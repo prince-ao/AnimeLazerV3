@@ -18,7 +18,7 @@ import { key, url } from "@env";
 const axios = require("axios");
 const API = {
   id: "_" + Math.random().toString(36).substr(2, 9),
-  url: url,
+  url: "http://74.68.71.213:3000/",
   key: key + " ",
 };
 

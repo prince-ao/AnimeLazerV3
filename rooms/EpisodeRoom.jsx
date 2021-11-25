@@ -876,7 +876,12 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                   </View>
                 </View>
               </View>
-              <View style={{ ...styles(truthy).descContainer, zIndex: 1 }}>
+              <View
+                style={{
+                  ...styles(truthy).descContainer,
+                  zIndex: 1,
+                }}
+              >
                 {isAdded ? (
                   <View
                     syle={{
@@ -1359,7 +1364,11 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                       <TouchableOpacity
                         onPress={() => setModalVisible(!modalVisible)}
                       >
-                        <Ionicons name="ios-star" size={40} color="#f8ef71" />
+                        <Ionicons
+                          name="ios-star"
+                          size={40}
+                          color={truthy ? "#f8ef71" : "#a1962d"}
+                        />
                       </TouchableOpacity>
                     </View>
                     <View
@@ -1382,7 +1391,7 @@ const EpisodeRoom = ({ navigation, route, truthy }) => {
                           textAlign: "center",
                           fontWeight: "bold",
                           fontSize: 20,
-                          color: "white",
+                          color: truthy ? "white" : "black",
                         }}
                       >
                         Episode: {episode}

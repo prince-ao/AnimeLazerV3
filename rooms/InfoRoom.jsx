@@ -4,6 +4,7 @@ import { StyleSheet, Text, View } from "react-native";
 const InfoRoom = () => {
   return (
     <View>
+      {/* //TODO */}
       <Text>Hello World</Text>
     </View>
   );

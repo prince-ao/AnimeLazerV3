@@ -24,6 +24,8 @@ const API = {
   key: key + " ",
 };
 
+console.log(url);
+
 const Statusbar = ({ backgroundColor, barStyle = "dark-content" }) => {
   return (
     <View style={{ backgroundColor }}>
@@ -140,6 +142,7 @@ const Home = ({ navigation, navigate, truth }) => {
         },
       })
       .then(async function (res) {
+        console.log();
         axios
           .get(`${API.url}Animes/monstersAnimes`, {
             headers: {
@@ -850,7 +853,6 @@ const Home = ({ navigation, navigate, truth }) => {
                   <TouchableOpacity
                     style={styles(truth).topAiringView}
                     onPress={() => {
-                      console.log(data.animeUrl);
                       setIsLoading(true);
                       axios
                         .get(`${API.url}AnimeLazer/Login`, {
@@ -1092,6 +1094,7 @@ const styles = (truth, isLoading) => {
       width: Dimensions.get("window").width / 0.1,
       height: Dimensions.get("window").height / 4.9,
       marginTop: Dimensions.get("window").height / 100,
+      marginBottom: 20,
     },
   });
 };
