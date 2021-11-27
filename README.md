@@ -1,6 +1,4 @@
-<div style="background-color:black">
-<p align="center"><img src="./assets/Logo.png" width="180"></p>
-</div>
+<p align="center"><img src="./assets/Logo2.png" width="180"></p>
 
 <h2 align="center"><b>Anime Lazer</b></h2>
 
