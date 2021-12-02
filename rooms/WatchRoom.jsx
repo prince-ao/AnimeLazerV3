@@ -205,7 +205,11 @@ const WatchRoom = ({ navigation, route, truthy }) => {
 					ref={videoRef}
 					source={{
 						uri: videoUrl,
-						headers: { Referer: "https://goload.one" },
+						headers: {
+							"User-Agent":
+								"Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Safari/537.36",
+							Referer: referer,
+						},
 					}}
 					rate={1.0}
 					volume={1.0}
@@ -329,91 +333,3 @@ const styles = (truthy) =>
 		},
 	});
 
-// import React, { useState, useRef } from 'react';
-// import { StyleSheet, View, Platform, Button, NativeModules, Dimensions} from 'react-native';
-// import * as ScreenOrientation from 'expo-screen-orientation'
-// import Video from 'react-native-video'
-
-// const { width, height } = Dimensions.get("window");
-
-// const WatchRoom = ({navigation, route, truthy}) => {
-//     const video = React.useRef(null);
-//     const [status, setStatus] = React.useState({});
-//     const videoUrl = route.params.src;
-
-//     const videoRef = useRef();
-
-//   //   const onFullscreenUpdate = async ({ fullscreenUpdate }) => {
-//   //     switch (fullscreenUpdate) {
-//   //       case Video.FULLSCREEN_UPDATE_PLAYER_DID_PRESENT:
-//   //         await ScreenOrientation.unlockAsync(); // only on Android required
-//   //         break;
-//   //       case Video.FULLSCREEN_UPDATE_PLAYER_WILL_DISMISS:
-//   //         await ScreenOrientation.lockAsync(
-//   //           ScreenOrientation.OrientationLock.PORTRAIT
-//   //         ); // only on Android required
-//   //         break;
-//   //   }
-//   // };
-//   console.log('src: ' + videoUrl)
-//   // const showVideoInFullscreen = async () => {
-//   //   await videoRef.current.presentFullscreenPlayer();
-//   // };
-//     return (
-//         <>
-//         {
-//             (Platform.OS === 'android') ? (
-//               <Video
-//                 style={styles(truthy).video}
-//                 ref={videoRef}
-//                 source={{ uri: "http://techslides.com/demos/sample-videos/small.mp4"}}
-//                 useNativeControls={true}
-//                 shouldPlay={true}
-//                 onReadyForDisplay={params => {
-//                   params.naturalSize.orientation = "landscape"
-//               }}
-//               />
-
-//             ) : (
-//               <Video
-//               ref={video}
-//               style={{backgroundColor: '#000',alignSelf: 'center'}}
-//               source={{
-//               uri: `${route.params.src}`,
-//               }}
-//               resizeMode={ResizeMode.CONTAIN}
-//               useNativeControls={true}
-//               fullscreenUpdate={onFullscreenUpdate}
-//               onReadyForDisplay={params => {
-//                   params.naturalSize.orientation = "landscape"
-//               }}
-//               onPlaybackStatusUpdate={status => setStatus(() => status)}
-//           />
-
-//             )
-//         }
-//         </>
-//     );
-// }
-// const styles = (truthy) =>
-//   StyleSheet.create({
-//     video: {
-//       width: width,
-//       height: height / 2.5,
-//     },
-//     back: {
-//       position: "absolute",
-//       padding: 10,
-//       left: 20,
-//       top: 10,
-//     },
-
-//     container: {
-//       flex: 1,
-//       backgroundColor: truthy ? "#000" : "#eeeeee",
-//       alignItems: "center",
-//       justifyContent: "center",
-//     },
-//   });
-
-// export default WatchRoom;
