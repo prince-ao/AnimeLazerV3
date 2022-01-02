@@ -4,7 +4,7 @@
 
 <h4 align="center">An Android and IOS app to watch anime on your phone without ads.</h4>
 
-<h5 align="center">Download coming soon...</h5>
+<h5 align="center">Download coming soon...(maybe)</h5>
 <hr>
 
 ## Screenshots
